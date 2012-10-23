@@ -10,13 +10,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.output.StatePrinter;
 import tlc2.util.BufferedRandomAccessFile;
+import tlc2.util.FP64;
 import tlc2.util.LongVec;
 import util.FileUtil;
 
@@ -40,7 +39,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final long aFingerprint)
+  public final synchronized long writeState(final long[] aFingerprint)
   throws IOException {
 	  return writeState(1, aFingerprint);
   }
@@ -51,7 +50,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final TLCState predecessor, final long aFingerprint)
+  public final synchronized long writeState(final TLCState predecessor, final long[] aFingerprint)
   throws IOException {
 	  return writeState(predecessor.uid, aFingerprint);
   }
@@ -62,12 +61,15 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  private final synchronized long writeState(long predecessorLoc, long fp)
+  private final synchronized long writeState(long predecessorLoc, long[] fps)
   throws IOException {
 	//TODO Remove synchronization as all threads content for this lock
     this.lastPtr = this.raf.getFilePointer();
     this.raf.writeLongNat(predecessorLoc);
-    this.raf.writeLong(fp);
+    for (int i = 0; i < fps.length; i++) {
+		long fp = fps[i];
+		this.raf.writeLong(fp);
+	}
     return this.lastPtr;
   }
 
@@ -80,10 +82,14 @@ public class TLCTrace {
     return this.raf.readLongNat();
   }
 
-  private synchronized long getFP(long loc) throws IOException {
+  private synchronized long[] getFP(long loc) throws IOException {
     this.raf.seek(loc);
     this.raf.readLongNat();    /*drop*/
-    return this.raf.readLong();
+    long [] fps = new long[FP64.FINGERPRINTS];
+    for (int i = 0; i < fps.length; i++) {
+		fps[i] = this.raf.readLong();
+	}
+    return fps;
   }
 
   /**
@@ -152,101 +158,54 @@ public class TLCTrace {
   }
   
   /**
-   * @return All states in the trace file
-   * @throws IOException
-   */
-  public final TLCStateInfo[] getTrace() throws IOException {
-		final Map<Long, TLCStateInfo> locToState = new HashMap<Long, TLCStateInfo>();
-
-		synchronized (this) {
-			final long curLoc = this.raf.getFilePointer();
-			try {
-				long length = this.raf.length();
-				// go to first byte
-				this.raf.seek(0);
-				
-				// read init state
-				this.raf.readLongNat(); /* drop predecessor of init state*/
-				TLCStateInfo state = this.tool.getState(this.raf.readLong());
-				locToState.put(0L, state);
-				
-				for (long location = 12; location < length; location+=12) {
-					final long predecessorLocation = this.raf.readLongNat();
-					final long fp = this.raf.readLong();
-					
-					// read predecessor from map
-					final TLCStateInfo predecessor = locToState.get(predecessorLocation);
-
-					// reconstruct current state
-					state = this.tool.getState(fp, predecessor.state);
-
-					// chain to predecessor
-					state.predecessorState = predecessor;
-					state.stateNumber = location / 12;
-					
-					// store in map
-					locToState.put(location, state);
-				}
-
-			} finally {
-				// rewind
-				this.raf.seek(curLoc);
-			}
-		}
-		
-		return locToState.values().toArray(new TLCStateInfo[locToState.size()]);
-  }
-  
-  /**
    * @param loc The start location (pointer) from where the trace should be computed
    * @param included true if the start location state should be included
    * @return An array of predecessor states
    * @throws IOException
    */
-  public final TLCStateInfo[] getTrace(long loc, boolean included)
-  throws IOException {
-    LongVec fps = new LongVec();
+	public final TLCStateInfo[] getTrace(long loc, boolean included) throws IOException {
+		LongVec fps = new LongVec();
 
-    synchronized(this) {
-      long curLoc = this.raf.getFilePointer();
-      long loc1 = (included) ? loc : this.getPrev(loc);
-      for (long ploc = loc1; ploc != 1; ploc = this.getPrev(ploc)) {
-	fps.addElement(this.getFP(ploc));
-      }
-      this.raf.seek(curLoc);
-    }
+		synchronized (this) {
+			long curLoc = this.raf.getFilePointer();
+			long loc1 = (included) ? loc : this.getPrev(loc);
+			for (long ploc = loc1; ploc != 1; ploc = this.getPrev(ploc)) {
+				fps.addElement(this.getFP(ploc));
+			}
+			this.raf.seek(curLoc);
+		}
 
-    int stateNum = 0;
-    int len = fps.size();
-    TLCStateInfo[] res = new TLCStateInfo[len];
-    if (len > 0) {
-      long fp = fps.elementAt(len-1);
-      TLCStateInfo sinfo = this.tool.getState(fp);
-      if (sinfo == null) 
-      {
-          MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);
-          MP.printError(EC.TLC_BUG, "1");
-          System.exit(1);
-      }
-      res[stateNum++] = sinfo;
-      for (int i = len - 2; i >= 0; i--) {
-	fp = fps.elementAt(i);
-	sinfo = this.tool.getState(fp, sinfo.state);
-	if (sinfo == null) {
-	    /*
-	     * The following error message is misleading, because it's triggered
-	     * when TLC can't find a non-initial state from its fingerprint
-	     * when it's generating an error trace.  LL 7 Mar 2012
-	     */
-        MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);
-        MP.printError(EC.TLC_BUG, "2");
-	  System.exit(1);
+		int stateNum = 0;
+		int len = fps.size();
+		TLCStateInfo[] res = new TLCStateInfo[len];
+		if (len > 0) {
+			long[] fp = fps.elementAt(len - 1);
+			TLCStateInfo sinfo = this.tool.getState(fp);
+			if (sinfo == null) {
+				MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);
+				MP.printError(EC.TLC_BUG, "1");
+				System.exit(1);
+			}
+			res[stateNum++] = sinfo;
+			for (int i = len - 2; i >= 0; i--) {
+				fp = fps.elementAt(i);
+				sinfo = this.tool.getState(fp, sinfo.state);
+				if (sinfo == null) {
+					/*
+					 * The following error message is misleading, because it's
+					 * triggered when TLC can't find a non-initial state from
+					 * its fingerprint when it's generating an error trace. LL 7
+					 * Mar 2012
+					 */
+					MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);
+					MP.printError(EC.TLC_BUG, "2");
+					System.exit(1);
+				}
+				res[stateNum++] = sinfo;
+			}
+		}
+		return res;
 	}
-	res[stateNum++] = sinfo;
-      }
-    }
-    return res;
-  }
 
   /**
    * Write out a sequence of states that reaches s2 from an initial
@@ -382,15 +341,6 @@ public class TLCTrace {
     return res;
   }
 
-  @SuppressWarnings("unused")
-  private long[] addBlock(long fp[], long prev[]) throws IOException {
-    // Reuse prev.
-    for (int i = 0; i < fp.length; i++) {
-      prev[i] = this.writeState(prev[i], fp[i]);
-    }
-    return prev;
-  }
-
   public synchronized final Enumerator elements() throws IOException {
     return new Enumerator();
   }
@@ -424,5 +374,4 @@ public class TLCTrace {
       return this.enumRaf.readLong();
     }
   }
-
 }

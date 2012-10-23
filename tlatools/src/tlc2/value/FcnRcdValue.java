@@ -480,7 +480,7 @@ public class FcnRcdValue extends Value implements Applicable {
   }
 
   /* The fingerprint method.  */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     this.normalize();
     int flen = this.values.length;
     fp = FP64.Extend(fp, FCNRCDVALUE);

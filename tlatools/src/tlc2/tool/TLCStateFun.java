@@ -75,7 +75,7 @@ public final class TLCStateFun extends TLCState {
       throw new WrongInvocationException("TLCStateFun.normalizeFcns: This is a TLC bug.");
   }
   
-  public final long fingerPrint() {
+  public final long[] fingerPrint() {
       throw new WrongInvocationException("TLCStateFun.fingerPrint: This is a TLC bug.");
   }
 

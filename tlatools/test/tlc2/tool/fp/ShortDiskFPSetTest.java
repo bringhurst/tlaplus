@@ -466,7 +466,7 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		
 		final long fp = 1L;
 		final LongVec fpv = new LongVec();
-		fpv.addElement(fp);
+		fpv.addElement(new long[]{fp});
 		
 		// put and putBlock have flipped return values %)
 		boolean putBlockRes = !putBlockFpSet.putBlock(fpv).get(0);
@@ -483,7 +483,7 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		
 		final long fp = 1L;
 		final LongVec fpv = new LongVec();
-		fpv.addElement(fp);
+		fpv.addElement(new long[]{fp});
 		
 		// put and putBlock have flipped return values %)
 		boolean containsBlockRes = !containsBlockFpSet.containsBlock(fpv).get(0);
@@ -495,7 +495,7 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		
 		final long fp = 1L;
 		final LongVec fpv = new LongVec();
-		fpv.addElement(fp);
+		fpv.addElement(new long[]{fp});
 		
 		// BitVector is true if fp not in set 
 		assertTrue(fpSet.containsBlock(fpv).get(0));
@@ -511,7 +511,7 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		
 		final long fp = 1L;
 		final LongVec fpv = new LongVec();
-		fpv.addElement(fp);
+		fpv.addElement(new long[]{fp});
 		
 		// BitVector is true if fp not in set 
 		assertTrue(fpSet.putBlock(fpv).get(0));

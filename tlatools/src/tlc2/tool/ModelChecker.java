@@ -305,7 +305,7 @@ public class ModelChecker extends AbstractChecker
                 boolean seen = false;
                 if (inModel)
                 {
-                    long fp = curState.fingerPrint();
+                    long[] fp = curState.fingerPrint();
                     seen = this.theFPSet.put(fp);
                     if (!seen)
                     {
@@ -436,7 +436,7 @@ public class ModelChecker extends AbstractChecker
                     boolean seen = false;
                     if (inModel)
                     {
-                        long fp = succState.fingerPrint();
+                        long[] fp = succState.fingerPrint();
                         seen = this.theFPSet.put(fp);
                         if (!seen)
                         {
@@ -590,7 +590,7 @@ public class ModelChecker extends AbstractChecker
             if (this.checkLiveness)
             {
                 // Add the stuttering step:
-                long curStateFP = curState.fingerPrint();
+                long[] curStateFP = curState.fingerPrint();
                 liveNextStates.addElement(curState);
                 liveNextFPs.addElement(curStateFP);
                 LiveCheck.addNextState(curState, curStateFP, liveNextStates, liveNextFPs);

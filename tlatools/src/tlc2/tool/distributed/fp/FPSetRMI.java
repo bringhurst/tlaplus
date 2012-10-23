@@ -49,7 +49,7 @@ public interface FPSetRMI extends Remote {
      * Returns <code>true</code> iff the fingerprint <code>fp</code> is
      * in this {@link FPSet}.
      */
-	boolean contains(long fp) throws IOException;
+	boolean contains(long[] fp) throws IOException;
 
 	/**
 	 * Checks existence in the {@link FPSet} for each fingerprints contained in
@@ -82,7 +82,7 @@ public interface FPSetRMI extends Remote {
      * in this set. If the fingerprint is not in the set, it is added to
      * the {@link FPSet} as a side-effect.
      */
-	boolean put(long fp) throws IOException;
+	boolean put(long[] fp) throws IOException;
 
 	/**
 	 * Checks existence in the {@link FPSet} for each fingerprints contained in

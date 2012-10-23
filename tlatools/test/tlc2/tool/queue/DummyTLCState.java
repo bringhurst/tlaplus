@@ -81,8 +81,8 @@ public class DummyTLCState extends TLCState {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.TLCState#fingerPrint()
 	 */
-	public long fingerPrint() {
-		return 0;
+	public long[] fingerPrint() {
+		return new long[0];
 	}
 
 	/* (non-Javadoc)

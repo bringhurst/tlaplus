@@ -134,7 +134,7 @@ public abstract class CheckImpl extends ModelChecker {
    */
   public final boolean checkState(TLCState state) throws IOException {
     // Record the state in coverSet and theFPSet:
-    long fp = state.fingerPrint();
+    long[] fp = state.fingerPrint();
     boolean seen = this.coverSet.put(fp);
     if (!seen) {
       if (!this.theFPSet.contains(fp)) {

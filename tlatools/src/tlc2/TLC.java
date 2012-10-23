@@ -489,9 +489,9 @@ public class TLC
                     try
                     {
                         fpIndex = Integer.parseInt(args[index]);
-                        if (fpIndex < 0 || fpIndex >= FP64.Polys.length)
+                        if (fpIndex < 0 || fpIndex >= FP64.numPolys)
                         {
-                            printErrorMsg("Error: The number for -fp must be between 0 and " + (FP64.Polys.length - 1)
+                            printErrorMsg("Error: The number for -fp must be between 0 and " + (FP64.numPolys - 1)
                                     + " (inclusive).");
                             return false;
                         }

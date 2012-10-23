@@ -87,7 +87,7 @@ public class SetCapValue extends Value implements Enumerable {
   public final boolean assignable(Value val) { return this.equals(val); }
 
   /* The fingerprint methods */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     this.convertAndCache();
     return this.capSet.fingerPrint(fp);
   }

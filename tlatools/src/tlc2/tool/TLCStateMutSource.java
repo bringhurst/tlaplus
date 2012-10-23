@@ -172,7 +172,7 @@ implements Cloneable, Serializable {
    * via the state queue. They have to be normalized before adding to
    * the state queue.  We do that here.   
    */
-  public final long fingerPrint() {
+  public final long[] fingerPrint() {
     int sz = this.values.length;
 
     Value[] minVals = this.values;
@@ -201,29 +201,28 @@ implements Cloneable, Serializable {
       }
     }
     // Fingerprint the state:
-    long fp = FP64.New();      
-    if (viewMap == null) {
-      for (int i = 0; i < sz; i++) {
-	fp = minVals[i].fingerPrint(fp);
-      }
-      if (this.values != minVals) {
-	for (int i = 0; i < sz; i++) {
-	  this.values[i].deepNormalize();
-	}
-      }
-    }
-    else {
-      for (int i = 0; i < sz; i++) {
-	this.values[i].deepNormalize();
-      }
-      TLCStateMutSource state = this;
-      if (minVals != this.values) {
-	state = new TLCStateMutSource(minVals, this.asts);
-      }
-      Value val = mytool.eval(viewMap, Context.Empty, state);
-      fp = val.fingerPrint(fp);
-    }
-    return fp;
+		long[] fp = FP64.New();
+		if (viewMap == null) {
+			for (int i = 0; i < sz; i++) {
+				fp = minVals[i].fingerPrint(fp);
+			}
+			if (this.values != minVals) {
+				for (int i = 0; i < sz; i++) {
+					this.values[i].deepNormalize();
+				}
+			}
+		} else {
+			for (int i = 0; i < sz; i++) {
+				this.values[i].deepNormalize();
+			}
+			TLCStateMutSource state = this;
+			if (minVals != this.values) {
+				state = new TLCStateMutSource(minVals, this.asts);
+			}
+			Value val = mytool.eval(viewMap, Context.Empty, state);
+			fp = val.fingerPrint(fp);
+		}
+		return fp;
   }
 
   public final void addCounts(ObjLongTable counts) {

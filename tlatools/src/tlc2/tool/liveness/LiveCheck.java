@@ -47,7 +47,7 @@ public class LiveCheck {
    * behavior graph. It is called when a new initial state is
    * generated.
    */
-  public static void addInitState(TLCState state, long stateFP) {
+  public static void addInitState(TLCState state, long[] stateFP) {
     for (int soln = 0; soln < solutions.length; soln++) {
       OrderOfSolution oos = solutions[soln];
       DiskGraph dgraph = dgraphs[soln];
@@ -75,7 +75,7 @@ public class LiveCheck {
    * This method adds new nodes into the behavior graph induced by s0.
    * It is called after the successors of s0 are computed.
    */
-  public static void addNextState(TLCState s0, long fp0,
+  public static void addNextState(TLCState s0, long[] fp0,
 				  StateVec nextStates,
 				  LongVec nextFPs)
   throws IOException {
@@ -98,7 +98,7 @@ public class LiveCheck {
 	  int succCnt = nextStates.size();
 	  for (int sidx = 0; sidx < succCnt; sidx++) {
 	    TLCState s1 = nextStates.elementAt(sidx);
-	    long fp1 = nextFPs.elementAt(sidx);
+	    long[] fp1 = nextFPs.elementAt(sidx);
 	    long ptr1 = dgraph.getPtr(fp1);
 	    if (ptr1 == -1 || !node0.transExists(fp1, -1)) {
 	      for (int i = 0; i < alen; i++) {

@@ -98,7 +98,7 @@ public class StringValue extends Value {
   public final int length() { return this.val.length(); }
   
   /* The fingerprint method */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     fp = FP64.Extend(fp, STRINGVALUE) ;
     fp = FP64.Extend(fp, this.val.length()) ;
     fp = FP64.Extend(fp, this.val.toString());

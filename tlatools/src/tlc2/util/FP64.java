@@ -2,6 +2,11 @@
 // Last modified on Tue May 25 23:22:20 PDT 1999 by yuanyu
 package tlc2.util;
 
+import java.util.Arrays;
+
+import tlc2.output.EC;
+import util.Assert;
+
 /**
  * A 64-bit fingerprint is stored in an instance of the type <code>long</code>.
  * The static methods of <code>FP64</code> are used to initialize 64-bit
@@ -12,12 +17,12 @@ package tlc2.util;
 public class FP64 {
 
 	/** Return the fingerprint of the empty string. */
-	public static long New() {
+	public static long[] New() {
 		return IrredPoly;
 	}
 
 	/** Return the fingerprint of the bytes in the array <code>bytes</code>. */
-	public static long New(byte[] bytes) {
+	public static long[] New(byte[] bytes) {
 		return Extend(IrredPoly, bytes, 0, bytes.length);
 	}
 
@@ -25,59 +30,90 @@ public class FP64 {
 	 * Extend the fingerprint <code>fp</code> by the characters of
 	 * <code>s</code>.
 	 */
-	public static long Extend(long fp, String s) {
-		final long[] mod = ByteModTable_7;
-		final int mask = 0xFF;
-		final int len = s.length();
-		for (int i = 0; i < len; i++) {
-			char c = s.charAt(i);
-			fp = ((fp >>> 8) ^ (mod[(((int) c) ^ ((int) fp)) & mask]));
+	public static long[] Extend(long[] fps, String s) {
+		for (int idx = 0; idx < fps.length; idx++) {
+			long fp = fps[idx];
+
+			final long[] mod = ByteModTable_7[idx];
+			final int mask = 0xFF;
+			final int len = s.length();
+			for (int i = 0; i < len; i++) {
+				char c = s.charAt(i);
+				fp = ((fp >>> 8) ^ (mod[(((int) c) ^ ((int) fp)) & mask]));
+			}
+
+			fps[idx] = fp;
 		}
-		return fp;
+
+		return fps;
 	}
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by the bytes in the array
 	 * <code>bytes</code>.
 	 */
-	private static long Extend(long fp, byte[] bytes, int start, int len) {
-		final long[] mod = ByteModTable_7;
-		int end = start + len;
-		for (int i = start; i < end; i++) {
-			fp = (fp >>> 8) ^ mod[(bytes[i] ^ (int) fp) & 0xFF];
+	private static long[] Extend(long[] fps, byte[] bytes, int start, int len) {
+		for (int idx = 0; idx < fps.length; idx++) {
+			long fp = fps[idx];
+
+			final long[] mod = ByteModTable_7[idx];
+			int end = start + len;
+			for (int i = start; i < end; i++) {
+				fp = (fp >>> 8) ^ mod[(bytes[i] ^ (int) fp) & 0xFF];
+			}
+			
+			fps[idx] = fp;
 		}
-		return fp;
+		
+		return fps;
 	}
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by a character <code>c</code>.
 	 */
-	public static long Extend(long fp, char c) {
-		long[] mod = ByteModTable_7;
-		fp = ((fp >>> 8) ^ (mod[(((int) c) ^ ((int) fp)) & 0xFF]));
-		return fp;
+	public static long[] Extend(long[] fps, char c) {
+		for (int idx = 0; idx < fps.length; idx++) {
+			long fp = fps[idx];
+			
+			long[] mod = ByteModTable_7[idx];
+			fp = ((fp >>> 8) ^ (mod[(((int) c) ^ ((int) fp)) & 0xFF]));
+			
+			fps[idx] = fp;
+		}
+		return fps;
 	}
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by a byte <code>c</code>.
 	 */
-	public static long Extend(long fp, byte b) {
-		long[] mod = ByteModTable_7;
-		fp = ((fp >>> 8) ^ (mod[(b ^ ((int) fp)) & 0xFF]));
-		return fp;
+	public static long[] Extend(long[] fps, byte b) {
+		for (int idx = 0; idx < fps.length; idx++) {
+			long fp = fps[idx];
+			
+			long[] mod = ByteModTable_7[idx];
+			fp = ((fp >>> 8) ^ (mod[(b ^ ((int) fp)) & 0xFF]));
+			fps[idx] = fp;
+		}
+		return fps;
 	}
 
 	/*
 	 * Extend the fingerprint <code>fp</code> by an integer <code>x</code>.
 	 */
-	public static long Extend(long fp, int x) {
-		long[] mod = ByteModTable_7;
-		for (int i = 0; i < 4; i++) {
-			byte b = (byte) (x & 0xFF);
-			fp = ((fp >>> 8) ^ (mod[(b ^ ((int) fp)) & 0xFF]));
-			x = x >>> 8;
+	public static long[] Extend(long[] fps, int x) {
+		for (int idx = 0; idx < fps.length; idx++) {
+			long fp = fps[idx];
+			
+			long[] mod = ByteModTable_7[idx];
+			for (int i = 0; i < 4; i++) {
+				byte b = (byte) (x & 0xFF);
+				fp = ((fp >>> 8) ^ (mod[(b ^ ((int) fp)) & 0xFF]));
+				x = x >>> 8;
+			}
+			
+			fps[idx] = fp;
 		}
-		return fp;
+		return fps;
 	}
 
 	/** Unlikely fingerprint? */
@@ -110,7 +146,7 @@ public class FP64 {
 	private static final long One = 0x8000000000000000L;
 	private static final long X63 = 0x1L;
 
-	public static final long[] Polys = { 0x911498AE0E66BAD6L, 0xda8a0ba66dae0181L, 0xc02f176b8f268d9fL,
+	private static final long[] Polys = { 0x911498AE0E66BAD6L, 0xda8a0ba66dae0181L, 0xc02f176b8f268d9fL,
 			0xd617bb1220fc7812L, 0xc6fd951ad34f9f74L, 0xdd1897bd991704d4L, 0xf5394c541cbfd343L, 0xb1dded37b5c7b8f7L,
 			0xb713ff61039dc632L, 0xdfb340cb2fb03d43L, 0xbc3e7e4c5ecb76a3L, 0xdbb4b1349cd7058aL, 0xf53e9dcb9e915cdfL,
 			0xca5f58e90dd01848L, 0x80e7ff4406891aa1L, 0xab541bf881fa8571L, 0xbf274e07ac5499d5L, 0x939b1ea933040a4eL,
@@ -138,52 +174,99 @@ public class FP64 {
 			0xe92a4b73246dd124L, 0xafc1e070787c4c86L, 0xdfe84d42cf06286bL, 0x8b29ec962e4b964bL, 0x807eb5de812ede0fL,
 			0xa3cd71299c8b3bfdL, 0x845b8031ef886f35L, 0x91f5a5fa9c5515a5L };
 
+	public static final int numPolys = Polys.length;
+	
 	/*
 	 * This is the table used for computing fingerprints. The ByteModTable could
 	 * be hardwired. Note that since we just extend a byte at a time, we need
 	 * just "ByteModeTable[7]".
 	 */
-	private static long[] ByteModTable_7;
+	private static long[][] ByteModTable_7;
 
-	/* This is the irreducible polynomial used as seed. */
-	private static long IrredPoly;
+	// TODO hard coded to 64bit fingerprints for the moment to get as close to
+	// the old API as possible.
+	public static final int FINGERPRINTS = 1;
+	
+	/* This are the irreducible polynomials used as seeds. */
+	private static long[] IrredPoly = new long[FINGERPRINTS];
 
-	public static long getIrredPoly() {
+	public static long[] getIrredPoly() {
 		return IrredPoly;
 	}
 
 	// Initialization code
 	public static void Init(int n) {
-		Init(Polys[n]);
+		long[] polys = new long[FINGERPRINTS];
+		for (int i = 0; i < polys.length; i++) {
+			int idx = n + i % Polys.length;
+			polys[i] = Polys[idx];
+		}
+		Init(polys);
 	}
 
-	public static void Init(long poly) {
-		IrredPoly = poly;
+	public static void Init(long[] polys) {
+		IrredPoly = polys;
 
-		// Maximum power needed == 127-7*8 == 127 - 56 == 71
-		int plength = 72;
-		long[] PowerTable = new long[plength];
+		ByteModTable_7 = new long[polys.length][];
+		
+		for (int idx = 0; idx < polys.length; idx++) {
+			long poly = polys[idx];
+			
+			
+			// Maximum power needed == 127-7*8 == 127 - 56 == 71
+			int plength = 72;
+			long[] PowerTable = new long[plength];
 
-		long t = One;
-		for (int i = 0; i < plength; i++) {
-			PowerTable[i] = t;
-			// System.out.println("pow[" + i + "] = " + Long.toHexString(t));
+			long t = One;
+			for (int i = 0; i < plength; i++) {
+				PowerTable[i] = t;
+				// System.out.println("pow[" + i + "] = " + Long.toHexString(t));
 
-			// t = t * x
-			long mask = ((t & X63) != 0) ? IrredPoly : 0;
-			t = (t >>> 1) ^ mask;
-		}
-
-		// Just need the 7th iteration of the ByteModTable initialization code
-		ByteModTable_7 = new long[256];
-		for (int j = 0; j <= 255; j++) {
-			long v = Zero;
-			for (int k = 0; k <= 7; k++) {
-				if ((j & (1L << k)) != 0) {
-					v ^= PowerTable[127 - (7 * 8) - k];
-				}
+				// t = t * x
+				long mask = ((t & X63) != 0) ? poly : 0;
+				t = (t >>> 1) ^ mask;
 			}
-			ByteModTable_7[j] = v;
+
+			// Just need the 7th iteration of the ByteModTable initialization code
+			ByteModTable_7[idx] = new long[256];
+			for (int j = 0; j <= 255; j++) {
+				long v = Zero;
+				for (int k = 0; k <= 7; k++) {
+					if ((j & (1L << k)) != 0) {
+						v ^= PowerTable[127 - (7 * 8) - k];
+					}
+				}
+				ByteModTable_7[idx][j] = v;
+			}
 		}
+	}
+
+    /**
+     * @see Arrays#equals(long[], long[])
+     */
+	public static boolean equals(long[] fpsA, long[] fpsB) {
+		return Arrays.equals(fpsA, fpsB);
+	}
+
+	/**
+	 * Starting with idx = 0 and increasing idx++ if necessary
+	 * 
+	 * @see Long#compareTo(Long) 
+	 */
+	public static int compareTo(long[] fpsA, long[] fpsB) {
+		// fingerprints should be of equal size
+		Assert.check(fpsA.length == fpsB.length, EC.GENERAL);
+
+		// we treat the long[] as a continuous bit string. Thus we start
+		// comparing the first element and move on accordingly.
+		for (int i = 0; i < fpsB.length; i++) {
+			final Long fpA = Long.valueOf(fpsA[i]);
+			int compareTo = fpA.compareTo(fpsB[i]);
+			if (compareTo != 0) {
+				return compareTo;
+			}
+		}
+		// make compiler happy
+		return 0;
 	}
 }

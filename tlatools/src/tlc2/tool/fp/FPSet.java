@@ -12,6 +12,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import tlc2.tool.distributed.fp.FPSetRMI;
 import tlc2.util.BitVector;
+import tlc2.util.FP64;
 import tlc2.util.LongVec;
 
 /**
@@ -60,11 +61,33 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
     public abstract boolean put(long fp) throws IOException;
 
     /* (non-Javadoc)
+     * @see tlc2.tool.distributed.fp.FPSetRMI#put(long[])
+     */
+	public boolean put(long[] fps) throws IOException {
+		if (FP64.FINGERPRINTS == 1) {
+			return put(fps[0]);
+		} else {
+			throw new UnsupportedOperationException("Use MultiFPSets for fingerprints larger 64 bit");
+		}
+	}
+
+    /* (non-Javadoc)
      * @see tlc2.tool.distributed.fp.FPSetRMI#contains(long)
      */
     public abstract boolean contains(long fp) throws IOException;
 
     /* (non-Javadoc)
+     * @see tlc2.tool.distributed.fp.FPSetRMI#contains(long[])
+     */
+    public boolean contains(long[] fps) throws IOException {
+		if (FP64.FINGERPRINTS == 1) {
+			return contains(fps[0]);
+		} else {
+			throw new UnsupportedOperationException("Use MultiFPSets for fingerprints larger 64 bit");
+		}
+    }
+    
+   /* (non-Javadoc)
      * @see tlc2.tool.distributed.fp.FPSetRMI#close()
      */
     public void close()

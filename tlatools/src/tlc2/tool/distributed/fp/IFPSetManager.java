@@ -38,7 +38,7 @@ public interface IFPSetManager extends Serializable {
 	/**
 	 * @see FPSetRMI#contains(long)
 	 */
-	boolean contains(long fp);
+	boolean contains(long[] fp);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as
@@ -70,7 +70,7 @@ public interface IFPSetManager extends Serializable {
 	 * the {@link FPSetRMI} responsible for the partition of the fingerprint
 	 * space.
 	 */
-	int getFPSetIndex(long fp);
+	int getFPSetIndex(long[] fp);
 
 	/**
 	 * @see FPSetRMI#getStatesSeen()
@@ -99,7 +99,7 @@ public interface IFPSetManager extends Serializable {
 	/**
 	 * @see FPSetRMI#put(long)
 	 */
-	boolean put(long fp);
+	boolean put(long[] fp);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as

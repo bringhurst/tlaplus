@@ -239,7 +239,7 @@ public class TupleValue extends Value implements Applicable {
   }
   
   /* The fingerprint method: tuples are functions. */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     int len = this.elems.length;
     fp = FP64.Extend(fp, FCNRCDVALUE);
     fp = FP64.Extend(fp, len);

@@ -179,7 +179,7 @@ public class SetOfRcdsValue extends Value implements Enumerable {
   }
   
   /* The fingerprint  */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     this.convertAndCache();
     return this.rcdSet.fingerPrint(fp);
   }

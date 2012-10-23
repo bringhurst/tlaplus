@@ -56,7 +56,7 @@ public abstract class TLCState implements Cloneable, Serializable {
   public abstract TLCState deepCopy();
   public abstract StateVec addToVec(StateVec states);
   public abstract void deepNormalize();
-  public abstract long fingerPrint();
+  public abstract long[] fingerPrint();
   public abstract boolean allAssigned();
   public abstract TLCState createEmpty();
 

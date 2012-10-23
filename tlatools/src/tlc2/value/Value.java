@@ -220,10 +220,10 @@ public abstract class Value implements ValueConstants, Serializable {
   }
   
   /* This method returns the fingerprint of this value. */
-  public long fingerPrint(long fp) {
+  public long[] fingerPrint(long[] fp) {
     Assert.fail("TLC has found a state in which the value of a variable contains " +
 		Value.ppr(this.toString())); // SZ Feb 24, 2009: changed to static access
-    return 0;      // make compiler happy
+    return new long[0];      // make compiler happy
   }
 
   /**
@@ -253,10 +253,14 @@ public abstract class Value implements ValueConstants, Serializable {
 
   /* This method returns the hash code of this value. */
   public final int hashCode() {
-    long fp = this.fingerPrint(FP64.New());
-    int high = (int)(fp >> 32);
-    int low = (int)fp;
-    return high ^ low;
+	int res = 0;
+    long[] fp = this.fingerPrint(FP64.New());
+    for (int i = 0; i < fp.length; i++) {
+    	int high = (int)(fp[i] >> 32);
+		int low = (int)fp[i];
+		res ^= high ^ low;
+	}
+    return res;
   }
 
   public static boolean expand = true;

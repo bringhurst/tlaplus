@@ -245,7 +245,7 @@ public class TLCServerThread extends IdThread {
 						TLCState state = newStates[i].elementAt(index);
 						// write state id and state fp to .st file for
 						// checkpointing
-						long fp = newFps[i].elementAt(index);
+						long[] fp = newFps[i].elementAt(index);
 						state.uid = this.tlcServer.trace.writeState(state, fp);
 						// add state to state queue for further processing
 						stateQueue.sEnqueue(state);

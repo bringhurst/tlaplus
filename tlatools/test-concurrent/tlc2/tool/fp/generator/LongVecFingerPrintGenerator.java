@@ -33,7 +33,7 @@ public class LongVecFingerPrintGenerator extends FingerPrintGenerator {
 
 				// Fill new fingerprints and sort them
 				for (int i = 0; i < batch; i++) {
-					predecessors.setElement(i, rnd.nextLong());
+					predecessors.setElement(i, new long[]{rnd.nextLong()});
 				}
 				initialized = true;
 				predecessors.sort();

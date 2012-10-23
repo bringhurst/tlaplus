@@ -213,7 +213,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.TLCServerRMI#getIrredPolyForFP()
 	 */
-	public final long getIrredPolyForFP() {
+	public final long[] getIrredPolyForFP() {
 		return FP64.getIrredPoly();
 	}
 
@@ -362,8 +362,9 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	/**
 	 * @throws Exception
 	 */
-	private final Set<Long> doInit() throws Exception {
-		final SortedSet<Long> set = new TreeSet<Long>();
+	private final Set<long[]> doInit() throws Exception {
+		//TODO Does a SortedSet handle long[] correctly in this case?
+		final SortedSet<long[]> set = new TreeSet<long[]>();
 		TLCState curState = null;
 		try {
 			TLCState[] initStates = work.getInitStates();
@@ -372,10 +373,10 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 				boolean inConstraints = work.isInModel(curState);
 				boolean seen = false;
 				if (inConstraints) {
-					long fp = curState.fingerPrint();
-					seen = !set.add(fp);
+					long[] fps = curState.fingerPrint();
+					seen = !set.add(fps);
 					if (!seen) {
-						initStates[i].uid = trace.writeState(fp);
+						initStates[i].uid = trace.writeState(fps);
 						stateQueue.enqueue(initStates[i]);
 					}
 				}
@@ -433,7 +434,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 		 */
 
 		//TODO if init states is huge, this might go OOM
-		Set<Long> initFPs = new TreeSet<Long>();
+		Set<long[]> initFPs = new TreeSet<long[]>();
 		if (!recovered) {
 			// Initialize with the initial states:
 			try {
@@ -481,7 +482,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 		waitForFPSetManager();
 		
 		// Add the init state(s) to the local FPSet or distributed servers 
-		for (Long fp : initFPs) {
+		for (long[] fp : initFPs) {
 			fpSetManager.put(fp);
 		}
 		

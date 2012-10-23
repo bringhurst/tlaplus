@@ -16,7 +16,7 @@ public class TLCStateInfo {
     this.info = info;
   }
 
-  public final long fingerPrint() {
+  public final long[] fingerPrint() {
     return this.state.fingerPrint();
   }
 

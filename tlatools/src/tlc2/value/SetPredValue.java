@@ -167,7 +167,7 @@ public class SetPredValue extends Value implements Enumerable {
   }
 
   /* The fingerprint method */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     this.inVal = SetEnumValue.convert(this);
     this.tool = null;
     return this.inVal.fingerPrint(fp);

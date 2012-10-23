@@ -278,7 +278,7 @@ public class RecordValue extends Value implements Applicable {
   }
   
   /* The fingerprint methods.  */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     this.normalize();
     int rlen = this.names.length;
     fp = FP64.Extend(fp, FCNRCDVALUE);

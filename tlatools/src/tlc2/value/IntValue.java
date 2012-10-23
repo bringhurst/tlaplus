@@ -115,7 +115,7 @@ public class IntValue extends Value {
   }
 
   /* The fingerprint methods */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     return FP64.Extend(FP64.Extend(fp, INTVALUE), this.val);
   }
 

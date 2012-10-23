@@ -27,7 +27,7 @@ public interface TLCServerRMI extends Remote {
 
 	public IFPSetManager getFPSetManager() throws RemoteException;
 
-	public long getIrredPolyForFP() throws RemoteException;
+	public long[] getIrredPolyForFP() throws RemoteException;
 	
 	/**
 	 * @return true iff server is done computing states

@@ -206,7 +206,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.IFPSetManager#put(long)
 	 */
-	public boolean put(long fp) {
+	public boolean put(long[] fp) {
 		int fpIdx = getIndex(fp);
 		while (true) {
 			try {
@@ -227,7 +227,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.IFPSetManager#contains(long)
 	 */
-	public boolean contains(long fp) {
+	public boolean contains(long[] fp) {
 		int fpIdx = getIndex(fp);
 		while (true) {
 			try {
@@ -248,7 +248,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(long)
 	 */
-	public int getFPSetIndex(long fp) {
+	public int getFPSetIndex(long[] fp) {
 		return (int) ((fp & mask) % numOfServers());
 	}
 

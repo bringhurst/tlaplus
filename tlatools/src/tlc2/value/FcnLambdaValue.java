@@ -495,7 +495,7 @@ public class FcnLambdaValue extends Value implements Applicable {
   }
   
   /* The fingerprint methods.  */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     FcnRcdValue fcn = FcnRcdValue.convert(this);
     return fcn.fingerPrint(fp);
   }

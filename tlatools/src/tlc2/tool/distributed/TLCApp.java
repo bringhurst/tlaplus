@@ -233,7 +233,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long)
 	 */
-	public final TLCStateInfo getState(long fp) {
+	public final TLCStateInfo getState(long[] fp) {
 		return this.tool.getState(fp);
 	}
 
@@ -241,7 +241,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long, tlc2.tool.TLCState)
 	 */
-	public final TLCStateInfo getState(long fp, TLCState s) {
+	public final TLCStateInfo getState(long[] fp, TLCState s) {
 		return this.tool.getState(fp, s);
 	}
 
@@ -384,9 +384,9 @@ public class TLCApp extends DistApp {
 				if (index < args.length) {
 					try {
 						fpIndex = Integer.parseInt(args[index]);
-						if (fpIndex < 0 || fpIndex >= FP64.Polys.length) {
+						if (fpIndex < 0 || fpIndex >= FP64.numPolys) {
 							printErrorMsg("Error: The number for -fp must be between 0 and "
-									+ (FP64.Polys.length - 1) + " (inclusive).");
+									+ (FP64.numPolys - 1) + " (inclusive).");
 							return null;
 						}
 						index++;

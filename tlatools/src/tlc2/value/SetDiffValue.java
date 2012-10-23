@@ -92,7 +92,7 @@ public class SetDiffValue extends Value implements Enumerable {
   }
 
   /* The fingerprint methods */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     this.convertAndCache();
     return this.diffSet.fingerPrint(fp);
   }

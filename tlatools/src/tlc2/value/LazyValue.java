@@ -127,7 +127,7 @@ public class LazyValue extends Value {
   }
 
   /* The fingerprint method */
-  public final long fingerPrint(long fp) {
+  public final long[] fingerPrint(long[] fp) {
     if (this.val == null || this.val == ValUndef) {
       Assert.fail("Error(TLC): Attempted to fingerprint a lazy value.");
     }

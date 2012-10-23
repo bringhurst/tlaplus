@@ -53,7 +53,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#put(long)
 	 */
-	public boolean put(long fp) {
+	public boolean put(long[] fp) {
 		try {
 			return this.fpSet.put(fp);
 		} catch (IOException e) {
@@ -66,7 +66,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#contains(long)
 	 */
-	public boolean contains(long fp) {
+	public boolean contains(long[] fp) {
 		try {
 			return this.fpSet.contains(fp);
 		} catch (IOException e) {
@@ -79,7 +79,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(long)
 	 */
-	public int getFPSetIndex(long fp) {
+	public int getFPSetIndex(long[] fp) {
 		return 0;
 	}
 
