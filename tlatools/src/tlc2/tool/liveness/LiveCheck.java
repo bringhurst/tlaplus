@@ -49,27 +49,27 @@ public class LiveCheck {
    * generated.
    */
   public static void addInitState(TLCState state, FP64 stateFP) {
-    for (int soln = 0; soln < solutions.length; soln++) {
-      OrderOfSolution oos = solutions[soln];
-      DiskGraph dgraph = dgraphs[soln];
-      if (oos.tableau == null) {
-	// if there is no tableau ...
-	dgraph.addInitNode(stateFP, -1);
-      }
-      else {
-	// if there is tableau ...
-	// (state, tnode) is a root node if tnode is an initial tableau
-	// node and tnode is consistent with state.
-	int initCnt = oos.tableau.getInitCnt();
-	for (int i = 0; i < initCnt; i++) {
-	  TBGraphNode tnode = oos.tableau.getNode(i);
-	  if (tnode.isConsistent(state, myTool)) {
-	    dgraph.addInitNode(stateFP, tnode.index);
-	    dgraph.recordNode(stateFP, tnode.index);
-	  }
-	}
-      }
-    }
+//    for (int soln = 0; soln < solutions.length; soln++) {
+//      OrderOfSolution oos = solutions[soln];
+//      DiskGraph dgraph = dgraphs[soln];
+//      if (oos.tableau == null) {
+//	// if there is no tableau ...
+//	dgraph.addInitNode(stateFP, -1);
+//      }
+//      else {
+//	// if there is tableau ...
+//	// (state, tnode) is a root node if tnode is an initial tableau
+//	// node and tnode is consistent with state.
+//	int initCnt = oos.tableau.getInitCnt();
+//	for (int i = 0; i < initCnt; i++) {
+//	  TBGraphNode tnode = oos.tableau.getNode(i);
+//	  if (tnode.isConsistent(state, myTool)) {
+//	    dgraph.addInitNode(stateFP, tnode.index);
+//	    dgraph.recordNode(stateFP, tnode.index);
+//	  }
+//	}
+//      }
+//    }
   }
 
   /**
@@ -80,89 +80,89 @@ public class LiveCheck {
 				  StateVec nextStates,
 				  LongVec nextFPs)
   throws IOException {
-    for (int soln = 0; soln < solutions.length; soln++) {
-      OrderOfSolution oos = solutions[soln];
-      DiskGraph dgraph = dgraphs[soln];
-      int slen = oos.checkState.length;
-      int alen = oos.checkAction.length;
-
-      boolean[] checkStateRes = new boolean[slen];
-      boolean[] checkActionRes = new boolean[alen];
-      for (int i = 0; i < slen; i++) {
-	checkStateRes[i] = oos.checkState[i].eval(myTool, s0, null);
-      }
-      synchronized(oos) {
-	if (oos.tableau == null) {
-	  // if there is no tableau ...
-	  GraphNode node0 = new GraphNode(fp0, -1);
-	  node0.setCheckState(checkStateRes);
-	  int succCnt = nextStates.size();
-	  for (int sidx = 0; sidx < succCnt; sidx++) {
-	    TLCState s1 = nextStates.elementAt(sidx);
-	    long[] fp1 = nextFPs.elementAt(sidx);
-	    long ptr1 = dgraph.getPtr(fp1);
-	    if (ptr1 == -1 || !node0.transExists(fp1, -1)) {
-	      for (int i = 0; i < alen; i++) {
-		checkActionRes[i] = oos.checkAction[i].eval(myTool, s0, s1);
-	      }
-	      node0.addTransition(fp1, -1, slen, alen, checkActionRes);
-	    }
-	  }
-	  // Add a node for the current state:
-	  dgraph.addNode(node0);
-	}
-	else {
-	  // if there is tableau ...
-	  int loc0 = dgraph.setDone(fp0);
-	  int[] nodes = dgraph.getNodesByLoc(loc0);
-	  if (nodes == null) continue;
-	  for (int nidx = 2; nidx < nodes.length; nidx += 3) {
-	    int tidx0 = nodes[nidx];
-	    TBGraphNode tnode0 = oos.tableau.getNode(tidx0);
-	    GraphNode node0 = new GraphNode(fp0, tidx0);
-	    node0.setCheckState(checkStateRes);
-	    int succCnt = nextStates.size();
-	    for (int sidx = 0; sidx < succCnt; sidx++) {
-	      TLCState s1 = nextStates.elementAt(sidx);
-	      long fp1 = nextFPs.elementAt(sidx);
-	      boolean isDone = dgraph.isDone(fp1);
-	      boolean noActionRes = true;
-	      for (int k = 0; k < tnode0.nextSize(); k++) {
-		TBGraphNode tnode1 = tnode0.nextAt(k);
-		long ptr1 = dgraph.getPtr(fp1, tnode1.index);
-		if (ptr1 == -1) {
-		  if (tnode1.isConsistent(s1, myTool)) {
-		    if (noActionRes) {
-		      for (int i = 0; i < alen; i++) {
-			checkActionRes[i] = oos.checkAction[i].eval(myTool, s0, s1);
-		      }
-		      noActionRes = false;
-		    }
-		    node0.addTransition(fp1, tnode1.index, slen, alen, checkActionRes);
-		    // Record that we have seen <fp1, tnode1>.  If fp1 is done, we have
-		    // to compute the next states for <fp1, tnode1>.
-		    dgraph.recordNode(fp1, tnode1.index);
-		    if (isDone) {
-		      addNextState(s1, fp1, tnode1, oos, dgraph);
-		    }
-		  }
-		}
-		else if (!node0.transExists(fp1, tnode1.index)) {
-		  if (noActionRes) {
-		    for (int i = 0; i < alen; i++) {
-		      checkActionRes[i] = oos.checkAction[i].eval(myTool, s0, s1);
-		    }
-		    noActionRes = false;
-		  }
-		  node0.addTransition(fp1, tnode1.index, slen, alen, checkActionRes);
-		}
-	      }
-	    }
-	    dgraph.addNode(node0);
-	  }
-	}
-      }
-    }
+//    for (int soln = 0; soln < solutions.length; soln++) {
+//      OrderOfSolution oos = solutions[soln];
+//      DiskGraph dgraph = dgraphs[soln];
+//      int slen = oos.checkState.length;
+//      int alen = oos.checkAction.length;
+//
+//      boolean[] checkStateRes = new boolean[slen];
+//      boolean[] checkActionRes = new boolean[alen];
+//      for (int i = 0; i < slen; i++) {
+//	checkStateRes[i] = oos.checkState[i].eval(myTool, s0, null);
+//      }
+//      synchronized(oos) {
+//	if (oos.tableau == null) {
+//	  // if there is no tableau ...
+//	  GraphNode node0 = new GraphNode(fp0, -1);
+//	  node0.setCheckState(checkStateRes);
+//	  int succCnt = nextStates.size();
+//	  for (int sidx = 0; sidx < succCnt; sidx++) {
+//	    TLCState s1 = nextStates.elementAt(sidx);
+//	    long[] fp1 = nextFPs.elementAt(sidx);
+//	    long ptr1 = dgraph.getPtr(fp1);
+//	    if (ptr1 == -1 || !node0.transExists(fp1, -1)) {
+//	      for (int i = 0; i < alen; i++) {
+//		checkActionRes[i] = oos.checkAction[i].eval(myTool, s0, s1);
+//	      }
+//	      node0.addTransition(fp1, -1, slen, alen, checkActionRes);
+//	    }
+//	  }
+//	  // Add a node for the current state:
+//	  dgraph.addNode(node0);
+//	}
+//	else {
+//	  // if there is tableau ...
+//	  int loc0 = dgraph.setDone(fp0);
+//	  int[] nodes = dgraph.getNodesByLoc(loc0);
+//	  if (nodes == null) continue;
+//	  for (int nidx = 2; nidx < nodes.length; nidx += 3) {
+//	    int tidx0 = nodes[nidx];
+//	    TBGraphNode tnode0 = oos.tableau.getNode(tidx0);
+//	    GraphNode node0 = new GraphNode(fp0, tidx0);
+//	    node0.setCheckState(checkStateRes);
+//	    int succCnt = nextStates.size();
+//	    for (int sidx = 0; sidx < succCnt; sidx++) {
+//	      TLCState s1 = nextStates.elementAt(sidx);
+//	      long fp1 = nextFPs.elementAt(sidx);
+//	      boolean isDone = dgraph.isDone(fp1);
+//	      boolean noActionRes = true;
+//	      for (int k = 0; k < tnode0.nextSize(); k++) {
+//		TBGraphNode tnode1 = tnode0.nextAt(k);
+//		long ptr1 = dgraph.getPtr(fp1, tnode1.index);
+//		if (ptr1 == -1) {
+//		  if (tnode1.isConsistent(s1, myTool)) {
+//		    if (noActionRes) {
+//		      for (int i = 0; i < alen; i++) {
+//			checkActionRes[i] = oos.checkAction[i].eval(myTool, s0, s1);
+//		      }
+//		      noActionRes = false;
+//		    }
+//		    node0.addTransition(fp1, tnode1.index, slen, alen, checkActionRes);
+//		    // Record that we have seen <fp1, tnode1>.  If fp1 is done, we have
+//		    // to compute the next states for <fp1, tnode1>.
+//		    dgraph.recordNode(fp1, tnode1.index);
+//		    if (isDone) {
+//		      addNextState(s1, fp1, tnode1, oos, dgraph);
+//		    }
+//		  }
+//		}
+//		else if (!node0.transExists(fp1, tnode1.index)) {
+//		  if (noActionRes) {
+//		    for (int i = 0; i < alen; i++) {
+//		      checkActionRes[i] = oos.checkAction[i].eval(myTool, s0, s1);
+//		    }
+//		    noActionRes = false;
+//		  }
+//		  node0.addTransition(fp1, tnode1.index, slen, alen, checkActionRes);
+//		}
+//	      }
+//	    }
+//	    dgraph.addNode(node0);
+//	  }
+//	}
+//      }
+//    }
   }
 
   /**
@@ -174,90 +174,90 @@ public class LiveCheck {
   private static void addNextState(TLCState s, FP64 fp, TBGraphNode tnode,
 				   OrderOfSolution oos, DiskGraph dgraph)
   throws IOException {
-    int slen = oos.checkState.length;
-    int alen = oos.checkAction.length;
-    boolean[] checkStateRes = new boolean[slen];
-    for (int m = 0; m < slen; m++) {
-      checkStateRes[m] = oos.checkState[m].eval(myTool, s, null);
-    }
-    GraphNode node = new GraphNode(fp, tnode.index);
-    node.setCheckState(checkStateRes);
-
-    // Add edges induced by s -> s:
-    boolean[] checkActionRes = null;    
-    for (int i = 0; i < tnode.nextSize(); i++) {
-      TBGraphNode tnode1 = tnode.nextAt(i);
-      int tidx1 = tnode1.index;
-      long ptr1 = dgraph.getPtr(fp, tidx1);
-      if (ptr1 == -1) {
-	if (tnode1.isConsistent(s, myTool)) {
-	  if (checkActionRes == null) {
-	    checkActionRes = new boolean[alen];
-	    for (int m = 0; m < alen; m++) {
-	      checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s);
-	    }
-	  }
-	  node.addTransition(fp, tidx1, slen, alen, checkActionRes);
-	  dgraph.recordNode(fp, tnode1.index);	  
-	  addNextState(s, fp, tnode1, oos, dgraph);
-	}
-      }
-      else {
-	if (checkActionRes == null) {
-	  checkActionRes = new boolean[alen];
-	  for (int m = 0; m < alen; m++) {
-	    checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s);
-	  }
-	}
-	node.addTransition(fp, tidx1, slen, alen, checkActionRes);
-      }
-    }
-
-    // Add edges induced by s -> s1:
-    for (int i = 0; i < actions.length; i++) {
-      StateVec nextStates = myTool.getNextStates(actions[i], s);
-      int nextCnt = nextStates.size();
-      for (int j = 0; j < nextCnt; j++) {
-	TLCState s1 = nextStates.elementAt(j);
-	if (myTool.isInModel(s1) && myTool.isInActions(s, s1)) {
-	  long fp1 = s1.fingerPrint();
-	  checkActionRes = null;
-	  boolean isDone = dgraph.isDone(fp1);
-	  for (int k = 0; k < tnode.nextSize(); k++) {
-	    TBGraphNode tnode1 = tnode.nextAt(k);
-	    int tidx1 = tnode1.index;
-	    long ptr1 = dgraph.getPtr(fp1, tidx1);
-	    if (ptr1 == -1) {
-	      if (tnode1.isConsistent(s1, myTool)) {
-		if (checkActionRes == null) {
-		  checkActionRes = new boolean[alen];
-		  for (int m = 0; m < alen; m++) {
-		    checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s1);
-		  }
-		}
-		node.addTransition(fp1, tidx1, slen, alen, checkActionRes);
-		// Record that we have seen <fp1, tnode1>.  If fp1 is done,
-		// we have to compute the next states for <fp1, tnode1>.
-		dgraph.recordNode(fp1, tidx1);
-		if (isDone) {
-		  addNextState(s1, fp1, tnode1, oos, dgraph);
-		}
-	      }
-	    }
-	    else if (!node.transExists(fp1, tidx1)) {
-	      if (checkActionRes == null) {
-		checkActionRes = new boolean[alen];
-		for (int m = 0; m < alen; m++) {
-		  checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s1);
-		}
-	      }
-	      node.addTransition(fp1, tidx1, slen, alen, checkActionRes);
-	    }
-	  }
-	}
-      }
-    }
-    dgraph.addNode(node);
+//    int slen = oos.checkState.length;
+//    int alen = oos.checkAction.length;
+//    boolean[] checkStateRes = new boolean[slen];
+//    for (int m = 0; m < slen; m++) {
+//      checkStateRes[m] = oos.checkState[m].eval(myTool, s, null);
+//    }
+//    GraphNode node = new GraphNode(fp, tnode.index);
+//    node.setCheckState(checkStateRes);
+//
+//    // Add edges induced by s -> s:
+//    boolean[] checkActionRes = null;    
+//    for (int i = 0; i < tnode.nextSize(); i++) {
+//      TBGraphNode tnode1 = tnode.nextAt(i);
+//      int tidx1 = tnode1.index;
+//      long ptr1 = dgraph.getPtr(fp, tidx1);
+//      if (ptr1 == -1) {
+//	if (tnode1.isConsistent(s, myTool)) {
+//	  if (checkActionRes == null) {
+//	    checkActionRes = new boolean[alen];
+//	    for (int m = 0; m < alen; m++) {
+//	      checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s);
+//	    }
+//	  }
+//	  node.addTransition(fp, tidx1, slen, alen, checkActionRes);
+//	  dgraph.recordNode(fp, tnode1.index);	  
+//	  addNextState(s, fp, tnode1, oos, dgraph);
+//	}
+//      }
+//      else {
+//	if (checkActionRes == null) {
+//	  checkActionRes = new boolean[alen];
+//	  for (int m = 0; m < alen; m++) {
+//	    checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s);
+//	  }
+//	}
+//	node.addTransition(fp, tidx1, slen, alen, checkActionRes);
+//      }
+//    }
+//
+//    // Add edges induced by s -> s1:
+//    for (int i = 0; i < actions.length; i++) {
+//      StateVec nextStates = myTool.getNextStates(actions[i], s);
+//      int nextCnt = nextStates.size();
+//      for (int j = 0; j < nextCnt; j++) {
+//	TLCState s1 = nextStates.elementAt(j);
+//	if (myTool.isInModel(s1) && myTool.isInActions(s, s1)) {
+//	  long fp1 = s1.fingerPrint();
+//	  checkActionRes = null;
+//	  boolean isDone = dgraph.isDone(fp1);
+//	  for (int k = 0; k < tnode.nextSize(); k++) {
+//	    TBGraphNode tnode1 = tnode.nextAt(k);
+//	    int tidx1 = tnode1.index;
+//	    long ptr1 = dgraph.getPtr(fp1, tidx1);
+//	    if (ptr1 == -1) {
+//	      if (tnode1.isConsistent(s1, myTool)) {
+//		if (checkActionRes == null) {
+//		  checkActionRes = new boolean[alen];
+//		  for (int m = 0; m < alen; m++) {
+//		    checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s1);
+//		  }
+//		}
+//		node.addTransition(fp1, tidx1, slen, alen, checkActionRes);
+//		// Record that we have seen <fp1, tnode1>.  If fp1 is done,
+//		// we have to compute the next states for <fp1, tnode1>.
+//		dgraph.recordNode(fp1, tidx1);
+//		if (isDone) {
+//		  addNextState(s1, fp1, tnode1, oos, dgraph);
+//		}
+//	      }
+//	    }
+//	    else if (!node.transExists(fp1, tidx1)) {
+//	      if (checkActionRes == null) {
+//		checkActionRes = new boolean[alen];
+//		for (int m = 0; m < alen; m++) {
+//		  checkActionRes[m] = oos.checkAction[m].eval(myTool, s, s1);
+//		}
+//	      }
+//	      node.addTransition(fp1, tidx1, slen, alen, checkActionRes);
+//	    }
+//	  }
+//	}
+//      }
+//    }
+//    dgraph.addNode(node);
   }
 
   /**

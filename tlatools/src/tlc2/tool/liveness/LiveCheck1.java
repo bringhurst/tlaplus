@@ -115,142 +115,142 @@ public class LiveCheck1 {
    */
   static Vect constructBEGraph(OrderOfSolution os) {
     Vect initNodes = new Vect(1);
-    int slen = os.checkState.length;
-    int alen = os.checkAction.length;
-    TLCState srcState = stateTrace[0];     // the initial state
-    long srcFP = srcState.fingerPrint();
-    boolean[] checkStateRes = new boolean[slen];
-    for (int i = 0; i < slen; i++) {
-      checkStateRes[i] = os.checkState[i].eval(myTool, srcState, null);
-    }
-    boolean[] checkActionRes = new boolean[alen];
-    for (int i = 0; i < alen; i++) {
-      checkActionRes[i] = os.checkAction[i].eval(myTool, srcState, srcState);
-    }
-    if (os.tableau == null) {
-      // If there is no tableau, construct begraph with trace.
-      LongObjTable allNodes = new LongObjTable(127);
-      BEGraphNode srcNode = new BEGraphNode(srcFP);
-      srcNode.setCheckState(checkStateRes);
-      srcNode.addTransition(srcNode, slen, alen, checkActionRes);
-      allNodes.put(srcFP, srcNode);
-      initNodes.addElement(srcNode);
-      for (int i = 1; i < stateTraceLen; i++) {
-	TLCState destState = stateTrace[i];
-	long destFP = destState.fingerPrint();
-	BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
-	if (destNode == null) {
-	  destNode = new BEGraphNode(destFP);
-	  for (int j = 0; j < slen; j++) {
-	    checkStateRes[j] = os.checkState[j].eval(myTool, srcState, null);
-	  }
-	  destNode.setCheckState(checkStateRes);
-	  for (int j = 0; j < alen; j++) {
-	    checkActionRes[j] = os.checkAction[j].eval(myTool, destState, destState);
-	  }
-	  destNode.addTransition(destNode, slen, alen, checkActionRes);
-	  for (int j = 0; j < alen; j++) {
-	    checkActionRes[j] = os.checkAction[j].eval(myTool, srcState, destState);
-	  }
-	  srcNode.addTransition(destNode, slen, alen, checkActionRes);
-	  allNodes.put(destFP, destNode);	  
-	}
-	else if (!srcNode.transExists(destNode)) {
-	  for (int j = 0; j < alen; j++) {
-	    checkActionRes[j] = os.checkAction[j].eval(myTool, srcState, destState);
-	  }
-	  srcNode.addTransition(destNode, slen, alen, checkActionRes);
-	}
-	srcNode = destNode;
-	srcState = destState;
-      }
-    }
-    else {
-      // If there is tableau, construct begraph of (tableau X trace).
-      LongObjTable allNodes = new LongObjTable(255);
-      Vect srcNodes = new Vect();
-      int initCnt = os.tableau.getInitCnt();
-      for (int i = 0; i < initCnt; i++) {
-	TBGraphNode tnode = os.tableau.getNode(i);
-	if (tnode.isConsistent(srcState, myTool)) {
-	  BEGraphNode destNode = new BTGraphNode(srcFP, tnode.index);
-	  destNode.setCheckState(checkStateRes);
-	  initNodes.addElement(destNode);
-	  srcNodes.addElement(destNode);
-	  allNodes.put(FP64.Extend(srcFP, tnode.index), destNode);
-	}
-      }
-      for (int i = 0; i < srcNodes.size(); i++) {
-	BEGraphNode srcNode = (BEGraphNode)srcNodes.elementAt(i);
-	TBGraphNode tnode = srcNode.getTNode(os.tableau);
-	for (int j = 0; j < tnode.nextSize(); j++) {
-	  TBGraphNode tnode1 = tnode.nextAt(j);
-	  long destFP = FP64.Extend(srcFP, tnode1.index);
-	  BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
-	  if (destNode != null) {
-	    srcNode.addTransition(destNode, slen, alen, checkActionRes);
-	  }
-	}
-      }
-      for (int i = 1; i < stateTraceLen; i++) {
-	Vect destNodes = new Vect();
-	TLCState destState = stateTrace[i];
-	long destStateFP = destState.fingerPrint();
-	for (int j = 0; j < slen; j++) {
-	  checkStateRes[j] = os.checkState[j].eval(myTool, destState, null);
-	}
-	for (int j = 0; j < alen; j++) {
-	  checkActionRes[j] = os.checkAction[j].eval(myTool, srcState, destState);
-	}
-	for (int j = 0; j < srcNodes.size(); j++) {
-	  BEGraphNode srcNode = (BEGraphNode)srcNodes.elementAt(j);
-	  TBGraphNode tnode = srcNode.getTNode(os.tableau);
-	  for (int k = 0; k < tnode.nextSize(); k++) {
-	    TBGraphNode tnode1 = tnode.nextAt(k);
-	    long destFP = FP64.Extend(destStateFP, tnode1.index);
-	    BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
-	    if (destNode == null) {
-	      if (tnode1.isConsistent(destState, myTool)) {
-		destNode = new BTGraphNode(destStateFP, tnode1.index);
-		destNode.setCheckState(checkStateRes);
-		srcNode.addTransition(destNode, slen, alen, checkActionRes);
-		destNodes.addElement(destNode);
-		allNodes.put(destFP, destNode);
-	      }
-	    }
-	    else if (!srcNode.transExists(destNode)) {
-	      srcNode.addTransition(destNode, slen, alen, checkActionRes);
-	    }
-	  }
-	}
-	for (int j = 0; j < alen; j++) {
-	  checkActionRes[j] = os.checkAction[j].eval(myTool, destState, destState);
-	}
-	for (int j = 0; j < destNodes.size(); j++) {
-	  BEGraphNode srcNode = (BEGraphNode)destNodes.elementAt(j);
-	  TBGraphNode tnode = srcNode.getTNode(os.tableau);
-	  for (int k = 0; k < tnode.nextSize(); k++) {
-	    TBGraphNode tnode1 = tnode.nextAt(k);
-	    long destFP = FP64.Extend(destStateFP, tnode1.index);
-	    BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
-	    if (destNode == null) {
-	      if (tnode1.isConsistent(destState, myTool)) {
-		destNode = new BTGraphNode(destStateFP, tnode1.index);
-		destNode.setCheckState(checkStateRes);
-		srcNode.addTransition(destNode, slen, alen, checkActionRes);
-		destNodes.addElement(destNode);
-		allNodes.put(destFP, destNode);
-	      }
-	    }
-	    else if (!srcNode.transExists(destNode)) {
-	      srcNode.addTransition(destNode, slen, alen, checkActionRes);
-	    }
-	  }
-	}
-	srcNodes = destNodes;
-	srcState = destState;
-      }
-    }
+//    int slen = os.checkState.length;
+//    int alen = os.checkAction.length;
+//    TLCState srcState = stateTrace[0];     // the initial state
+//    long srcFP = srcState.fingerPrint();
+//    boolean[] checkStateRes = new boolean[slen];
+//    for (int i = 0; i < slen; i++) {
+//      checkStateRes[i] = os.checkState[i].eval(myTool, srcState, null);
+//    }
+//    boolean[] checkActionRes = new boolean[alen];
+//    for (int i = 0; i < alen; i++) {
+//      checkActionRes[i] = os.checkAction[i].eval(myTool, srcState, srcState);
+//    }
+//    if (os.tableau == null) {
+//      // If there is no tableau, construct begraph with trace.
+//      LongObjTable allNodes = new LongObjTable(127);
+//      BEGraphNode srcNode = new BEGraphNode(srcFP);
+//      srcNode.setCheckState(checkStateRes);
+//      srcNode.addTransition(srcNode, slen, alen, checkActionRes);
+//      allNodes.put(srcFP, srcNode);
+//      initNodes.addElement(srcNode);
+//      for (int i = 1; i < stateTraceLen; i++) {
+//	TLCState destState = stateTrace[i];
+//	long destFP = destState.fingerPrint();
+//	BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
+//	if (destNode == null) {
+//	  destNode = new BEGraphNode(destFP);
+//	  for (int j = 0; j < slen; j++) {
+//	    checkStateRes[j] = os.checkState[j].eval(myTool, srcState, null);
+//	  }
+//	  destNode.setCheckState(checkStateRes);
+//	  for (int j = 0; j < alen; j++) {
+//	    checkActionRes[j] = os.checkAction[j].eval(myTool, destState, destState);
+//	  }
+//	  destNode.addTransition(destNode, slen, alen, checkActionRes);
+//	  for (int j = 0; j < alen; j++) {
+//	    checkActionRes[j] = os.checkAction[j].eval(myTool, srcState, destState);
+//	  }
+//	  srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//	  allNodes.put(destFP, destNode);	  
+//	}
+//	else if (!srcNode.transExists(destNode)) {
+//	  for (int j = 0; j < alen; j++) {
+//	    checkActionRes[j] = os.checkAction[j].eval(myTool, srcState, destState);
+//	  }
+//	  srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//	}
+//	srcNode = destNode;
+//	srcState = destState;
+//      }
+//    }
+//    else {
+//      // If there is tableau, construct begraph of (tableau X trace).
+//      LongObjTable allNodes = new LongObjTable(255);
+//      Vect srcNodes = new Vect();
+//      int initCnt = os.tableau.getInitCnt();
+//      for (int i = 0; i < initCnt; i++) {
+//	TBGraphNode tnode = os.tableau.getNode(i);
+//	if (tnode.isConsistent(srcState, myTool)) {
+//	  BEGraphNode destNode = new BTGraphNode(srcFP, tnode.index);
+//	  destNode.setCheckState(checkStateRes);
+//	  initNodes.addElement(destNode);
+//	  srcNodes.addElement(destNode);
+//	  allNodes.put(FP64.Extend(srcFP, tnode.index), destNode);
+//	}
+//      }
+//      for (int i = 0; i < srcNodes.size(); i++) {
+//	BEGraphNode srcNode = (BEGraphNode)srcNodes.elementAt(i);
+//	TBGraphNode tnode = srcNode.getTNode(os.tableau);
+//	for (int j = 0; j < tnode.nextSize(); j++) {
+//	  TBGraphNode tnode1 = tnode.nextAt(j);
+//	  long destFP = FP64.Extend(srcFP, tnode1.index);
+//	  BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
+//	  if (destNode != null) {
+//	    srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//	  }
+//	}
+//      }
+//      for (int i = 1; i < stateTraceLen; i++) {
+//	Vect destNodes = new Vect();
+//	TLCState destState = stateTrace[i];
+//	long destStateFP = destState.fingerPrint();
+//	for (int j = 0; j < slen; j++) {
+//	  checkStateRes[j] = os.checkState[j].eval(myTool, destState, null);
+//	}
+//	for (int j = 0; j < alen; j++) {
+//	  checkActionRes[j] = os.checkAction[j].eval(myTool, srcState, destState);
+//	}
+//	for (int j = 0; j < srcNodes.size(); j++) {
+//	  BEGraphNode srcNode = (BEGraphNode)srcNodes.elementAt(j);
+//	  TBGraphNode tnode = srcNode.getTNode(os.tableau);
+//	  for (int k = 0; k < tnode.nextSize(); k++) {
+//	    TBGraphNode tnode1 = tnode.nextAt(k);
+//	    long destFP = FP64.Extend(destStateFP, tnode1.index);
+//	    BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
+//	    if (destNode == null) {
+//	      if (tnode1.isConsistent(destState, myTool)) {
+//		destNode = new BTGraphNode(destStateFP, tnode1.index);
+//		destNode.setCheckState(checkStateRes);
+//		srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//		destNodes.addElement(destNode);
+//		allNodes.put(destFP, destNode);
+//	      }
+//	    }
+//	    else if (!srcNode.transExists(destNode)) {
+//	      srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//	    }
+//	  }
+//	}
+//	for (int j = 0; j < alen; j++) {
+//	  checkActionRes[j] = os.checkAction[j].eval(myTool, destState, destState);
+//	}
+//	for (int j = 0; j < destNodes.size(); j++) {
+//	  BEGraphNode srcNode = (BEGraphNode)destNodes.elementAt(j);
+//	  TBGraphNode tnode = srcNode.getTNode(os.tableau);
+//	  for (int k = 0; k < tnode.nextSize(); k++) {
+//	    TBGraphNode tnode1 = tnode.nextAt(k);
+//	    long destFP = FP64.Extend(destStateFP, tnode1.index);
+//	    BEGraphNode destNode = (BEGraphNode)allNodes.get(destFP);
+//	    if (destNode == null) {
+//	      if (tnode1.isConsistent(destState, myTool)) {
+//		destNode = new BTGraphNode(destStateFP, tnode1.index);
+//		destNode.setCheckState(checkStateRes);
+//		srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//		destNodes.addElement(destNode);
+//		allNodes.put(destFP, destNode);
+//	      }
+//	    }
+//	    else if (!srcNode.transExists(destNode)) {
+//	      srcNode.addTransition(destNode, slen, alen, checkActionRes);
+//	    }
+//	  }
+//	}
+//	srcNodes = destNodes;
+//	srcState = destState;
+//      }
+//    }
     return initNodes;
   }
 
@@ -435,65 +435,65 @@ public class LiveCheck1 {
    */
   private static void addNextState(TLCState s, long fp, BTGraphNode node,
 				   OrderOfSolution os, BEGraph bgraph) {
-    TBGraphNode tnode = node.getTNode(os.tableau);
-    int slen = os.checkState.length;
-    int alen = os.checkAction.length;
-    boolean[] checkStateRes = null;
-    boolean[] checkActionRes = null;
-    for (int i = 0; i < actions.length; i++) {
-      Action curAction = actions[i];
-      StateVec nextStates = myTool.getNextStates(curAction, s);
-      for (int j = 0; j < nextStates.size(); j++) {
-	// Add edges induced by s -> s1:
-	TLCState s1 = nextStates.elementAt(j);
-	long fp1 = s1.fingerPrint();
-	boolean[] checkActionRes1 = null;	
-	for (int k = 0; k < tnode.nextSize(); k++) {
-	  TBGraphNode tnode1 = tnode.nextAt(k);
-	  BTGraphNode destNode = bgraph.allNodes.getBTNode(fp1, tnode1.index);
-	  if (destNode == null) {
-	    if (tnode1.isConsistent(s1, myTool)) {
-	      destNode = new BTGraphNode(fp1, tnode1.index);
-	      if (checkStateRes == null) {
-		checkStateRes = new boolean[slen];
-		for (int m = 0; m < slen; m++) {
-		  checkStateRes[m] = os.checkState[m].eval(myTool, s1, null);
-		}
-	      }
-	      if (checkActionRes == null) {
-		checkActionRes = new boolean[alen];
-		for (int m = 0; m < alen; m++) {
-		  checkActionRes[m] = os.checkAction[m].eval(myTool, s, s1);
-		}
-	      }
-	      destNode.setCheckState(checkStateRes);
-	      node.addTransition(destNode, slen, alen, checkActionRes);
-	      if (checkActionRes1 == null) {
-		checkActionRes1 = new boolean[alen];
-		for (int m = 0; m < alen; m++) {
-		  checkActionRes1[m] = os.checkAction[m].eval(myTool, s1, s1);
-		}
-	      }	      
-	      addNodesForStut(s1, fp1, destNode, checkStateRes, checkActionRes1,
-			      os, bgraph);
-	      int idx = bgraph.allNodes.putBTNode(destNode);
-	      if (bgraph.allNodes.isDone(idx)) {
-		addNextState(s1, fp1, destNode, os, bgraph);
-	      }
-	    }
-	  }
-	  else if (!node.transExists(destNode)) {
-	    if (checkActionRes == null) {
-	      checkActionRes = new boolean[alen];
-	      for (int m = 0; m < alen; m++) {
-		checkActionRes[m] = os.checkAction[m].eval(myTool, s, s1);
-	      }
-	    }
-	    node.addTransition(destNode, slen, alen, checkActionRes);
-	  }
-	}
-      }
-    }
+//    TBGraphNode tnode = node.getTNode(os.tableau);
+//    int slen = os.checkState.length;
+//    int alen = os.checkAction.length;
+//    boolean[] checkStateRes = null;
+//    boolean[] checkActionRes = null;
+//    for (int i = 0; i < actions.length; i++) {
+//      Action curAction = actions[i];
+//      StateVec nextStates = myTool.getNextStates(curAction, s);
+//      for (int j = 0; j < nextStates.size(); j++) {
+//	// Add edges induced by s -> s1:
+//	TLCState s1 = nextStates.elementAt(j);
+//	long fp1 = s1.fingerPrint();
+//	boolean[] checkActionRes1 = null;	
+//	for (int k = 0; k < tnode.nextSize(); k++) {
+//	  TBGraphNode tnode1 = tnode.nextAt(k);
+//	  BTGraphNode destNode = bgraph.allNodes.getBTNode(fp1, tnode1.index);
+//	  if (destNode == null) {
+//	    if (tnode1.isConsistent(s1, myTool)) {
+//	      destNode = new BTGraphNode(fp1, tnode1.index);
+//	      if (checkStateRes == null) {
+//		checkStateRes = new boolean[slen];
+//		for (int m = 0; m < slen; m++) {
+//		  checkStateRes[m] = os.checkState[m].eval(myTool, s1, null);
+//		}
+//	      }
+//	      if (checkActionRes == null) {
+//		checkActionRes = new boolean[alen];
+//		for (int m = 0; m < alen; m++) {
+//		  checkActionRes[m] = os.checkAction[m].eval(myTool, s, s1);
+//		}
+//	      }
+//	      destNode.setCheckState(checkStateRes);
+//	      node.addTransition(destNode, slen, alen, checkActionRes);
+//	      if (checkActionRes1 == null) {
+//		checkActionRes1 = new boolean[alen];
+//		for (int m = 0; m < alen; m++) {
+//		  checkActionRes1[m] = os.checkAction[m].eval(myTool, s1, s1);
+//		}
+//	      }	      
+//	      addNodesForStut(s1, fp1, destNode, checkStateRes, checkActionRes1,
+//			      os, bgraph);
+//	      int idx = bgraph.allNodes.putBTNode(destNode);
+//	      if (bgraph.allNodes.isDone(idx)) {
+//		addNextState(s1, fp1, destNode, os, bgraph);
+//	      }
+//	    }
+//	  }
+//	  else if (!node.transExists(destNode)) {
+//	    if (checkActionRes == null) {
+//	      checkActionRes = new boolean[alen];
+//	      for (int m = 0; m < alen; m++) {
+//		checkActionRes[m] = os.checkAction[m].eval(myTool, s, s1);
+//	      }
+//	    }
+//	    node.addTransition(destNode, slen, alen, checkActionRes);
+//	  }
+//	}
+//      }
+//    }
   }
 
   public synchronized static void setDone(long fp) {
@@ -563,174 +563,174 @@ public class LiveCheck1 {
   /* Print out the error state trace.  */
   static void printErrorTrace(BEGraphNode node) throws IOException 
   {
-      MP.printError(EC.TLC_TEMPORAL_PROPERTY_VIOLATED);
-      MP.printError(EC.TLC_COUNTER_EXAMPLE);
-    // First, find a "bad" cycle from the "bad" scc.
-    ObjectStack cycleStack = new MemObjectStack(metadir, "cyclestack");
-    int slen = currentOOS.checkState.length;
-    int alen = currentOOS.checkAction.length;
-    long lowNum = thirdNum - 1;
-    boolean[] AEStateRes = new boolean[currentPEM.AEState.length];
-    boolean[] AEActionRes = new boolean[currentPEM.AEAction.length];
-    boolean[] promiseRes = new boolean[currentOOS.promises.length];
-    int cnt = AEStateRes.length + AEActionRes.length + promiseRes.length;
-    BEGraphNode curNode = node;
-    while (cnt > 0) {
-      curNode.setNumber(thirdNum);
-      int cnt0 = cnt;      
-    _next:
-      while (true) {
-	// Check AEState:
-	for (int i = 0; i < currentPEM.AEState.length; i++) {
-	  int idx = currentPEM.AEState[i];
-	  if (!AEStateRes[i] && curNode.getCheckState(idx)) {
-	    AEStateRes[i] = true;
-	    cnt--;
-	  }
-	}
-	// Check if the component is fulfilling. (See MP page 453.)
-	// Note that the promises are precomputed and stored in oos.
-	for (int i = 0; i < currentOOS.promises.length; i++) {
-	  LNEven promise = currentOOS.promises[i];
-	  TBPar par = curNode.getTNode(currentOOS.tableau).getPar();
-	  if (!promiseRes[i] && par.isFulfilling(promise)) {
-	    promiseRes[i] = true;
-	    cnt--;
-	  }
-	}
-	if (cnt <= 0) break;
-	// Check AEAction:
-	BEGraphNode nextNode1 = null;
-	BEGraphNode nextNode2 = null;
-	int cnt1 = cnt;
-	for (int i = 0; i < curNode.nextSize(); i++) {
-	  BEGraphNode node1 = curNode.nextAt(i);
-	  long num = node1.getNumber();
-	  if (lowNum <= num && num <= thirdNum) {
-	    nextNode1 = node1;
-	    for (int j = 0; j < currentPEM.AEAction.length; j++) {
-	      int idx = currentPEM.AEAction[j];
-	      if (!AEActionRes[j] && curNode.getCheckAction(slen, alen, i, idx)) {
-		AEActionRes[j] = true;
-		cnt--;
-	      }
-	    }
-	  }
-	  if (cnt < cnt1) {
-	    cycleStack.push(curNode);
-	    curNode = node1;
-	    thirdNum++;
-	    break _next;
-	  }
-	  if (lowNum <= num && num < thirdNum) nextNode2 = node1;
-	}
-	if (cnt < cnt0) {
-	  cycleStack.push(curNode);
-	  curNode = nextNode1;
-	  thirdNum++;
-	  break;
-	}
-	// Backtrack if needed:
-	while (nextNode2 == null) {
-	  curNode = (BEGraphNode)cycleStack.pop();
-	  for (int i = 0; i < curNode.nextSize(); i++) {
-	    BEGraphNode node1 = curNode.nextAt(i);
-	    long num = node1.getNumber();
-	    if (lowNum <= num && num < thirdNum) {
-	      cycleStack.push(curNode);
-	      nextNode2 = node1;
-	      break;
-	    }
-	  }
-	}
-	cycleStack.push(curNode);
-	curNode = nextNode2;
-	curNode.setNumber(thirdNum);
-      }
-    }
-    // Close the path to form a cycle. curNode has not been pushed on cycleStack.
-    curNode.setNumber(++thirdNum);
-  _done:
-    while (curNode != node) {
-      boolean found = false;
-      for (int i = 0; i < curNode.nextSize(); i++) {
-	BEGraphNode nextNode = curNode.nextAt(i);
-	long num = nextNode.getNumber();
-	if (lowNum <= num && num < thirdNum) {
-	  cycleStack.push(curNode);
-	  if (nextNode == node) {
-	    break _done;
-	  }
-	  found = true;
-	  curNode = nextNode;
-	  curNode.setNumber(thirdNum);
-	  break;
-	}
-      }
-      if (!found) {
-	curNode = (BEGraphNode)cycleStack.pop();
-      }
-    }
-    if (cycleStack.size() == 0) {
-      cycleStack.push(curNode);
-    }
-
-    // Now, print the error trace. We first construct the prefix that
-    // led to the bad cycle.  The nodes on prefix and cycleStack then
-    // form the complete counter example.
-    int stateNum = 0;
-    BEGraphNode[] prefix = BEGraph.getPath(initNode, node);
-    TLCStateInfo[] states = new TLCStateInfo[prefix.length];
-
-    // Recover the initial state:
-    long fp = prefix[0].stateFP;
-    TLCStateInfo sinfo = myTool.getState(fp);
-    if (sinfo == null) {
-      throw new EvalException(EC.TLC_FAILED_TO_RECOVER_INIT);
-    }
-    states[stateNum++] = sinfo;
-
-    // Recover the successor states:
-    for (int i = 1; i < states.length; i++) {
-      long fp1 = prefix[i].stateFP;
-      if (fp1 != fp) {
-	sinfo = myTool.getState(fp1, sinfo.state);
-	if (sinfo == null) {
-	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
-	}
-	states[stateNum++] = sinfo;
-      }
-      fp = fp1;
-    }
-
-    // Print the prefix:
-    TLCState lastState = null;    
-    for (int i = 0; i < stateNum; i++) {
-      StatePrinter.printState(states[i], lastState, i+1);
-      lastState = states[i].state;
-    }
-
-    // Print the cycle:
-    int cyclePos = stateNum;
-    long[] fps = new long[cycleStack.size()];
-    int idx = fps.length;
-    while (idx > 0) {
-      fps[--idx] = ((BEGraphNode)cycleStack.pop()).stateFP;
-    }
-    // Assert.assert(fps.length > 0);
-    sinfo = states[stateNum-1];
-    for (int i = 1; i < fps.length; i++) {
-      if (fps[i] != fps[i-1]) {
-	sinfo = myTool.getState(fps[i], sinfo.state);
-	if (sinfo == null) {
-	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
-	}
-	StatePrinter.printState(sinfo, lastState, ++stateNum);
-	lastState = sinfo.state;	
-      }
-    }
-    StatePrinter.printStutteringState(++stateNum);
-    MP.printMessage(EC.TLC_BACK_TO_STATE, "" + cyclePos);
+//      MP.printError(EC.TLC_TEMPORAL_PROPERTY_VIOLATED);
+//      MP.printError(EC.TLC_COUNTER_EXAMPLE);
+//    // First, find a "bad" cycle from the "bad" scc.
+//    ObjectStack cycleStack = new MemObjectStack(metadir, "cyclestack");
+//    int slen = currentOOS.checkState.length;
+//    int alen = currentOOS.checkAction.length;
+//    long lowNum = thirdNum - 1;
+//    boolean[] AEStateRes = new boolean[currentPEM.AEState.length];
+//    boolean[] AEActionRes = new boolean[currentPEM.AEAction.length];
+//    boolean[] promiseRes = new boolean[currentOOS.promises.length];
+//    int cnt = AEStateRes.length + AEActionRes.length + promiseRes.length;
+//    BEGraphNode curNode = node;
+//    while (cnt > 0) {
+//      curNode.setNumber(thirdNum);
+//      int cnt0 = cnt;      
+//    _next:
+//      while (true) {
+//	// Check AEState:
+//	for (int i = 0; i < currentPEM.AEState.length; i++) {
+//	  int idx = currentPEM.AEState[i];
+//	  if (!AEStateRes[i] && curNode.getCheckState(idx)) {
+//	    AEStateRes[i] = true;
+//	    cnt--;
+//	  }
+//	}
+//	// Check if the component is fulfilling. (See MP page 453.)
+//	// Note that the promises are precomputed and stored in oos.
+//	for (int i = 0; i < currentOOS.promises.length; i++) {
+//	  LNEven promise = currentOOS.promises[i];
+//	  TBPar par = curNode.getTNode(currentOOS.tableau).getPar();
+//	  if (!promiseRes[i] && par.isFulfilling(promise)) {
+//	    promiseRes[i] = true;
+//	    cnt--;
+//	  }
+//	}
+//	if (cnt <= 0) break;
+//	// Check AEAction:
+//	BEGraphNode nextNode1 = null;
+//	BEGraphNode nextNode2 = null;
+//	int cnt1 = cnt;
+//	for (int i = 0; i < curNode.nextSize(); i++) {
+//	  BEGraphNode node1 = curNode.nextAt(i);
+//	  long num = node1.getNumber();
+//	  if (lowNum <= num && num <= thirdNum) {
+//	    nextNode1 = node1;
+//	    for (int j = 0; j < currentPEM.AEAction.length; j++) {
+//	      int idx = currentPEM.AEAction[j];
+//	      if (!AEActionRes[j] && curNode.getCheckAction(slen, alen, i, idx)) {
+//		AEActionRes[j] = true;
+//		cnt--;
+//	      }
+//	    }
+//	  }
+//	  if (cnt < cnt1) {
+//	    cycleStack.push(curNode);
+//	    curNode = node1;
+//	    thirdNum++;
+//	    break _next;
+//	  }
+//	  if (lowNum <= num && num < thirdNum) nextNode2 = node1;
+//	}
+//	if (cnt < cnt0) {
+//	  cycleStack.push(curNode);
+//	  curNode = nextNode1;
+//	  thirdNum++;
+//	  break;
+//	}
+//	// Backtrack if needed:
+//	while (nextNode2 == null) {
+//	  curNode = (BEGraphNode)cycleStack.pop();
+//	  for (int i = 0; i < curNode.nextSize(); i++) {
+//	    BEGraphNode node1 = curNode.nextAt(i);
+//	    long num = node1.getNumber();
+//	    if (lowNum <= num && num < thirdNum) {
+//	      cycleStack.push(curNode);
+//	      nextNode2 = node1;
+//	      break;
+//	    }
+//	  }
+//	}
+//	cycleStack.push(curNode);
+//	curNode = nextNode2;
+//	curNode.setNumber(thirdNum);
+//      }
+//    }
+//    // Close the path to form a cycle. curNode has not been pushed on cycleStack.
+//    curNode.setNumber(++thirdNum);
+//  _done:
+//    while (curNode != node) {
+//      boolean found = false;
+//      for (int i = 0; i < curNode.nextSize(); i++) {
+//	BEGraphNode nextNode = curNode.nextAt(i);
+//	long num = nextNode.getNumber();
+//	if (lowNum <= num && num < thirdNum) {
+//	  cycleStack.push(curNode);
+//	  if (nextNode == node) {
+//	    break _done;
+//	  }
+//	  found = true;
+//	  curNode = nextNode;
+//	  curNode.setNumber(thirdNum);
+//	  break;
+//	}
+//      }
+//      if (!found) {
+//	curNode = (BEGraphNode)cycleStack.pop();
+//      }
+//    }
+//    if (cycleStack.size() == 0) {
+//      cycleStack.push(curNode);
+//    }
+//
+//    // Now, print the error trace. We first construct the prefix that
+//    // led to the bad cycle.  The nodes on prefix and cycleStack then
+//    // form the complete counter example.
+//    int stateNum = 0;
+//    BEGraphNode[] prefix = BEGraph.getPath(initNode, node);
+//    TLCStateInfo[] states = new TLCStateInfo[prefix.length];
+//
+//    // Recover the initial state:
+//    long fp = prefix[0].stateFP;
+//    TLCStateInfo sinfo = myTool.getState(fp);
+//    if (sinfo == null) {
+//      throw new EvalException(EC.TLC_FAILED_TO_RECOVER_INIT);
+//    }
+//    states[stateNum++] = sinfo;
+//
+//    // Recover the successor states:
+//    for (int i = 1; i < states.length; i++) {
+//      long fp1 = prefix[i].stateFP;
+//      if (fp1 != fp) {
+//	sinfo = myTool.getState(fp1, sinfo.state);
+//	if (sinfo == null) {
+//	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
+//	}
+//	states[stateNum++] = sinfo;
+//      }
+//      fp = fp1;
+//    }
+//
+//    // Print the prefix:
+//    TLCState lastState = null;    
+//    for (int i = 0; i < stateNum; i++) {
+//      StatePrinter.printState(states[i], lastState, i+1);
+//      lastState = states[i].state;
+//    }
+//
+//    // Print the cycle:
+//    int cyclePos = stateNum;
+//    long[] fps = new long[cycleStack.size()];
+//    int idx = fps.length;
+//    while (idx > 0) {
+//      fps[--idx] = ((BEGraphNode)cycleStack.pop()).stateFP;
+//    }
+//    // Assert.assert(fps.length > 0);
+//    sinfo = states[stateNum-1];
+//    for (int i = 1; i < fps.length; i++) {
+//      if (fps[i] != fps[i-1]) {
+//	sinfo = myTool.getState(fps[i], sinfo.state);
+//	if (sinfo == null) {
+//	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
+//	}
+//	StatePrinter.printState(sinfo, lastState, ++stateNum);
+//	lastState = sinfo.state;	
+//      }
+//    }
+//    StatePrinter.printStutteringState(++stateNum);
+//    MP.printMessage(EC.TLC_BACK_TO_STATE, "" + cyclePos);
   }
   
   /**

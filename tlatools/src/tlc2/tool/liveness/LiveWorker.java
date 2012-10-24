@@ -74,14 +74,14 @@ public class LiveWorker extends IdThread {
     LongVec initNodes = this.dg.getInitNodes();
     int numOfInits = initNodes.size();
     for (int j = 0; j < numOfInits; j += 2) {
-      long state = initNodes.elementAt(j);
-      int tidx = (int)initNodes.elementAt(j+1);
-      long ptr = this.dg.getLink(state, tidx);
-      if (ptr >= 0) {
-	nodeQueue.enqueueLong(state);
-	nodeQueue.enqueueInt(tidx);
-	nodeQueue.enqueueLong(ptr);
-      }
+//      long state = initNodes.elementAt(j);
+//      int tidx = (int)initNodes.elementAt(j+1);
+//      long ptr = this.dg.getLink(state, tidx);
+//      if (ptr >= 0) {
+//	nodeQueue.enqueueLong(state);
+//	nodeQueue.enqueueInt(tidx);
+//	nodeQueue.enqueueLong(ptr);
+//      }
     }
       
     int[] eaaction = this.pem.EAAction;
@@ -488,12 +488,12 @@ public class LiveWorker extends IdThread {
 	    if (nextState == state) {
 	      // we have found a path from startState to state:
 	      while (curState != startState) {
-		postfix.addElement(curState);
-		nodes = nodeTbl.getNodesByLoc(ploc);
-		curState = NodePtrTable.getKey(nodes);		
-		ploc = NodePtrTable.getParent(nodes);		
+//		postfix.addElement(curState);
+//		nodes = nodeTbl.getNodesByLoc(ploc);
+//		curState = NodePtrTable.getKey(nodes);		
+//		ploc = NodePtrTable.getParent(nodes);		
 	      }
-	      postfix.addElement(startState);
+//	      postfix.addElement(startState);
 	      break _done;
 	    }
 
@@ -523,76 +523,76 @@ public class LiveWorker extends IdThread {
     TLCStateInfo[] states = new TLCStateInfo[plen];
 
     // Recover the initial state:
-    long fp = prefix.elementAt(plen-1);
-    TLCStateInfo sinfo = LiveCheck.myTool.getState(fp);
-    if (sinfo == null) {
-      throw new EvalException(EC.TLC_FAILED_TO_RECOVER_INIT);
-    }
-    states[stateNum++] = sinfo;
-
-    // Recover the successor states:
-    for (int i = plen-2; i >= 0; i--) {
-      long curFP = prefix.elementAt(i);
-      if (curFP != fp) {
-	sinfo = LiveCheck.myTool.getState(curFP, sinfo.state);
-	if (sinfo == null) {
-	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
-	}
-	states[stateNum++] = sinfo;
-	fp = curFP;
-      }
-    }
+//    long fp = prefix.elementAt(plen-1);
+//    TLCStateInfo sinfo = LiveCheck.myTool.getState(fp);
+//    if (sinfo == null) {
+//      throw new EvalException(EC.TLC_FAILED_TO_RECOVER_INIT);
+//    }
+//    states[stateNum++] = sinfo;
+//
+//    // Recover the successor states:
+//    for (int i = plen-2; i >= 0; i--) {
+//      long curFP = prefix.elementAt(i);
+//      if (curFP != fp) {
+//	sinfo = LiveCheck.myTool.getState(curFP, sinfo.state);
+//	if (sinfo == null) {
+//	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
+//	}
+//	states[stateNum++] = sinfo;
+//	fp = curFP;
+//      }
+//    }
 
     // Print the prefix:
-    TLCState lastState = null;
-    for (int i = 0; i < stateNum; i++) {
-      StatePrinter.printState(states[i], lastState, i+1);
-      lastState = states[i].state;
-    }
+//    TLCState lastState = null;
+//    for (int i = 0; i < stateNum; i++) {
+//      StatePrinter.printState(states[i], lastState, i+1);
+//      lastState = states[i].state;
+//    }
+//
+//    // Print the cycle:
+//    int cyclePos = stateNum;
+//    long cycleFP = fp;
+//    while (cycleStack.size() > 0) {
+//      postfix.addElement(cycleStack.popLong());
+//      cycleStack.popInt();
+//    }
+//
+//    // Assert.assert(fps.length > 0);
+//    for (int i = postfix.size()-1; i >= 0; i--) {
+//      long curFP = postfix.elementAt(i);
+//      if (curFP != fp) {
+//	sinfo = LiveCheck.myTool.getState(curFP, sinfo.state);
+//	if (sinfo == null) {
+//	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
+//	}
+//	StatePrinter.printState(sinfo, lastState, ++stateNum);
+//	lastState = sinfo.state;
+//	fp = curFP;
+//      }
+//    }
 
-    // Print the cycle:
-    int cyclePos = stateNum;
-    long cycleFP = fp;
-    while (cycleStack.size() > 0) {
-      postfix.addElement(cycleStack.popLong());
-      cycleStack.popInt();
-    }
-
-    // Assert.assert(fps.length > 0);
-    for (int i = postfix.size()-1; i >= 0; i--) {
-      long curFP = postfix.elementAt(i);
-      if (curFP != fp) {
-	sinfo = LiveCheck.myTool.getState(curFP, sinfo.state);
-	if (sinfo == null) {
-	  throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
-	}
-	StatePrinter.printState(sinfo, lastState, ++stateNum);
-	lastState = sinfo.state;
-	fp = curFP;
-      }
-    }
-
-    if (fp == cycleFP) 
-    {
-        StatePrinter.printStutteringState(++stateNum);
-    } else 
-    {
-      sinfo = LiveCheck.myTool.getState(cycleFP, sinfo.state);
-      if (sinfo == null) 
-      {
-          throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
-      }
-      if (TLCGlobals.tool)
-      {
-          MP.printState(EC.TLC_BACK_TO_STATE, new String[] { "" + cyclePos } );
-      } else
-      {
-          StatePrinter.printState(sinfo, null, (++stateNum));
-          // SZ Jul 10, 2009: replaced with state printer
-          // ToolIO.err.println("STATE " + (++stateNum) + ": " + sinfo.info);
-          MP.printMessage(EC.TLC_BACK_TO_STATE, "" + cyclePos);
-      }
-    }
+//    if (fp == cycleFP) 
+//    {
+//        StatePrinter.printStutteringState(++stateNum);
+//    } else 
+//    {
+//      sinfo = LiveCheck.myTool.getState(cycleFP, sinfo.state);
+//      if (sinfo == null) 
+//      {
+//          throw new EvalException(EC.TLC_FAILED_TO_RECOVER_NEXT);
+//      }
+//      if (TLCGlobals.tool)
+//      {
+//          MP.printState(EC.TLC_BACK_TO_STATE, new String[] { "" + cyclePos } );
+//      } else
+//      {
+//          StatePrinter.printState(sinfo, null, (++stateNum));
+//          // SZ Jul 10, 2009: replaced with state printer
+//          // ToolIO.err.println("STATE " + (++stateNum) + ": " + sinfo.info);
+//          MP.printMessage(EC.TLC_BACK_TO_STATE, "" + cyclePos);
+//      }
+//    }
   }
 
   public final void run() 

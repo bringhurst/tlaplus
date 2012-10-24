@@ -68,8 +68,8 @@ public class DiskGraph {
   }
 
   public final void addInitNode(long node, int tidx) {
-    this.initNodes.addElement(node);
-    this.initNodes.addElement(tidx);
+//    this.initNodes.addElement(node);
+//    this.initNodes.addElement(tidx);
   }
   
   public final LongVec getInitNodes() { return this.initNodes; }
@@ -270,129 +270,129 @@ public class DiskGraph {
    * and si -> si-1 is a state transition.
    */  
   public final LongVec getPath(long state) throws IOException {
-    int numOfInits = this.initNodes.size();
-    for (int i = 0; i < numOfInits; i += 2) {
-      long state0 = this.initNodes.elementAt(i);
-      // SZ Jul 13, 2009: removed to kill the warning
-      // SZ Feb 20, 2009: variable never read locally
-      // int tidx0 = (int) 
-      this.initNodes.elementAt(i+1); 
-      if (state0 == state) {
+//    int numOfInits = this.initNodes.size();
+//    for (int i = 0; i < numOfInits; i += 2) {
+//      long state0 = this.initNodes.elementAt(i);
+//      // SZ Jul 13, 2009: removed to kill the warning
+//      // SZ Feb 20, 2009: variable never read locally
+//      // int tidx0 = (int) 
+//      this.initNodes.elementAt(i+1); 
+//      if (state0 == state) {
 	LongVec res = new LongVec(1);
-	res.addElement(state0);
+//	res.addElement(state0);
 	return res;
-      }
-    }
-
-    // Restore the nodePtrTbl:
-    this.makeNodePtrTbl();
-
-    // Do breath-first search:
-    long offset = MAX_PTR + 1;
-    MemIntQueue queue = new MemIntQueue(this.metadir, null);
-    
-    if (this.hasTableau) {
-      // Initialize queue with initial states:
-      for (int i = 0; i < numOfInits; i += 2) {
-	long state0 = this.initNodes.elementAt(i);
-	int tidx0 = (int)this.initNodes.elementAt(i+1);
-	queue.enqueueLong(state0);
-	queue.enqueueInt(tidx0);
-	queue.enqueueLong(this.nodePtrTbl.get(state0, tidx0));
-	this.nodePtrTbl.put(state0, tidx0, MAX_PTR);
-      }
-
-      while (true) {
-	long curState = queue.dequeueLong();
-	int curTidx = queue.dequeueInt();
-	long curPtr = queue.dequeueLong();
-	GraphNode curNode = this.getNode(curState, curTidx, curPtr);
-	int succCnt = curNode.succSize();
-
-	for (int i = 0; i < succCnt; i++) {
-	  long nextState = curNode.getStateFP(i);
-	  int nextTidx = curNode.getTidx(i);
-	  if (nextState == state) {
-	    // found a path to state:
-	    LongVec res = new LongVec(2);
-	    res.addElement(nextState);
-	    int curLoc = this.nodePtrTbl.getNodesLoc(curState);
-	    int[] nodes = this.nodePtrTbl.getNodesByLoc(curLoc);
-	    while (true) {
-	      res.addElement(curState);
-	      long ploc = -1;	      
-	      for (int j = 2; j < nodes.length; j += 3) {
-		ploc = NodePtrTable.getElem(nodes, j);
-		if (!isFilePointer(ploc)) break;
-	      }
-	      if (ploc == MAX_PTR) break;
-	      curLoc = (int)(ploc-offset);
-	      nodes = this.nodePtrTbl.getNodesByLoc(curLoc);
-	      curState = NodePtrTable.getKey(nodes);
-	    }
-	    return res;
-	  }
-	  
-	  int nextLoc = this.nodePtrTbl.getNodesLoc(nextState);
-	  int[] nextNodes = this.nodePtrTbl.getNodesByLoc(nextLoc);
-	  int cloc = NodePtrTable.getIdx(nextNodes, nextTidx);
-	  long nextPtr = NodePtrTable.getElem(nextNodes, cloc);
-
-	  if (isFilePointer(nextPtr)) {
-	    // nextState is not visited: enqueue it, mark it visited, and
-	    // memorize its parent.
-	    queue.enqueueLong(nextState);
-	    queue.enqueueInt(nextTidx);
-	    queue.enqueueLong(nextPtr);
-	    int curLoc = this.nodePtrTbl.getNodesLoc(curState);
-	    NodePtrTable.putElem(nextNodes, offset+curLoc, cloc);
-	  }
-	}
-      }
-    }
-    else {
-      // Initialize queue with initial states:
-      for (int i = 0; i < numOfInits; i += 2) {
-	long state0 = this.initNodes.elementAt(i);
-	queue.enqueueLong(state0);
-	queue.enqueueLong(this.nodePtrTbl.get(state0));
-	this.nodePtrTbl.put(state0, MAX_PTR);
-      }
-
-      while (true) {
-	long curState = queue.dequeueLong();
-	long curPtr = queue.dequeueLong();
-	GraphNode curNode = this.getNode(curState, -1, curPtr);
-	int succCnt = curNode.succSize();
-
-	for (int i = 0; i < succCnt; i++) {
-	  long nextState = curNode.getStateFP(i);
-	  if (nextState == state) {
-	    // found a path to state: construct the path and return.
-	    LongVec res = new LongVec(2);
-	    res.addElement(nextState);
-	    int curLoc = this.nodePtrTbl.getLoc(curState);
-	    while (true) {
-	      res.addElement(curState);
-	      long ploc = this.nodePtrTbl.getByLoc(curLoc);
-	      if (ploc == MAX_PTR) break;
-	      curLoc = (int)(ploc-offset);
-	      curState = this.nodePtrTbl.getKeyByLoc(curLoc);
-	    }
-	    return res;	    
-	  }
-	  int nextLoc = this.nodePtrTbl.getLoc(nextState);
-	  long nextPtr = this.nodePtrTbl.getByLoc(nextLoc);
-	  if (isFilePointer(nextPtr)) {
-	    // nextState is not visited:
-	    queue.enqueueLong(nextState);
-	    queue.enqueueLong(nextPtr);
-	    int curLoc = this.nodePtrTbl.getLoc(curState);
-	    this.nodePtrTbl.putByLoc(nextState, offset+curLoc, nextLoc);
-	  }
-	}
-      }
-    }
+//      }
+//    }
+//
+//    // Restore the nodePtrTbl:
+//    this.makeNodePtrTbl();
+//
+//    // Do breath-first search:
+//    long offset = MAX_PTR + 1;
+//    MemIntQueue queue = new MemIntQueue(this.metadir, null);
+//    
+//    if (this.hasTableau) {
+//      // Initialize queue with initial states:
+//      for (int i = 0; i < numOfInits; i += 2) {
+//	long state0 = this.initNodes.elementAt(i);
+//	int tidx0 = (int)this.initNodes.elementAt(i+1);
+//	queue.enqueueLong(state0);
+//	queue.enqueueInt(tidx0);
+//	queue.enqueueLong(this.nodePtrTbl.get(state0, tidx0));
+//	this.nodePtrTbl.put(state0, tidx0, MAX_PTR);
+//      }
+//
+//      while (true) {
+//	long curState = queue.dequeueLong();
+//	int curTidx = queue.dequeueInt();
+//	long curPtr = queue.dequeueLong();
+//	GraphNode curNode = this.getNode(curState, curTidx, curPtr);
+//	int succCnt = curNode.succSize();
+//
+//	for (int i = 0; i < succCnt; i++) {
+//	  long nextState = curNode.getStateFP(i);
+//	  int nextTidx = curNode.getTidx(i);
+//	  if (nextState == state) {
+//	    // found a path to state:
+//	    LongVec res = new LongVec(2);
+//	    res.addElement(nextState);
+//	    int curLoc = this.nodePtrTbl.getNodesLoc(curState);
+//	    int[] nodes = this.nodePtrTbl.getNodesByLoc(curLoc);
+//	    while (true) {
+//	      res.addElement(curState);
+//	      long ploc = -1;	      
+//	      for (int j = 2; j < nodes.length; j += 3) {
+//		ploc = NodePtrTable.getElem(nodes, j);
+//		if (!isFilePointer(ploc)) break;
+//	      }
+//	      if (ploc == MAX_PTR) break;
+//	      curLoc = (int)(ploc-offset);
+//	      nodes = this.nodePtrTbl.getNodesByLoc(curLoc);
+//	      curState = NodePtrTable.getKey(nodes);
+//	    }
+//	    return res;
+//	  }
+//	  
+//	  int nextLoc = this.nodePtrTbl.getNodesLoc(nextState);
+//	  int[] nextNodes = this.nodePtrTbl.getNodesByLoc(nextLoc);
+//	  int cloc = NodePtrTable.getIdx(nextNodes, nextTidx);
+//	  long nextPtr = NodePtrTable.getElem(nextNodes, cloc);
+//
+//	  if (isFilePointer(nextPtr)) {
+//	    // nextState is not visited: enqueue it, mark it visited, and
+//	    // memorize its parent.
+//	    queue.enqueueLong(nextState);
+//	    queue.enqueueInt(nextTidx);
+//	    queue.enqueueLong(nextPtr);
+//	    int curLoc = this.nodePtrTbl.getNodesLoc(curState);
+//	    NodePtrTable.putElem(nextNodes, offset+curLoc, cloc);
+//	  }
+//	}
+//      }
+//    }
+//    else {
+//      // Initialize queue with initial states:
+//      for (int i = 0; i < numOfInits; i += 2) {
+//	long state0 = this.initNodes.elementAt(i);
+//	queue.enqueueLong(state0);
+//	queue.enqueueLong(this.nodePtrTbl.get(state0));
+//	this.nodePtrTbl.put(state0, MAX_PTR);
+//      }
+//
+//      while (true) {
+//	long curState = queue.dequeueLong();
+//	long curPtr = queue.dequeueLong();
+//	GraphNode curNode = this.getNode(curState, -1, curPtr);
+//	int succCnt = curNode.succSize();
+//
+//	for (int i = 0; i < succCnt; i++) {
+//	  long nextState = curNode.getStateFP(i);
+//	  if (nextState == state) {
+//	    // found a path to state: construct the path and return.
+//	    LongVec res = new LongVec(2);
+//	    res.addElement(nextState);
+//	    int curLoc = this.nodePtrTbl.getLoc(curState);
+//	    while (true) {
+//	      res.addElement(curState);
+//	      long ploc = this.nodePtrTbl.getByLoc(curLoc);
+//	      if (ploc == MAX_PTR) break;
+//	      curLoc = (int)(ploc-offset);
+//	      curState = this.nodePtrTbl.getKeyByLoc(curLoc);
+//	    }
+//	    return res;	    
+//	  }
+//	  int nextLoc = this.nodePtrTbl.getLoc(nextState);
+//	  long nextPtr = this.nodePtrTbl.getByLoc(nextLoc);
+//	  if (isFilePointer(nextPtr)) {
+//	    // nextState is not visited:
+//	    queue.enqueueLong(nextState);
+//	    queue.enqueueLong(nextPtr);
+//	    int curLoc = this.nodePtrTbl.getLoc(curState);
+//	    this.nodePtrTbl.putByLoc(nextState, offset+curLoc, nextLoc);
+//	  }
+//	}
+//      }
+//    }
   }
 
   public final String toString() {
