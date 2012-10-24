@@ -304,7 +304,7 @@ implements Enumerable, Reducible {
   public final boolean assignable(Value val) { return this.equals(val); }
 
   /* The fingerprint methods */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     this.normalize();
     int sz = this.elems.size();    
     fp = FP64.Extend(fp, SETENUMVALUE);

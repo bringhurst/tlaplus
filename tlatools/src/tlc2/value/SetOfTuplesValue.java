@@ -6,6 +6,7 @@
 package tlc2.value;
 
 import tlc2.TLCGlobals;
+import tlc2.util.FP64;
 import util.Assert;
 
 public class SetOfTuplesValue extends Value implements Enumerable {
@@ -159,7 +160,7 @@ public class SetOfTuplesValue extends Value implements Enumerable {
   }
 
   /* The fingerprint  */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     this.convertAndCache();
     return this.tupleSet.fingerPrint(fp);
   }

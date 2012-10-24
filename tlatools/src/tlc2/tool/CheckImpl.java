@@ -11,6 +11,7 @@ import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.FPSetFactory;
 import tlc2.tool.queue.DiskStateQueue;
+import tlc2.util.FP64;
 import util.ToolIO;
 
 /**
@@ -134,7 +135,7 @@ public abstract class CheckImpl extends ModelChecker {
    */
   public final boolean checkState(TLCState state) throws IOException {
     // Record the state in coverSet and theFPSet:
-    long[] fp = state.fingerPrint();
+	  FP64 fp = state.fingerPrint();
     boolean seen = this.coverSet.put(fp);
     if (!seen) {
       if (!this.theFPSet.contains(fp)) {
@@ -163,7 +164,7 @@ public abstract class CheckImpl extends ModelChecker {
   public final TLCStateInfo[] generateNewTrace() throws IOException {
     long pos = -1;
     while ((pos = this.stateEnum.nextPos()) != -1) {
-      long fp = this.stateEnum.nextFP();
+      FP64 fp = this.stateEnum.nextFP();
       if (!this.coverSet.contains(fp)) {
 	return this.trace.getTrace(pos, true);
       }

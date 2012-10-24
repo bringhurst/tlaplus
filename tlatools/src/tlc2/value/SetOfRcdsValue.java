@@ -7,6 +7,7 @@ package tlc2.value;
 
 import tlc2.TLCGlobals;
 import tlc2.output.EC;
+import tlc2.util.FP64;
 import util.Assert;
 import util.UniqueString;
 
@@ -179,7 +180,7 @@ public class SetOfRcdsValue extends Value implements Enumerable {
   }
   
   /* The fingerprint  */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     this.convertAndCache();
     return this.rcdSet.fingerPrint(fp);
   }

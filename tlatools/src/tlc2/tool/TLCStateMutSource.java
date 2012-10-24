@@ -172,7 +172,7 @@ implements Cloneable, Serializable {
    * via the state queue. They have to be normalized before adding to
    * the state queue.  We do that here.   
    */
-  public final long[] fingerPrint() {
+  public final FP64 fingerPrint() {
     int sz = this.values.length;
 
     Value[] minVals = this.values;
@@ -201,7 +201,7 @@ implements Cloneable, Serializable {
       }
     }
     // Fingerprint the state:
-		long[] fp = FP64.New();
+    	FP64 fp = FP64.New();
 		if (viewMap == null) {
 			for (int i = 0; i < sz; i++) {
 				fp = minVals[i].fingerPrint(fp);

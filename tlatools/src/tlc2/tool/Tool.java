@@ -2682,12 +2682,12 @@ public class Tool
   }
   
   /* Reconstruct the initial state whose fingerprint is fp. */
-  public final TLCStateInfo getState(long[] fp) {
+  public final TLCStateInfo getState(FP64 fp) {
     StateVec initStates = this.getInitStates();
     for (int i = 0; i < initStates.size(); i++) {
       TLCState state = initStates.elementAt(i);
-      long[] nfp = state.fingerPrint();
-      if (FP64.equals(fp, nfp)) {
+      FP64 nfp = state.fingerPrint();
+      if (fp.equals(nfp)) {
         String info = "<Initial predicate>";
         return new TLCStateInfo(state, info);
       }
@@ -2696,14 +2696,14 @@ public class Tool
   }
   
   /* Reconstruct the next state of state s whose fingerprint is fp. */
-  public final TLCStateInfo getState(long[] fp, TLCState s) {
+  public final TLCStateInfo getState(FP64 fp, TLCState s) {
     for (int i = 0; i < this.actions.length; i++) {
       Action curAction = this.actions[i];
       StateVec nextStates = this.getNextStates(curAction, s);
       for (int j = 0; j < nextStates.size(); j++) {
         TLCState state = nextStates.elementAt(j);
-        long[] nfp = state.fingerPrint();
-        if (FP64.equals(fp, nfp)) {
+        FP64 nfp = state.fingerPrint();
+        if (fp.equals(nfp)) {
           return new TLCStateInfo(state, curAction.getLocation());
         }
       }

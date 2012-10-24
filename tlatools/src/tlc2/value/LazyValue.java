@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 
 import tla2sany.semantic.SemanticNode;
 import tlc2.util.Context;
+import tlc2.util.FP64;
 import util.Assert;
 
 public class LazyValue extends Value {
@@ -127,7 +128,7 @@ public class LazyValue extends Value {
   }
 
   /* The fingerprint method */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     if (this.val == null || this.val == ValUndef) {
       Assert.fail("Error(TLC): Attempted to fingerprint a lazy value.");
     }

@@ -22,7 +22,7 @@ public class BigInt extends BigInteger implements Cloneable, ExternalSortable {
   public BigInt(int numBits, Random rnd) { super(numBits, rnd); }
 
   /* Returns the fingerprint of this. */
-  public final long[] fingerPrint() {
+  public final FP64 fingerPrint() {
     return FP64.New(this.toByteArray());
   }
 

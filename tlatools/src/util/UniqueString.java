@@ -242,7 +242,7 @@ public final class UniqueString implements Serializable
     }
 
     
-    public long[] fingerPrint(long[] fp)
+    public FP64 fingerPrint(FP64 fp)
     {
         return FP64.Extend(fp, this.tok);
     }

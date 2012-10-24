@@ -39,7 +39,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final long[] aFingerprint)
+  public final synchronized long writeState(final FP64 aFingerprint)
   throws IOException {
 	  return writeState(1, aFingerprint);
   }
@@ -50,7 +50,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final TLCState predecessor, final long[] aFingerprint)
+  public final synchronized long writeState(final TLCState predecessor, final FP64 aFingerprint)
   throws IOException {
 	  return writeState(predecessor.uid, aFingerprint);
   }
@@ -61,15 +61,12 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  private final synchronized long writeState(long predecessorLoc, long[] fps)
+  private final synchronized long writeState(long predecessorLoc, FP64 fps)
   throws IOException {
 	//TODO Remove synchronization as all threads content for this lock
     this.lastPtr = this.raf.getFilePointer();
     this.raf.writeLongNat(predecessorLoc);
-    for (int i = 0; i < fps.length; i++) {
-		long fp = fps[i];
-		this.raf.writeLong(fp);
-	}
+    fps.write(this.raf);
     return this.lastPtr;
   }
 
@@ -82,14 +79,10 @@ public class TLCTrace {
     return this.raf.readLongNat();
   }
 
-  private synchronized long[] getFP(long loc) throws IOException {
+  private synchronized FP64 getFP(long loc) throws IOException {
     this.raf.seek(loc);
     this.raf.readLongNat();    /*drop*/
-    long [] fps = new long[FP64.FINGERPRINTS];
-    for (int i = 0; i < fps.length; i++) {
-		fps[i] = this.raf.readLong();
-	}
-    return fps;
+    return FP64.read(this.raf);
   }
 
   /**
@@ -179,7 +172,7 @@ public class TLCTrace {
 		int len = fps.size();
 		TLCStateInfo[] res = new TLCStateInfo[len];
 		if (len > 0) {
-			long[] fp = fps.elementAt(len - 1);
+			FP64 fp = fps.elementAt(len - 1);
 			TLCStateInfo sinfo = this.tool.getState(fp);
 			if (sinfo == null) {
 				MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);
@@ -369,7 +362,7 @@ public class TLCTrace {
       return -1;
     }
 
-    final long nextFP() throws IOException {
+    final FP64 nextFP() throws IOException {
       this.enumRaf.readLongNat();    /*drop*/
       return this.enumRaf.readLong();
     }

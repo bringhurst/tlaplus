@@ -233,7 +233,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long)
 	 */
-	public final TLCStateInfo getState(long[] fp) {
+	public final TLCStateInfo getState(FP64 fp) {
 		return this.tool.getState(fp);
 	}
 
@@ -241,7 +241,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long, tlc2.tool.TLCState)
 	 */
-	public final TLCStateInfo getState(long[] fp, TLCState s) {
+	public final TLCStateInfo getState(FP64 fp, TLCState s) {
 		return this.tool.getState(fp, s);
 	}
 

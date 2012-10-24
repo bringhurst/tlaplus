@@ -5,6 +5,8 @@
 
 package tlc2.tool;
 
+import tlc2.util.FP64;
+
 public class TLCStateInfo {
   public TLCStateInfo predecessorState;
   public long stateNumber;
@@ -16,7 +18,7 @@ public class TLCStateInfo {
     this.info = info;
   }
 
-  public final long[] fingerPrint() {
+  public final FP64 fingerPrint() {
     return this.state.fingerPrint();
   }
 

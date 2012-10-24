@@ -5,6 +5,7 @@
 
 package tlc2.value;
 
+import tlc2.util.FP64;
 import util.Assert;
 
 public class UnionValue extends Value implements Enumerable {
@@ -120,7 +121,7 @@ public class UnionValue extends Value implements Enumerable {
   }
 
   /* The fingerprint  */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     this.convertAndCache();    
     return this.realSet.fingerPrint(fp);
   }

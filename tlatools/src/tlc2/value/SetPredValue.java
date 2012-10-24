@@ -15,6 +15,7 @@ import tlc2.tool.EvalException;
 import tlc2.tool.TLCState;
 import tlc2.tool.Tool;
 import tlc2.util.Context;
+import tlc2.util.FP64;
 import util.Assert;
 
 public class SetPredValue extends Value implements Enumerable {
@@ -167,7 +168,7 @@ public class SetPredValue extends Value implements Enumerable {
   }
 
   /* The fingerprint method */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     this.inVal = SetEnumValue.convert(this);
     this.tool = null;
     return this.inVal.fingerPrint(fp);

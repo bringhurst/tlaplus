@@ -13,6 +13,7 @@ import tlc2.tool.Action;
 import tlc2.tool.StateVec;
 import tlc2.tool.TLCState;
 import tlc2.tool.Tool;
+import tlc2.util.FP64;
 import tlc2.util.LongVec;
 
 public class LiveCheck {
@@ -47,7 +48,7 @@ public class LiveCheck {
    * behavior graph. It is called when a new initial state is
    * generated.
    */
-  public static void addInitState(TLCState state, long[] stateFP) {
+  public static void addInitState(TLCState state, FP64 stateFP) {
     for (int soln = 0; soln < solutions.length; soln++) {
       OrderOfSolution oos = solutions[soln];
       DiskGraph dgraph = dgraphs[soln];
@@ -75,7 +76,7 @@ public class LiveCheck {
    * This method adds new nodes into the behavior graph induced by s0.
    * It is called after the successors of s0 are computed.
    */
-  public static void addNextState(TLCState s0, long[] fp0,
+  public static void addNextState(TLCState s0, FP64 fp0,
 				  StateVec nextStates,
 				  LongVec nextFPs)
   throws IOException {
@@ -170,7 +171,7 @@ public class LiveCheck {
    * compute the children of (s, t). Hopefully, this case does not
    * occur very frequently.
    */
-  private static void addNextState(TLCState s, long fp, TBGraphNode tnode,
+  private static void addNextState(TLCState s, FP64 fp, TBGraphNode tnode,
 				   OrderOfSolution oos, DiskGraph dgraph)
   throws IOException {
     int slen = oos.checkState.length;

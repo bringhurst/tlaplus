@@ -2,51 +2,53 @@
 // Last modified on Tue May 25 23:22:20 PDT 1999 by yuanyu
 package tlc2.util;
 
-import java.util.Arrays;
-
-import tlc2.output.EC;
-import util.Assert;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
- * A 64-bit fingerprint is stored in an instance of the type <code>long</code>.
+ * A 128-bit fingerprint is stored in an instance of the type <code>long</code>.
  * The static methods of <code>FP64</code> are used to initialize 64-bit
  * fingerprints and to extend them.
  * 
  * Written by Allan Heydon and Marc Najork.
  */
-public class FP64 {
+public class FP64 implements Comparable<FP64> {
 
 	/** Return the fingerprint of the empty string. */
-	public static long[] New() {
-		// Cloning IrredPoly is essential. 
-		// All fingerprints use this as the root.
-		return IrredPoly.clone();
+	public static FP64 New() {
+		return new FP64();
 	}
 
 	/** Return the fingerprint of the bytes in the array <code>bytes</code>. */
-	public static long[] New(byte[] bytes) {
-		return Extend(IrredPoly, bytes, 0, bytes.length);
+	public static FP64 New(byte[] bytes) {
+		return Extend(New(), bytes, 0, bytes.length);
 	}
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by the characters of
 	 * <code>s</code>.
 	 */
-	public static long[] Extend(long[] fps, String s) {
-		for (int idx = 0; idx < fps.length; idx++) {
-			long fp = fps[idx];
-
-			final long[] mod = ByteModTable_7[idx];
-			final int mask = 0xFF;
-			final int len = s.length();
-			for (int i = 0; i < len; i++) {
-				char c = s.charAt(i);
-				fp = ((fp >>> 8) ^ (mod[(((int) c) ^ ((int) fp)) & mask]));
-			}
-
-			fps[idx] = fp;
+	public static FP64 Extend(FP64 fps, String s) {
+		
+		// lower 64 bit
+		long fp = fps.IrredPolyLower; 
+		final int mask = 0xFF;
+		final int len = s.length();
+		for (int i = 0; i < len; i++) {
+			char c = s.charAt(i);
+			fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fp)) & mask]));
 		}
-
+		fps.IrredPolyLower = fp;
+		
+		// higher 64 bit
+		fp = fps.IrredPolyHigher; 
+		for (int i = 0; i < len; i++) {
+			char c = s.charAt(i);
+			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & mask]));
+		}
+		fps.IrredPolyHigher = fp;
+		
 		return fps;
 	}
 
@@ -54,18 +56,22 @@ public class FP64 {
 	 * Extend the fingerprint <code>fp</code> by the bytes in the array
 	 * <code>bytes</code>.
 	 */
-	private static long[] Extend(long[] fps, byte[] bytes, int start, int len) {
-		for (int idx = 0; idx < fps.length; idx++) {
-			long fp = fps[idx];
+	private static FP64 Extend(FP64 fps, byte[] bytes, int start, int len) {
 
-			final long[] mod = ByteModTable_7[idx];
-			int end = start + len;
-			for (int i = start; i < end; i++) {
-				fp = (fp >>> 8) ^ mod[(bytes[i] ^ (int) fp) & 0xFF];
-			}
-			
-			fps[idx] = fp;
+		// lower 64 bit
+		long fp = fps.IrredPolyLower;
+		int end = start + len;
+		for (int i = start; i < end; i++) {
+			fp = (fp >>> 8) ^ ByteModTable_7Lower[(bytes[i] ^ (int) fp) & 0xFF];
 		}
+		fps.IrredPolyLower = fp;
+		
+		// higher 64 bit
+		fp = fps.IrredPolyHigher;
+		for (int i = start; i < end; i++) {
+			fp = (fp >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fp) & 0xFF];
+		}
+		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -73,48 +79,62 @@ public class FP64 {
 	/**
 	 * Extend the fingerprint <code>fp</code> by a character <code>c</code>.
 	 */
-	public static long[] Extend(long[] fps, char c) {
-		for (int idx = 0; idx < fps.length; idx++) {
-			long fp = fps[idx];
+	public static FP64 Extend(FP64 fps, char c) {
 			
-			long[] mod = ByteModTable_7[idx];
-			fp = ((fp >>> 8) ^ (mod[(((int) c) ^ ((int) fp)) & 0xFF]));
-			
-			fps[idx] = fp;
-		}
+		// lower 64 bit
+		long fp = fps.IrredPolyLower;
+		fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fp)) & 0xFF]));
+		fps.IrredPolyLower = fp;
+
+		// higher 64 bit
+		fp = fps.IrredPolyHigher;
+		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & 0xFF]));
+		fps.IrredPolyHigher = fp;
+	
 		return fps;
 	}
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by a byte <code>c</code>.
 	 */
-	public static long[] Extend(long[] fps, byte b) {
-		for (int idx = 0; idx < fps.length; idx++) {
-			long fp = fps[idx];
+	public static FP64 Extend(FP64 fps, byte b) {
 			
-			long[] mod = ByteModTable_7[idx];
-			fp = ((fp >>> 8) ^ (mod[(b ^ ((int) fp)) & 0xFF]));
-			fps[idx] = fp;
-		}
+		// lower 64 bit
+		long fp = fps.IrredPolyLower;
+		fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fp)) & 0xFF]));
+		fps.IrredPolyLower = fp;
+			
+		// higher 64 bit
+		fp = fps.IrredPolyHigher;
+		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
+		fps.IrredPolyHigher = fp;
+		
 		return fps;
 	}
 
 	/*
 	 * Extend the fingerprint <code>fp</code> by an integer <code>x</code>.
 	 */
-	public static long[] Extend(long[] fps, int x) {
-		for (int idx = 0; idx < fps.length; idx++) {
-			long fp = fps[idx];
+	public static FP64 Extend(FP64 fps, int x) {
 			
-			long[] mod = ByteModTable_7[idx];
-			for (int i = 0; i < 4; i++) {
-				byte b = (byte) (x & 0xFF);
-				fp = ((fp >>> 8) ^ (mod[(b ^ ((int) fp)) & 0xFF]));
-				x = x >>> 8;
-			}
-			
-			fps[idx] = fp;
+		// lower 64 bit
+		long fp = fps.IrredPolyLower;
+		for (int i = 0; i < 4; i++) {
+			byte b = (byte) (x & 0xFF);
+			fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fp)) & 0xFF]));
+			x = x >>> 8;
 		}
+		fps.IrredPolyLower = fp;
+
+		// higher 64 bit
+		fp = fps.IrredPolyHigher;
+		for (int i = 0; i < 4; i++) {
+			byte b = (byte) (x & 0xFF);
+			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
+			x = x >>> 8;
+		}
+		fps.IrredPolyHigher = fp;
+
 		return fps;
 	}
 
@@ -183,92 +203,135 @@ public class FP64 {
 	 * be hardwired. Note that since we just extend a byte at a time, we need
 	 * just "ByteModeTable[7]".
 	 */
-	private static long[][] ByteModTable_7;
+	private static long[] ByteModTable_7Lower;
+	private static long[] ByteModTable_7Higher;
 
-	// TODO hard coded to 64bit fingerprints for the moment to get as close to
-	// the old API as possible.
-	public static final int FINGERPRINTS = 1;
+	private static int indexLower;
+	private static int indexHigher;
 	
-	/* This are the irreducible polynomials used as seeds. */
-	private static long[] IrredPoly = new long[FINGERPRINTS];
-
-	public static long[] getIrredPoly() {
-		return IrredPoly;
-	}
-
 	// Initialization code
 	public static void Init(int n) {
-		long[] polys = new long[FINGERPRINTS];
-		for (int i = 0; i < polys.length; i++) {
-			int idx = n + i % Polys.length;
-			polys[i] = Polys[idx];
-		}
-		Init(polys);
+		indexLower = n;
+		indexHigher = indexLower +  1 % numPolys;
+		
+		ByteModTable_7Lower = getByteModTable(Polys[indexLower]);
+		ByteModTable_7Higher = getByteModTable(Polys[indexHigher]);
 	}
 
 	public static void Init(long[] polys) {
-		IrredPoly = polys;
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+	
+	private static long[] getByteModTable(long polynominal) {
+		// Maximum power needed == 127-7*8 == 127 - 56 == 71
+		int plength = 72;
+		long[] PowerTable = new long[plength];
 
-		ByteModTable_7 = new long[polys.length][];
-		
-		for (int idx = 0; idx < polys.length; idx++) {
-			long poly = polys[idx];
-			
-			
-			// Maximum power needed == 127-7*8 == 127 - 56 == 71
-			int plength = 72;
-			long[] PowerTable = new long[plength];
+		long t = One;
+		for (int i = 0; i < plength; i++) {
+			PowerTable[i] = t;
+			// System.out.println("pow[" + i + "] = " + Long.toHexString(t));
 
-			long t = One;
-			for (int i = 0; i < plength; i++) {
-				PowerTable[i] = t;
-				// System.out.println("pow[" + i + "] = " + Long.toHexString(t));
+			// t = t * x
+			long mask = ((t & X63) != 0) ? polynominal : 0;
+			t = (t >>> 1) ^ mask;
+		}
 
-				// t = t * x
-				long mask = ((t & X63) != 0) ? poly : 0;
-				t = (t >>> 1) ^ mask;
-			}
-
-			// Just need the 7th iteration of the ByteModTable initialization code
-			ByteModTable_7[idx] = new long[256];
-			for (int j = 0; j <= 255; j++) {
-				long v = Zero;
-				for (int k = 0; k <= 7; k++) {
-					if ((j & (1L << k)) != 0) {
-						v ^= PowerTable[127 - (7 * 8) - k];
-					}
+		// Just need the 7th iteration of the ByteModTable initialization code
+		long[] byteModTbl = new long[256];
+		for (int j = 0; j <= 255; j++) {
+			long v = Zero;
+			for (int k = 0; k <= 7; k++) {
+				if ((j & (1L << k)) != 0) {
+					v ^= PowerTable[127 - (7 * 8) - k];
 				}
-				ByteModTable_7[idx][j] = v;
 			}
+			byteModTbl[j] = v;
+		}
+		return byteModTbl;
+	}
+	
+	/* These are the irreducible polynomials used as seeds => 128bit */
+	private long IrredPolyLower;
+	private long IrredPolyHigher;
+	
+	public FP64() {
+		IrredPolyLower = Polys[indexLower];
+		IrredPolyHigher = Polys[indexHigher];
+	}
+
+	public long[] getIrredPoly() {
+		return new long[] {IrredPolyLower, IrredPolyHigher};
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+	    int lHigh = (int) (IrredPolyLower >> 32);
+	    int lLow = (int) IrredPolyLower;
+
+	    int hHigh = (int) (IrredPolyHigher >> 32);
+	    int hLow = (int) IrredPolyHigher;
+	    
+		return (lHigh ^ lLow) ^ (hHigh ^ hLow);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object other) {
+		if (other instanceof FP64) {
+			final FP64 fOther = (FP64) other;
+			if (IrredPolyLower == fOther.IrredPolyLower) {
+				if (IrredPolyHigher == fOther.IrredPolyHigher) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	public int compareTo(FP64 other) {
+		int compareTo = Long.valueOf(IrredPolyLower).compareTo(other.IrredPolyLower);
+		if (compareTo != 0) {
+			return compareTo;
+		} else {
+			return Long.valueOf(IrredPolyHigher).compareTo(other.IrredPolyHigher);
 		}
 	}
 
-    /**
-     * @see Arrays#equals(long[], long[])
-     */
-	public static boolean equals(long[] fpsA, long[] fpsB) {
-		return Arrays.equals(fpsA, fpsB);
+	public int getIndex(long mask) {
+		// TODO something like the following:
+		//return this.long[0] and long[1] & mask
+		return (int) (IrredPolyLower & mask);
 	}
 
 	/**
-	 * Starting with idx = 0 and increasing idx++ if necessary
-	 * 
-	 * @see Long#compareTo(Long) 
+	 * @deprecated Do not use
 	 */
-	public static int compareTo(long[] fpsA, long[] fpsB) {
-		// fingerprints should be of equal size
-		Assert.check(fpsA.length == fpsB.length, EC.GENERAL);
+	public long getInternal() {
+		//TODO hack to reuse old FPSet impl that only support 64 bit long
+		return getIrredPoly()[0];
+	}
 
-		// we treat the long[] as a continuous bit string. Thus we start
-		// comparing the first element and move on accordingly.
-		for (int i = 0; i < fpsB.length; i++) {
-			final Long fpA = Long.valueOf(fpsA[i]);
-			int compareTo = fpA.compareTo(fpsB[i]);
-			if (compareTo != 0) {
-				return compareTo;
-			}
-		}
-		// make compiler happy
-		return 0;
+	public static FP64 read(BufferedRandomAccessFile raf) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	public void write(BufferedRandomAccessFile raf) throws IOException {
+		raf.writeLong(IrredPolyLower);
+		raf.writeLong(IrredPolyHigher);
+	}
+
+	public void write(ObjectOutputStream oos) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	public static FP64 read(ObjectInputStream ois) {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 }

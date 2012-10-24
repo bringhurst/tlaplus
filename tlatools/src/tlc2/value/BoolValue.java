@@ -88,7 +88,7 @@ public class BoolValue extends Value {
   }
 
   /* The fingerprint method */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     fp = FP64.Extend(fp, BOOLVALUE) ;
     fp = FP64.Extend(fp, (this.val) ? 't' : 'f') ;
     return fp ;

@@ -210,7 +210,7 @@ public class ModelValue extends Value {
   }
 
   /* The fingerprint methods */
-  public final long[] fingerPrint(long[] fp) {
+  public final FP64 fingerPrint(FP64 fp) {
     return this.val.fingerPrint(FP64.Extend(fp, MODELVALUE));
   }
 

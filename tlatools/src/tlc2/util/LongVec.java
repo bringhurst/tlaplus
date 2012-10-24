@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class LongVec implements Cloneable, Serializable {
 	private static final long serialVersionUID = 2406899362740899071L;
-	private long[][] elementData;
+	private FP64[] elementData;
 	private int elementCount;
 
 	public LongVec() {
@@ -22,22 +22,22 @@ public class LongVec implements Cloneable, Serializable {
 
 	public LongVec(int initialCapacity) {
 		this.elementCount = 0;
-		this.elementData = new long[initialCapacity][];
+		this.elementData = new FP64[initialCapacity];
 	}
 
-	public final void addElement(long[] x) {
+	public final void addElement(FP64 x) {
 		if (this.elementCount == this.elementData.length) {
 			ensureCapacity(this.elementCount + 1);
 		}
 		this.elementData[this.elementCount++] = x;
 	}
 
-	public final void setElement(int index, long[] x) {
+	public final void setElement(int index, FP64 x) {
 		this.elementData[index] = x;
 		this.elementCount = ++elementCount % elementData.length + 1;
 	}
 
-	public final long[] elementAt(int index) {
+	public final FP64 elementAt(int index) {
 		return this.elementData[index];
 	}
 
@@ -60,8 +60,8 @@ public class LongVec implements Cloneable, Serializable {
 			if (newCapacity < minCapacity) {
 				newCapacity = minCapacity;
 			}
-			long oldBuffer[][] = this.elementData;
-			this.elementData = new long[newCapacity][];
+			FP64[] oldBuffer = this.elementData;
+			this.elementData = new FP64[newCapacity];
 
 			System.arraycopy(oldBuffer, 0, elementData, 0, elementCount);
 		}
@@ -73,25 +73,17 @@ public class LongVec implements Cloneable, Serializable {
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		this.elementCount = ois.readInt();
-		this.elementData = new long[this.elementCount][];
+		this.elementData = new FP64[this.elementCount];
 		for (int i = 0; i < this.elementCount; i++) {
-			int length = ois.readInt();
-			long[] fps = new long[length]; 
-			for (int j = 0; j < length; j++) {
-				fps[j] = ois.readLong();
-			}
-			this.elementData[i] = fps;
+			this.elementData[i] = FP64.read(ois);
 		}
 	}
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		oos.writeInt(this.elementCount);
 		for (int i = 0; i < this.elementCount; i++) {
-			long[] ls = this.elementData[i];
-			oos.writeInt(ls.length);
-			for (int j = 0; j < ls.length; j++) {
-				oos.writeLong(ls[j]);
-			}
+			FP64 fp = this.elementData[i];
+			fp.write(oos);
 		}
 	}
 

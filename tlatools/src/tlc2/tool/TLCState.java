@@ -11,6 +11,7 @@ import java.io.Serializable;
 import tla2sany.semantic.OpDeclNode;
 import tla2sany.semantic.SemanticNode;
 import tla2sany.semantic.SymbolNode;
+import tlc2.util.FP64;
 import tlc2.value.Value;
 import tlc2.value.ValueInputStream;
 import tlc2.value.ValueOutputStream;
@@ -56,7 +57,7 @@ public abstract class TLCState implements Cloneable, Serializable {
   public abstract TLCState deepCopy();
   public abstract StateVec addToVec(StateVec states);
   public abstract void deepNormalize();
-  public abstract long[] fingerPrint();
+  public abstract FP64 fingerPrint();
   public abstract boolean allAssigned();
   public abstract TLCState createEmpty();
 

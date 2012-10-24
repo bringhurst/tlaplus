@@ -10,6 +10,7 @@ import java.io.IOException;
 import tla2sany.semantic.SemanticNode;
 import tla2sany.semantic.SymbolNode;
 import tlc2.util.Context;
+import tlc2.util.FP64;
 import tlc2.value.Value;
 import tlc2.value.ValueInputStream;
 import tlc2.value.ValueOutputStream;
@@ -75,7 +76,7 @@ public final class TLCStateFun extends TLCState {
       throw new WrongInvocationException("TLCStateFun.normalizeFcns: This is a TLC bug.");
   }
   
-  public final long[] fingerPrint() {
+  public final FP64 fingerPrint() {
       throw new WrongInvocationException("TLCStateFun.fingerPrint: This is a TLC bug.");
   }
 
