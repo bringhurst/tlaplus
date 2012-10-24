@@ -206,7 +206,7 @@ public class FP64 implements Comparable<FP64> {
 	private static long[] ByteModTable_7Lower;
 //	private static long[] ByteModTable_7Higher;
 
-	private static int indexLower;
+	public static int indexLower;
 //	private static int indexHigher;
 	
 	// Initialization code
@@ -258,6 +258,16 @@ public class FP64 implements Comparable<FP64> {
 	public FP64() {
 		IrredPolyLower = Polys[indexLower];
 //		IrredPolyHigher = Polys[indexHigher];
+	}
+
+	public FP64(long low) {
+		IrredPolyLower = low;
+//		IrredPolyHigher = 0L;
+	}
+	
+	public FP64(long low, long hi) {
+		IrredPolyLower = low;
+//		IrredPolyHigher = hi;
 	}
 
 	public long[] getIrredPoly() {

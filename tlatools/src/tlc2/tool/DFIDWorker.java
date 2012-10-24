@@ -7,6 +7,7 @@ import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.output.StatePrinter;
 import tlc2.tool.fp.dfid.FPIntSet;
+import tlc2.util.FP64;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
 import tlc2.util.ObjLongTable;
@@ -105,7 +106,7 @@ public class DFIDWorker extends IdThread implements IWorker {
 
     while (len > 0) {
       int index = (int)Math.floor(this.rng.nextDouble() * len);
-      long fp = succFPs.elementAt(index);
+      long fp = succFPs.elementAt(index).getInternal();
       int status = this.theFPSet.getStatus(fp);
 
       // Assert.check(status != FPIntSet.NEW);
@@ -166,7 +167,7 @@ public class DFIDWorker extends IdThread implements IWorker {
 	this.succStateStack[0].reset();
 	this.succFPStack[0].reset();
 	boolean isLeaf = this.toLevel < 2;
-	boolean noLeaf = this.tlc.doNext(curState, cfp, isLeaf,
+	boolean noLeaf = this.tlc.doNext(curState, new FP64(cfp), isLeaf,
 					 this.astCounts,
 					 this.succStateStack[0],
 					 this.succFPStack[0]);
@@ -186,13 +187,13 @@ public class DFIDWorker extends IdThread implements IWorker {
 	  }
 	  else {
 	    curState = this.succStateStack[this.curLevel-1].elementAt(index);
-	    cfp = this.succFPStack[this.curLevel-1].elementAt(index);
+	    cfp = this.succFPStack[this.curLevel-1].elementAt(index).getInternal();
 	    this.stateStack[this.curLevel] = curState;
 	    this.fpStack[this.curLevel] = cfp;
 	    this.succStateStack[this.curLevel].reset();
 	    this.succFPStack[this.curLevel].reset();
 	    isLeaf = (this.curLevel >= this.toLevel-1);
-	    noLeaf = this.tlc.doNext(curState, cfp, isLeaf,
+	    noLeaf = this.tlc.doNext(curState, new FP64(cfp), isLeaf,
 				     this.astCounts,
 				     this.succStateStack[this.curLevel],
 				     this.succFPStack[this.curLevel]);

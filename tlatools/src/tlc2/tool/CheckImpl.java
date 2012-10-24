@@ -164,7 +164,7 @@ public abstract class CheckImpl extends ModelChecker {
   public final TLCStateInfo[] generateNewTrace() throws IOException {
     long pos = -1;
     while ((pos = this.stateEnum.nextPos()) != -1) {
-      FP64 fp = this.stateEnum.nextFP();
+      FP64 fp = new FP64(this.stateEnum.nextFP());
       if (!this.coverSet.contains(fp)) {
 	return this.trace.getTrace(pos, true);
       }

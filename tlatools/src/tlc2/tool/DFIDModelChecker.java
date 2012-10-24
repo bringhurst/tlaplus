@@ -14,6 +14,7 @@ import tlc2.tool.fp.dfid.FPIntSet;
 import tlc2.tool.fp.dfid.MemFPIntSet;
 import tlc2.tool.liveness.LiveCheck;
 import tlc2.tool.liveness.LiveException;
+import tlc2.util.FP64;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
 import tlc2.util.ObjLongTable;
@@ -260,12 +261,12 @@ public class DFIDModelChecker extends AbstractChecker
                 int status = FPIntSet.NEW;
                 if (inModel)
                 {
-                    long fp = curState.fingerPrint();
-                    status = this.theFPSet.setStatus(fp, FPIntSet.NEW);
+                    FP64 fp = curState.fingerPrint();
+                    status = this.theFPSet.setStatus(fp.getInternal(), FPIntSet.NEW);
                     if (status == FPIntSet.NEW)
                     {
                         this.theInitStates[idx] = curState;
-                        this.theInitFPs[idx++] = fp;
+                        this.theInitFPs[idx++] = fp.getInternal();
 
                         // Write out the state if asked
                         if (this.allStateWriter != null)
@@ -338,7 +339,7 @@ public class DFIDModelChecker extends AbstractChecker
      * not been done in nextStates.  Return true if it finds a leaf
      * successor of curState.
      */
-    public final boolean doNext(TLCState curState, long cfp, boolean isLeaf, ObjLongTable counts, StateVec states,
+    public final boolean doNext(TLCState curState, FP64 cfp, boolean isLeaf, ObjLongTable counts, StateVec states,
             LongVec fps) throws Throwable
     {
         boolean deadLocked = true;
@@ -391,8 +392,8 @@ public class DFIDModelChecker extends AbstractChecker
                     int status = FPIntSet.NEW;
                     if (inModel)
                     {
-                        long fp = succState.fingerPrint();
-                        status = this.theFPSet.setStatus(fp, FPIntSet.NEW);
+                        FP64 fp = succState.fingerPrint();
+                        status = this.theFPSet.setStatus(fp.getInternal(), FPIntSet.NEW);
                         allSuccDone = allSuccDone && FPIntSet.isDone(status);
                         allSuccNonLeaf = allSuccNonLeaf && !FPIntSet.isLeaf(status);
 
@@ -532,7 +533,7 @@ public class DFIDModelChecker extends AbstractChecker
             if (this.checkLiveness && isLeaf)
             {
                 // Add a stuttering step for curState:
-                long curStateFP = curState.fingerPrint();
+                FP64 curStateFP = curState.fingerPrint();
                 liveNextStates.addElement(curState);
                 liveNextFPs.addElement(curStateFP);
                 // Add curState to the behavior graph:
@@ -545,7 +546,7 @@ public class DFIDModelChecker extends AbstractChecker
             // Otherwise, set curState to NONELEAF.
             if (allSuccDone || (isLeaf && allSuccNonLeaf))
             {
-                this.theFPSet.setStatus(cfp, FPIntSet.DONE);
+                this.theFPSet.setStatus(cfp.getInternal(), FPIntSet.DONE);
             }
             return allSuccNonLeaf;
         } catch (Throwable e)

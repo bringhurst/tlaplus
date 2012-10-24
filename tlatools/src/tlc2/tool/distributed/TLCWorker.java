@@ -100,7 +100,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 				statesComputed += nstates.length;
 				// add all succ states/fps to the array designated for the corresponding fp server
 				for (int j = 0; j < nstates.length; j++) {
-					long[] fp = nstates[j].fingerPrint();
+					FP64 fp = nstates[j].fingerPrint();
 					if (!cache.hit(fp)) {
 						treeSet.add(new Holder(fp, nstates[j], state1));
 					}
@@ -132,13 +132,11 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			//
 			// Additionally we later might wanna optimize lock acquisition based
 			// on the invariant of sorted fingerprints.
-			long[] last = null;
+			FP64 last = null;
 			for (final Holder holder : treeSet) {
 				// make sure invariant is followed
-				long fp[] = holder.getFp();
-				if (last != null) {
-					Assert.check(FP64.compareTo(fp, last) > 0, EC.GENERAL);
-				}
+				FP64 fp = holder.getFp();
+				Assert.check(fp.compareTo(last) > 0, EC.GENERAL);
 				last = fp;
 
 				int fpIndex = fpSetManager.getFPSetIndex(fp);
@@ -308,8 +306,8 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 				}
 			}
 
-			long[] irredPoly = server.getIrredPolyForFP();
-			FP64.Init(irredPoly);
+			int irredPolyIdx = server.getIrredPolyForFP();
+			FP64.Init(irredPolyIdx);
 
 			// this call has to be made before the first UniqueString gets
 			// created! Otherwise workers and server end up creating different
@@ -426,11 +424,11 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 	
 	public static class Holder implements Comparable<Holder> {
 
-		private final long[] fp;
+		private final FP64 fp;
 		private final TLCState successor;
 		private final TLCState predecessor;
 
-		public Holder(long fp[], TLCState successor, TLCState predecessor) {
+		public Holder(FP64 fp, TLCState successor, TLCState predecessor) {
 			this.fp = fp;
 			this.successor = successor;
 			this.predecessor = predecessor;
@@ -439,7 +437,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 		/**
 		 * @return the fp
 		 */
-		public long[] getFp() {
+		public FP64 getFp() {
 			return fp;
 		}
 
@@ -461,7 +459,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		public int compareTo(Holder o) {
-			return FP64.compareTo(fp, o.fp);
+			return fp.compareTo(o.fp);
 		}
 	}
 }

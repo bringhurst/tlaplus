@@ -362,7 +362,7 @@ public class TLCTrace {
       return -1;
     }
 
-    final FP64 nextFP() throws IOException {
+    final long nextFP() throws IOException {
       this.enumRaf.readLongNat();    /*drop*/
       return this.enumRaf.readLong();
     }

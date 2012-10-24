@@ -28,6 +28,7 @@ import tlc2.tool.distributed.fp.callable.CheckFPsCallable;
 import tlc2.tool.distributed.fp.callable.ContainsBlockCallable;
 import tlc2.tool.distributed.fp.callable.PutBlockCallable;
 import tlc2.util.BitVector;
+import tlc2.util.FP64;
 import tlc2.util.LongVec;
 import util.Assert;
 import util.ToolIO;
@@ -198,15 +199,15 @@ public abstract class FPSetManager implements IFPSetManager {
 		return hostname;
 	}
 
-	protected int getIndex(long fp) {
-		long l = fp & mask;
+	protected int getIndex(FP64 fp) {
+		long l = fp.getIndex(mask);
 		return (int) (l % this.fpSets.size());
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.IFPSetManager#put(long)
+	 * @see tlc2.tool.distributed.IFPSetManager#put(FP64)
 	 */
-	public boolean put(long[] fp) {
+	public boolean put(FP64 fp) {
 		int fpIdx = getIndex(fp);
 		while (true) {
 			try {
@@ -225,9 +226,9 @@ public abstract class FPSetManager implements IFPSetManager {
 	}
 	
 	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.IFPSetManager#contains(long)
+	 * @see tlc2.tool.distributed.IFPSetManager#contains(FP64)
 	 */
-	public boolean contains(long[] fp) {
+	public boolean contains(FP64 fp) {
 		int fpIdx = getIndex(fp);
 		while (true) {
 			try {
@@ -246,10 +247,11 @@ public abstract class FPSetManager implements IFPSetManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(long)
+	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(FP64)
 	 */
-	public int getFPSetIndex(long[] fp) {
-		return (int) ((fp & mask) % numOfServers());
+	public int getFPSetIndex(FP64 fp) {
+		int index = fp.getIndex(mask);
+		return index % numOfServers();
 	}
 
 	/* (non-Javadoc)
@@ -616,11 +618,11 @@ public abstract class FPSetManager implements IFPSetManager {
 			return fpset.putBlock(longVec);
 		}
 
-		public boolean put(long fp) throws IOException {
+		public boolean put(FP64 fp) throws IOException {
 			return fpset.put(fp);
 		}
 
-		public boolean contains(long fp) throws IOException {
+		public boolean contains(FP64 fp) throws IOException {
 			return fpset.contains(fp);
 		}
 		
