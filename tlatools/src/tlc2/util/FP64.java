@@ -316,7 +316,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 //		}
 	}
 
-	public int getIndex(long mask) {
+	public int getIndex(final long mask) {
 		// TODO something like the following:
 		//return this.long[0] and long[1] & mask
 		return (int) (IrredPolyLower & mask);
@@ -330,8 +330,8 @@ public class FP64 implements Serializable, Comparable<FP64> {
 		return getIrredPoly()[0];
 	}
 
-	public static FP64 read(BufferedRandomAccessFile raf) {
-		throw new UnsupportedOperationException("Not yet implemented");
+	public static FP64 read(BufferedRandomAccessFile raf) throws IOException {
+		return new FP64(raf.readLong()/*, raf.readLong()*/);
 	}
 
 	public void write(BufferedRandomAccessFile raf) throws IOException {
@@ -339,11 +339,12 @@ public class FP64 implements Serializable, Comparable<FP64> {
 //		raf.writeLong(IrredPolyHigher);
 	}
 
-	public void write(ObjectOutputStream oos) {
-		throw new UnsupportedOperationException("Not yet implemented");
+	public void write(ObjectOutputStream oos) throws IOException {
+		oos.writeLong(IrredPolyLower);
+//		oos.writeLong(IrredPolyHigher);
 	}
 
-	public static FP64 read(ObjectInputStream ois) {
-		throw new UnsupportedOperationException("Not yet implemented");
+	public static FP64 read(ObjectInputStream ois) throws IOException {
+		return new FP64(ois.readLong()/*, ois.readLong()*/);
 	}
 }
