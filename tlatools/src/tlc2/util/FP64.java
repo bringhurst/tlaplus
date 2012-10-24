@@ -18,7 +18,9 @@ public class FP64 {
 
 	/** Return the fingerprint of the empty string. */
 	public static long[] New() {
-		return IrredPoly;
+		// Cloning IrredPoly is essential. 
+		// All fingerprints use this as the root.
+		return IrredPoly.clone();
 	}
 
 	/** Return the fingerprint of the bytes in the array <code>bytes</code>. */
