@@ -36,7 +36,6 @@ import tlc2.util.Cache;
 import tlc2.util.FP64;
 import tlc2.util.LongVec;
 import tlc2.util.SimpleCache;
-import util.Assert;
 import util.ToolIO;
 import util.UniqueString;
 @SuppressWarnings("serial")
@@ -132,12 +131,9 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			//
 			// Additionally we later might wanna optimize lock acquisition based
 			// on the invariant of sorted fingerprints.
-			FP64 last = null;
 			for (final Holder holder : treeSet) {
 				// make sure invariant is followed
 				FP64 fp = holder.getFp();
-				Assert.check(fp.compareTo(last) > 0, EC.GENERAL);
-				last = fp;
 
 				int fpIndex = fpSetManager.getFPSetIndex(fp);
 				pvv[fpIndex].addElement(holder.getParentState());
