@@ -42,12 +42,12 @@ public class FP64 implements Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 		
 		// higher 64 bit
-		fp = fps.IrredPolyHigher; 
-		for (int i = 0; i < len; i++) {
-			char c = s.charAt(i);
-			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & mask]));
-		}
-		fps.IrredPolyHigher = fp;
+//		fp = fps.IrredPolyHigher; 
+//		for (int i = 0; i < len; i++) {
+//			char c = s.charAt(i);
+//			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & mask]));
+//		}
+//		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -67,11 +67,11 @@ public class FP64 implements Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 		
 		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		for (int i = start; i < end; i++) {
-			fp = (fp >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fp) & 0xFF];
-		}
-		fps.IrredPolyHigher = fp;
+//		fp = fps.IrredPolyHigher;
+//		for (int i = start; i < end; i++) {
+//			fp = (fp >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fp) & 0xFF];
+//		}
+//		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -87,9 +87,9 @@ public class FP64 implements Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 
 		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & 0xFF]));
-		fps.IrredPolyHigher = fp;
+//		fp = fps.IrredPolyHigher;
+//		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & 0xFF]));
+//		fps.IrredPolyHigher = fp;
 	
 		return fps;
 	}
@@ -105,9 +105,9 @@ public class FP64 implements Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 			
 		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
-		fps.IrredPolyHigher = fp;
+//		fp = fps.IrredPolyHigher;
+//		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
+//		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -127,13 +127,13 @@ public class FP64 implements Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 
 		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		for (int i = 0; i < 4; i++) {
-			byte b = (byte) (x & 0xFF);
-			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
-			x = x >>> 8;
-		}
-		fps.IrredPolyHigher = fp;
+//		fp = fps.IrredPolyHigher;
+//		for (int i = 0; i < 4; i++) {
+//			byte b = (byte) (x & 0xFF);
+//			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
+//			x = x >>> 8;
+//		}
+//		fps.IrredPolyHigher = fp;
 
 		return fps;
 	}
@@ -204,18 +204,18 @@ public class FP64 implements Comparable<FP64> {
 	 * just "ByteModeTable[7]".
 	 */
 	private static long[] ByteModTable_7Lower;
-	private static long[] ByteModTable_7Higher;
+//	private static long[] ByteModTable_7Higher;
 
 	private static int indexLower;
-	private static int indexHigher;
+//	private static int indexHigher;
 	
 	// Initialization code
 	public static void Init(int n) {
 		indexLower = n;
-		indexHigher = indexLower +  1 % numPolys;
+//		indexHigher = indexLower +  1 % numPolys;
 		
 		ByteModTable_7Lower = getByteModTable(Polys[indexLower]);
-		ByteModTable_7Higher = getByteModTable(Polys[indexHigher]);
+//		ByteModTable_7Higher = getByteModTable(Polys[indexHigher]);
 	}
 
 	public static void Init(long[] polys) {
@@ -253,15 +253,15 @@ public class FP64 implements Comparable<FP64> {
 	
 	/* These are the irreducible polynomials used as seeds => 128bit */
 	private long IrredPolyLower;
-	private long IrredPolyHigher;
+//	private long IrredPolyHigher;
 	
 	public FP64() {
 		IrredPolyLower = Polys[indexLower];
-		IrredPolyHigher = Polys[indexHigher];
+//		IrredPolyHigher = Polys[indexHigher];
 	}
 
 	public long[] getIrredPoly() {
-		return new long[] {IrredPolyLower, IrredPolyHigher};
+		return new long[] {IrredPolyLower/*, IrredPolyHigher*/};
 	}
 	
 	/* (non-Javadoc)
@@ -271,10 +271,10 @@ public class FP64 implements Comparable<FP64> {
 	    int lHigh = (int) (IrredPolyLower >> 32);
 	    int lLow = (int) IrredPolyLower;
 
-	    int hHigh = (int) (IrredPolyHigher >> 32);
-	    int hLow = (int) IrredPolyHigher;
+//	    int hHigh = (int) (IrredPolyHigher >> 32);
+//	    int hLow = (int) IrredPolyHigher;
 	    
-		return (lHigh ^ lLow) ^ (hHigh ^ hLow);
+		return (lHigh ^ lLow)/* ^ (hHigh ^ hLow)*/;
 	}
 
 	/* (non-Javadoc)
@@ -284,9 +284,9 @@ public class FP64 implements Comparable<FP64> {
 		if (other instanceof FP64) {
 			final FP64 fOther = (FP64) other;
 			if (IrredPolyLower == fOther.IrredPolyLower) {
-				if (IrredPolyHigher == fOther.IrredPolyHigher) {
+//				if (IrredPolyHigher == fOther.IrredPolyHigher) {
 					return true;
-				}
+//				}
 			}
 		}
 		return false;
@@ -297,11 +297,11 @@ public class FP64 implements Comparable<FP64> {
 	 */
 	public int compareTo(FP64 other) {
 		int compareTo = Long.valueOf(IrredPolyLower).compareTo(other.IrredPolyLower);
-		if (compareTo != 0) {
+//		if (compareTo != 0) {
 			return compareTo;
-		} else {
-			return Long.valueOf(IrredPolyHigher).compareTo(other.IrredPolyHigher);
-		}
+//		} else {
+//			return Long.valueOf(IrredPolyHigher).compareTo(other.IrredPolyHigher);
+//		}
 	}
 
 	public int getIndex(long mask) {
@@ -324,7 +324,7 @@ public class FP64 implements Comparable<FP64> {
 
 	public void write(BufferedRandomAccessFile raf) throws IOException {
 		raf.writeLong(IrredPolyLower);
-		raf.writeLong(IrredPolyHigher);
+//		raf.writeLong(IrredPolyHigher);
 	}
 
 	public void write(ObjectOutputStream oos) {
