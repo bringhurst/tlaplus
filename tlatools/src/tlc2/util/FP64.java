@@ -5,6 +5,7 @@ package tlc2.util;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * A 128-bit fingerprint is stored in an instance of the type <code>long</code>.
@@ -13,7 +14,7 @@ import java.io.ObjectOutputStream;
  * 
  * Written by Allan Heydon and Marc Najork.
  */
-public class FP64 implements Comparable<FP64> {
+public class FP64 implements Serializable, Comparable<FP64> {
 
 	/** Return the fingerprint of the empty string. */
 	public static FP64 New() {
@@ -278,28 +279,29 @@ public class FP64 implements Comparable<FP64> {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-	    int lHigh = (int) (IrredPolyLower >> 32);
-	    int lLow = (int) IrredPolyLower;
-
-//	    int hHigh = (int) (IrredPolyHigher >> 32);
-//	    int hLow = (int) IrredPolyHigher;
-	    
-		return (lHigh ^ lLow)/* ^ (hHigh ^ hLow)*/;
+		final int prime = 31;
+		int result = 1;
+//		result = prime * result + (int) (IrredPolyHigher ^ (IrredPolyHigher >>> 32));
+		result = prime * result + (int) (IrredPolyLower ^ (IrredPolyLower >>> 32));
+		return result;
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	public boolean equals(Object other) {
-		if (other instanceof FP64) {
-			final FP64 fOther = (FP64) other;
-			if (IrredPolyLower == fOther.IrredPolyLower) {
-//				if (IrredPolyHigher == fOther.IrredPolyHigher) {
-					return true;
-//				}
-			}
-		}
-		return false;
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FP64 other = (FP64) obj;
+//		if (IrredPolyHigher != other.IrredPolyHigher)
+//			return false;
+		if (IrredPolyLower != other.IrredPolyLower)
+			return false;
+		return true;
 	}
 
 	/* (non-Javadoc)

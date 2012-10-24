@@ -34,7 +34,7 @@ public class SimpleCache implements Cache {
 	public boolean hit(final FP64 fp) {
 	    final int index = fp.getIndex(this.mask);
 	    FP64 hit = this.cache[index];
-	    if (hit.equals(fp)) {
+	    if (fp.equals(hit)) {
 	    	cacheHit++;
 	    	return true;
 	    } else {
