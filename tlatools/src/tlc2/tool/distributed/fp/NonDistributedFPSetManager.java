@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.util.BitVector;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 
 @SuppressWarnings("serial")
@@ -54,7 +54,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#put(FP64)
 	 */
-	public boolean put(FP64 fp) {
+	public boolean put(FP128 fp) {
 		try {
 			return this.fpSet.put(fp);
 		} catch (IOException e) {
@@ -67,7 +67,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#contains(FP64)
 	 */
-	public boolean contains(FP64 fp) {
+	public boolean contains(FP128 fp) {
 		try {
 			return this.fpSet.contains(fp);
 		} catch (IOException e) {
@@ -80,7 +80,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(FP64)
 	 */
-	public int getFPSetIndex(FP64 fp) {
+	public int getFPSetIndex(FP128 fp) {
 		return 0;
 	}
 

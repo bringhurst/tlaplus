@@ -7,7 +7,7 @@ package tlc2.value;
 
 import tlc2.output.EC;
 import tlc2.output.MP;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 import util.UniqueString;
 
@@ -278,16 +278,16 @@ public class RecordValue extends Value implements Applicable {
   }
   
   /* The fingerprint methods.  */
-  public final FP64 fingerPrint(FP64 fp) {
+  public final FP128 fingerPrint(FP128 fp) {
     this.normalize();
     int rlen = this.names.length;
-    fp = FP64.Extend(fp, FCNRCDVALUE);
-    fp = FP64.Extend(fp, rlen);
+    fp = FP128.Extend(fp, FCNRCDVALUE);
+    fp = FP128.Extend(fp, rlen);
     for (int i = 0; i < rlen; i++) {
       String str = this.names[i].toString();
-      fp = FP64.Extend(fp, STRINGVALUE);
-      fp = FP64.Extend(fp, str.length());
-      fp = FP64.Extend(fp, str);
+      fp = FP128.Extend(fp, STRINGVALUE);
+      fp = FP128.Extend(fp, str.length());
+      fp = FP128.Extend(fp, str);
       fp = this.values[i].fingerPrint(fp);
     }
     return fp;

@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 
 import tlc2.tool.distributed.fp.FPSetManager.FPSets;
 import tlc2.util.BitVector;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 
 public interface IFPSetManager extends Serializable {
@@ -39,7 +39,7 @@ public interface IFPSetManager extends Serializable {
 	/**
 	 * @see FPSetRMI#contains(long)
 	 */
-	boolean contains(FP64 fp);
+	boolean contains(FP128 fp);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as
@@ -71,7 +71,7 @@ public interface IFPSetManager extends Serializable {
 	 * the {@link FPSetRMI} responsible for the partition of the fingerprint
 	 * space.
 	 */
-	int getFPSetIndex(FP64 fp);
+	int getFPSetIndex(FP128 fp);
 
 	/**
 	 * @see FPSetRMI#getStatesSeen()
@@ -100,7 +100,7 @@ public interface IFPSetManager extends Serializable {
 	/**
 	 * @see FPSetRMI#put(long)
 	 */
-	boolean put(FP64 fp);
+	boolean put(FP128 fp);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as

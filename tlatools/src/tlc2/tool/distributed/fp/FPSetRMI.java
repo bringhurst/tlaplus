@@ -10,7 +10,7 @@ import java.rmi.RemoteException;
 
 import tlc2.tool.fp.FPSet;
 import tlc2.util.BitVector;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 
 /**
@@ -50,7 +50,7 @@ public interface FPSetRMI extends Remote {
      * Returns <code>true</code> iff the fingerprint <code>fp</code> is
      * in this {@link FPSet}.
      */
-	boolean contains(FP64 fp) throws IOException;
+	boolean contains(FP128 fp) throws IOException;
 
 	/**
 	 * Checks existence in the {@link FPSet} for each fingerprints contained in
@@ -83,7 +83,7 @@ public interface FPSetRMI extends Remote {
      * in this set. If the fingerprint is not in the set, it is added to
      * the {@link FPSet} as a side-effect.
      */
-	boolean put(FP64 fp) throws IOException;
+	boolean put(FP128 fp) throws IOException;
 
 	/**
 	 * Checks existence in the {@link FPSet} for each fingerprints contained in

@@ -10,7 +10,7 @@ import java.io.Serializable;
 import tla2sany.semantic.SemanticNode;
 import tlc2.TLCGlobals;
 import tlc2.pprint.PrettyPrint;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 
 public abstract class Value implements ValueConstants, Serializable {
@@ -220,7 +220,7 @@ public abstract class Value implements ValueConstants, Serializable {
   }
   
   /* This method returns the fingerprint of this value. */
-  public FP64 fingerPrint(FP64 fp) {
+  public FP128 fingerPrint(FP128 fp) {
     Assert.fail("TLC has found a state in which the value of a variable contains " +
 		Value.ppr(this.toString())); // SZ Feb 24, 2009: changed to static access
     return null;      // make compiler happy
@@ -253,7 +253,7 @@ public abstract class Value implements ValueConstants, Serializable {
 
   /* This method returns the hash code of this value. */
   public final int hashCode() {
-    return this.fingerPrint(FP64.New()).hashCode();
+    return this.fingerPrint(FP128.New()).hashCode();
   }
 
   public static boolean expand = true;

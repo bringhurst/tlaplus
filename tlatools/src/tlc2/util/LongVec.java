@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class LongVec implements Cloneable, Serializable {
 	private static final long serialVersionUID = 2406899362740899071L;
-	private FP64[] elementData;
+	private FP128[] elementData;
 	private int elementCount;
 
 	public LongVec() {
@@ -22,22 +22,22 @@ public class LongVec implements Cloneable, Serializable {
 
 	public LongVec(int initialCapacity) {
 		this.elementCount = 0;
-		this.elementData = new FP64[initialCapacity];
+		this.elementData = new FP128[initialCapacity];
 	}
 
-	public final void addElement(FP64 x) {
+	public final void addElement(FP128 x) {
 		if (this.elementCount == this.elementData.length) {
 			ensureCapacity(this.elementCount + 1);
 		}
 		this.elementData[this.elementCount++] = x;
 	}
 
-	public final void setElement(int index, FP64 x) {
+	public final void setElement(int index, FP128 x) {
 		this.elementData[index] = x;
 		this.elementCount = ++elementCount % elementData.length + 1;
 	}
 
-	public final FP64 elementAt(int index) {
+	public final FP128 elementAt(int index) {
 		return this.elementData[index];
 	}
 
@@ -60,8 +60,8 @@ public class LongVec implements Cloneable, Serializable {
 			if (newCapacity < minCapacity) {
 				newCapacity = minCapacity;
 			}
-			FP64[] oldBuffer = this.elementData;
-			this.elementData = new FP64[newCapacity];
+			FP128[] oldBuffer = this.elementData;
+			this.elementData = new FP128[newCapacity];
 
 			System.arraycopy(oldBuffer, 0, elementData, 0, elementCount);
 		}
@@ -73,16 +73,16 @@ public class LongVec implements Cloneable, Serializable {
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		this.elementCount = ois.readInt();
-		this.elementData = new FP64[this.elementCount];
+		this.elementData = new FP128[this.elementCount];
 		for (int i = 0; i < this.elementCount; i++) {
-			this.elementData[i] = FP64.read(ois);
+			this.elementData[i] = FP128.read(ois);
 		}
 	}
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		oos.writeInt(this.elementCount);
 		for (int i = 0; i < this.elementCount; i++) {
-			FP64 fp = this.elementData[i];
+			FP128 fp = this.elementData[i];
 			fp.write(oos);
 		}
 	}

@@ -5,7 +5,7 @@
 
 package tlc2.value;
 
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 import util.UniqueString;
 
@@ -98,10 +98,10 @@ public class StringValue extends Value {
   public final int length() { return this.val.length(); }
   
   /* The fingerprint method */
-  public final FP64 fingerPrint(FP64 fp) {
-    fp = FP64.Extend(fp, STRINGVALUE) ;
-    fp = FP64.Extend(fp, this.val.length()) ;
-    fp = FP64.Extend(fp, this.val.toString());
+  public final FP128 fingerPrint(FP128 fp) {
+    fp = FP128.Extend(fp, STRINGVALUE) ;
+    fp = FP128.Extend(fp, this.val.length()) ;
+    fp = FP128.Extend(fp, this.val.toString());
     return fp;
   }
 

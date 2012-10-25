@@ -14,15 +14,15 @@ import java.io.Serializable;
  * 
  * Written by Allan Heydon and Marc Najork.
  */
-public class FP64 implements Serializable, Comparable<FP64> {
+public class FP128 implements Serializable, Comparable<FP128> {
 
 	/** Return the fingerprint of the empty string. */
-	public static FP64 New() {
-		return new FP64();
+	public static FP128 New() {
+		return new FP128();
 	}
 
 	/** Return the fingerprint of the bytes in the array <code>bytes</code>. */
-	public static FP64 New(byte[] bytes) {
+	public static FP128 New(byte[] bytes) {
 		return Extend(New(), bytes, 0, bytes.length);
 	}
 
@@ -30,7 +30,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	 * Extend the fingerprint <code>fp</code> by the characters of
 	 * <code>s</code>.
 	 */
-	public static FP64 Extend(FP64 fps, String s) {
+	public static FP128 Extend(FP128 fps, String s) {
 		
 		// lower 64 bit
 		long fp = fps.IrredPolyLower; 
@@ -43,12 +43,12 @@ public class FP64 implements Serializable, Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 		
 		// higher 64 bit
-//		fp = fps.IrredPolyHigher; 
-//		for (int i = 0; i < len; i++) {
-//			char c = s.charAt(i);
-//			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & mask]));
-//		}
-//		fps.IrredPolyHigher = fp;
+		fp = fps.IrredPolyHigher; 
+		for (int i = 0; i < len; i++) {
+			char c = s.charAt(i);
+			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & mask]));
+		}
+		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -57,7 +57,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	 * Extend the fingerprint <code>fp</code> by the bytes in the array
 	 * <code>bytes</code>.
 	 */
-	private static FP64 Extend(FP64 fps, byte[] bytes, int start, int len) {
+	private static FP128 Extend(FP128 fps, byte[] bytes, int start, int len) {
 
 		// lower 64 bit
 		long fp = fps.IrredPolyLower;
@@ -68,11 +68,11 @@ public class FP64 implements Serializable, Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 		
 		// higher 64 bit
-//		fp = fps.IrredPolyHigher;
-//		for (int i = start; i < end; i++) {
-//			fp = (fp >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fp) & 0xFF];
-//		}
-//		fps.IrredPolyHigher = fp;
+		fp = fps.IrredPolyHigher;
+		for (int i = start; i < end; i++) {
+			fp = (fp >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fp) & 0xFF];
+		}
+		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -80,7 +80,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	/**
 	 * Extend the fingerprint <code>fp</code> by a character <code>c</code>.
 	 */
-	public static FP64 Extend(FP64 fps, char c) {
+	public static FP128 Extend(FP128 fps, char c) {
 			
 		// lower 64 bit
 		long fp = fps.IrredPolyLower;
@@ -88,9 +88,9 @@ public class FP64 implements Serializable, Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 
 		// higher 64 bit
-//		fp = fps.IrredPolyHigher;
-//		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & 0xFF]));
-//		fps.IrredPolyHigher = fp;
+		fp = fps.IrredPolyHigher;
+		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & 0xFF]));
+		fps.IrredPolyHigher = fp;
 	
 		return fps;
 	}
@@ -98,7 +98,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	/**
 	 * Extend the fingerprint <code>fp</code> by a byte <code>c</code>.
 	 */
-	public static FP64 Extend(FP64 fps, byte b) {
+	public static FP128 Extend(FP128 fps, byte b) {
 			
 		// lower 64 bit
 		long fp = fps.IrredPolyLower;
@@ -106,9 +106,9 @@ public class FP64 implements Serializable, Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 			
 		// higher 64 bit
-//		fp = fps.IrredPolyHigher;
-//		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
-//		fps.IrredPolyHigher = fp;
+		fp = fps.IrredPolyHigher;
+		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
+		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -116,7 +116,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	/*
 	 * Extend the fingerprint <code>fp</code> by an integer <code>x</code>.
 	 */
-	public static FP64 Extend(FP64 fps, int x) {
+	public static FP128 Extend(FP128 fps, int x) {
 			
 		// lower 64 bit
 		long fp = fps.IrredPolyLower;
@@ -128,13 +128,13 @@ public class FP64 implements Serializable, Comparable<FP64> {
 		fps.IrredPolyLower = fp;
 
 		// higher 64 bit
-//		fp = fps.IrredPolyHigher;
-//		for (int i = 0; i < 4; i++) {
-//			byte b = (byte) (x & 0xFF);
-//			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
-//			x = x >>> 8;
-//		}
-//		fps.IrredPolyHigher = fp;
+		fp = fps.IrredPolyHigher;
+		for (int i = 0; i < 4; i++) {
+			byte b = (byte) (x & 0xFF);
+			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
+			x = x >>> 8;
+		}
+		fps.IrredPolyHigher = fp;
 
 		return fps;
 	}
@@ -205,18 +205,18 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	 * just "ByteModeTable[7]".
 	 */
 	private static long[] ByteModTable_7Lower;
-//	private static long[] ByteModTable_7Higher;
+	private static long[] ByteModTable_7Higher;
 
 	public static int indexLower;
-//	private static int indexHigher;
+	private static int indexHigher;
 	
 	// Initialization code
 	public static void Init(int n) {
 		indexLower = n;
-//		indexHigher = indexLower +  1 % numPolys;
+		indexHigher = indexLower +  1 % numPolys;
 		
 		ByteModTable_7Lower = getByteModTable(Polys[indexLower]);
-//		ByteModTable_7Higher = getByteModTable(Polys[indexHigher]);
+		ByteModTable_7Higher = getByteModTable(Polys[indexHigher]);
 	}
 
 	public static void Init(long[] polys) {
@@ -254,25 +254,25 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	
 	/* These are the irreducible polynomials used as seeds => 128bit */
 	private long IrredPolyLower;
-//	private long IrredPolyHigher;
+	private long IrredPolyHigher;
 	
-	public FP64() {
+	public FP128() {
 		IrredPolyLower = Polys[indexLower];
-//		IrredPolyHigher = Polys[indexHigher];
+		IrredPolyHigher = Polys[indexHigher];
 	}
 
-	public FP64(long low) {
+	public FP128(long low) {
 		IrredPolyLower = low;
-//		IrredPolyHigher = 0L;
+		IrredPolyHigher = 0L;
 	}
 	
-	public FP64(long low, long hi) {
+	public FP128(long low, long hi) {
 		IrredPolyLower = low;
-//		IrredPolyHigher = hi;
+		IrredPolyHigher = hi;
 	}
 
 	public long[] getIrredPoly() {
-		return new long[] {IrredPolyLower/*, IrredPolyHigher*/};
+		return new long[] {IrredPolyLower, IrredPolyHigher};
 	}
 	
 	/* (non-Javadoc)
@@ -281,7 +281,7 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-//		result = prime * result + (int) (IrredPolyHigher ^ (IrredPolyHigher >>> 32));
+		result = prime * result + (int) (IrredPolyHigher ^ (IrredPolyHigher >>> 32));
 		result = prime * result + (int) (IrredPolyLower ^ (IrredPolyLower >>> 32));
 		return result;
 	}
@@ -289,16 +289,16 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		FP64 other = (FP64) obj;
-//		if (IrredPolyHigher != other.IrredPolyHigher)
-//			return false;
+		FP128 other = (FP128) obj;
+		if (IrredPolyHigher != other.IrredPolyHigher)
+			return false;
 		if (IrredPolyLower != other.IrredPolyLower)
 			return false;
 		return true;
@@ -307,19 +307,19 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	public int compareTo(FP64 other) {
+	public int compareTo(final FP128 other) {
 		int compareTo = Long.valueOf(IrredPolyLower).compareTo(other.IrredPolyLower);
-//		if (compareTo != 0) {
+		if (compareTo != 0) {
 			return compareTo;
-//		} else {
-//			return Long.valueOf(IrredPolyHigher).compareTo(other.IrredPolyHigher);
-//		}
+		} else {
+			return Long.valueOf(IrredPolyHigher).compareTo(other.IrredPolyHigher);
+		}
 	}
 
 	public int getIndex(final long mask) {
 		// TODO something like the following:
 		//return this.long[0] and long[1] & mask
-		return (int) (IrredPolyLower & mask);
+		return (int) (getInternal() & mask);
 	}
 
 	/**
@@ -327,24 +327,24 @@ public class FP64 implements Serializable, Comparable<FP64> {
 	 */
 	public long getInternal() {
 		//TODO hack to reuse old FPSet impl that only support 64 bit long
-		return getIrredPoly()[0];
+		return IrredPolyLower ^ IrredPolyHigher;
 	}
 
-	public static FP64 read(BufferedRandomAccessFile raf) throws IOException {
-		return new FP64(raf.readLong()/*, raf.readLong()*/);
+	public static FP128 read(final BufferedRandomAccessFile raf) throws IOException {
+		return new FP128(raf.readLong(), raf.readLong());
 	}
 
-	public void write(BufferedRandomAccessFile raf) throws IOException {
+	public void write(final BufferedRandomAccessFile raf) throws IOException {
 		raf.writeLong(IrredPolyLower);
-//		raf.writeLong(IrredPolyHigher);
+		raf.writeLong(IrredPolyHigher);
 	}
 
-	public void write(ObjectOutputStream oos) throws IOException {
+	public void write(final ObjectOutputStream oos) throws IOException {
 		oos.writeLong(IrredPolyLower);
-//		oos.writeLong(IrredPolyHigher);
+		oos.writeLong(IrredPolyHigher);
 	}
 
-	public static FP64 read(ObjectInputStream ois) throws IOException {
-		return new FP64(ois.readLong()/*, ois.readLong()*/);
+	public static FP128 read(final ObjectInputStream ois) throws IOException {
+		return new FP128(ois.readLong(), ois.readLong());
 	}
 }

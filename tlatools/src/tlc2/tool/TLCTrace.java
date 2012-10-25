@@ -15,7 +15,7 @@ import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.output.StatePrinter;
 import tlc2.util.BufferedRandomAccessFile;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 import util.FileUtil;
 
@@ -39,7 +39,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final FP64 aFingerprint)
+  public final synchronized long writeState(final FP128 aFingerprint)
   throws IOException {
 	  return writeState(1, aFingerprint);
   }
@@ -50,7 +50,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final TLCState predecessor, final FP64 aFingerprint)
+  public final synchronized long writeState(final TLCState predecessor, final FP128 aFingerprint)
   throws IOException {
 	  return writeState(predecessor.uid, aFingerprint);
   }
@@ -61,7 +61,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  private final synchronized long writeState(long predecessorLoc, FP64 fps)
+  private final synchronized long writeState(long predecessorLoc, FP128 fps)
   throws IOException {
 	//TODO Remove synchronization as all threads content for this lock
     this.lastPtr = this.raf.getFilePointer();
@@ -79,10 +79,10 @@ public class TLCTrace {
     return this.raf.readLongNat();
   }
 
-  private synchronized FP64 getFP(long loc) throws IOException {
+  private synchronized FP128 getFP(long loc) throws IOException {
     this.raf.seek(loc);
     this.raf.readLongNat();    /*drop*/
-    return FP64.read(this.raf);
+    return FP128.read(this.raf);
   }
 
   /**
@@ -172,7 +172,7 @@ public class TLCTrace {
 		int len = fps.size();
 		TLCStateInfo[] res = new TLCStateInfo[len];
 		if (len > 0) {
-			FP64 fp = fps.elementAt(len - 1);
+			FP128 fp = fps.elementAt(len - 1);
 			TLCStateInfo sinfo = this.tool.getState(fp);
 			if (sinfo == null) {
 				MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);

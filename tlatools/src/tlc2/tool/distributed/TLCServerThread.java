@@ -27,7 +27,7 @@ import tlc2.tool.fp.FPSet;
 import tlc2.tool.queue.IStateQueue;
 import tlc2.tool.queue.StateQueue;
 import tlc2.util.BitVector;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
 
@@ -246,7 +246,7 @@ public class TLCServerThread extends IdThread {
 						TLCState state = newStates[i].elementAt(index);
 						// write state id and state fp to .st file for
 						// checkpointing
-						FP64 fp = newFps[i].elementAt(index);
+						FP128 fp = newFps[i].elementAt(index);
 						state.uid = this.tlcServer.trace.writeState(state, fp);
 						// add state to state queue for further processing
 						stateQueue.sEnqueue(state);

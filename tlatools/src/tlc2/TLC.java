@@ -17,7 +17,7 @@ import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.management.ModelCheckerMXWrapper;
 import tlc2.tool.management.TLCStandardMBean;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.RandomGenerator;
 import tlc2.value.Value;
 import util.DebugPrinter;
@@ -489,9 +489,9 @@ public class TLC
                     try
                     {
                         fpIndex = Integer.parseInt(args[index]);
-                        if (fpIndex < 0 || fpIndex >= FP64.numPolys)
+                        if (fpIndex < 0 || fpIndex >= FP128.numPolys)
                         {
-                            printErrorMsg("Error: The number for -fp must be between 0 and " + (FP64.numPolys - 1)
+                            printErrorMsg("Error: The number for -fp must be between 0 and " + (FP128.numPolys - 1)
                                     + " (inclusive).");
                             return false;
                         }
@@ -657,7 +657,7 @@ public class TLC
                 // clean up the states directory only when not recovering
                 FileUtil.deleteDir(TLCGlobals.metaRoot, true);
             }
-            FP64.Init(fpIndex);
+            FP128.Init(fpIndex);
 
             // Start checking:
             if (isSimulate)

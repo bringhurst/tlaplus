@@ -8,7 +8,7 @@ import java.io.Serializable;
 import tlc2.tool.Defns;
 import tlc2.tool.TLCState;
 import tlc2.tool.distributed.InternRMI;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 
 /**
  * For any string (state variable, operator definition) the strings are stored 
@@ -242,9 +242,9 @@ public final class UniqueString implements Serializable
     }
 
     
-    public FP64 fingerPrint(FP64 fp)
+    public FP128 fingerPrint(FP128 fp)
     {
-        return FP64.Extend(fp, this.tok);
+        return FP128.Extend(fp, this.tok);
     }
 
     /**

@@ -17,7 +17,7 @@ import tlc2.tool.EvalException;
 import tlc2.tool.TLCState;
 import tlc2.tool.Tool;
 import tlc2.util.Context;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 
 public class FcnLambdaValue extends Value implements Applicable {
@@ -496,7 +496,7 @@ public class FcnLambdaValue extends Value implements Applicable {
   }
   
   /* The fingerprint methods.  */
-  public final FP64 fingerPrint(FP64 fp) {
+  public final FP128 fingerPrint(FP128 fp) {
     FcnRcdValue fcn = FcnRcdValue.convert(this);
     return fcn.fingerPrint(fp);
   }

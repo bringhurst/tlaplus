@@ -12,7 +12,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import tlc2.tool.distributed.fp.FPSetRMI;
 import tlc2.util.BitVector;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 
 /**
@@ -68,14 +68,14 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
     /* (non-Javadoc)
      * @see tlc2.tool.distributed.fp.FPSetRMI#put(long)
      */
-    public boolean put(FP64 fp) throws IOException {
+    public boolean put(FP128 fp) throws IOException {
     	return put(fp.getInternal());
     }
 
     /* (non-Javadoc)
      * @see tlc2.tool.distributed.fp.FPSetRMI#contains(long)
      */
-    public boolean contains(FP64 fp) throws IOException {
+    public boolean contains(FP128 fp) throws IOException {
     	return contains(fp.getInternal());
     }
    

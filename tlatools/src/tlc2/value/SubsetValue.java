@@ -8,7 +8,7 @@ package tlc2.value;
 import java.util.BitSet;
 
 import tlc2.output.EC;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 
 public class SubsetValue extends Value implements Enumerable {
@@ -101,7 +101,7 @@ public class SubsetValue extends Value implements Enumerable {
   public final boolean assignable(Value val) { return this.equals(val); }
 
   /* The fingerprint  */
-  public final FP64 fingerPrint(FP64 fp) {
+  public final FP128 fingerPrint(FP128 fp) {
     this.convertAndCache();
     return this.pset.fingerPrint(fp);
   }

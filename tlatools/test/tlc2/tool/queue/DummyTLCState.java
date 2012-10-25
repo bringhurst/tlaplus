@@ -4,7 +4,7 @@ import tla2sany.semantic.SemanticNode;
 import tla2sany.semantic.SymbolNode;
 import tlc2.tool.StateVec;
 import tlc2.tool.TLCState;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.value.Value;
 import util.UniqueString;
 
@@ -82,8 +82,8 @@ public class DummyTLCState extends TLCState {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.TLCState#fingerPrint()
 	 */
-	public FP64 fingerPrint() {
-		return FP64.New();
+	public FP128 fingerPrint() {
+		return FP128.New();
 	}
 
 	/* (non-Javadoc)

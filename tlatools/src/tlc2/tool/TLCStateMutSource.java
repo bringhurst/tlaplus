@@ -14,7 +14,7 @@ import tla2sany.semantic.SemanticNode;
 import tla2sany.semantic.SymbolNode;
 import tlc2.TLCGlobals;
 import tlc2.util.Context;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.ObjLongTable;
 import tlc2.value.MVPerm;
 import tlc2.value.Value;
@@ -172,7 +172,7 @@ implements Cloneable, Serializable {
    * via the state queue. They have to be normalized before adding to
    * the state queue.  We do that here.   
    */
-  public final FP64 fingerPrint() {
+  public final FP128 fingerPrint() {
     int sz = this.values.length;
 
     Value[] minVals = this.values;
@@ -201,7 +201,7 @@ implements Cloneable, Serializable {
       }
     }
     // Fingerprint the state:
-    	FP64 fp = FP64.New();
+    	FP128 fp = FP128.New();
 		if (viewMap == null) {
 			for (int i = 0; i < sz; i++) {
 				fp = minVals[i].fingerPrint(fp);

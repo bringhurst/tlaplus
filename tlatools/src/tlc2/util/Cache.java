@@ -10,7 +10,7 @@ public interface Cache {
 	 *            fingerprint to be tested
 	 * @return true iff given fingerprint is in cache
 	 */
-	boolean hit(FP64 fingerprint);
+	boolean hit(FP128 fingerprint);
 	/**
 	 * @return Ratio of cache hits and misses
 	 */

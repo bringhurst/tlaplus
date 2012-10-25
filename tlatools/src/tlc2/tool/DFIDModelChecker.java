@@ -14,7 +14,7 @@ import tlc2.tool.fp.dfid.FPIntSet;
 import tlc2.tool.fp.dfid.MemFPIntSet;
 import tlc2.tool.liveness.LiveCheck;
 import tlc2.tool.liveness.LiveException;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
 import tlc2.util.ObjLongTable;
@@ -261,7 +261,7 @@ public class DFIDModelChecker extends AbstractChecker
                 int status = FPIntSet.NEW;
                 if (inModel)
                 {
-                    FP64 fp = curState.fingerPrint();
+                    FP128 fp = curState.fingerPrint();
                     status = this.theFPSet.setStatus(fp.getInternal(), FPIntSet.NEW);
                     if (status == FPIntSet.NEW)
                     {
@@ -339,7 +339,7 @@ public class DFIDModelChecker extends AbstractChecker
      * not been done in nextStates.  Return true if it finds a leaf
      * successor of curState.
      */
-    public final boolean doNext(TLCState curState, FP64 cfp, boolean isLeaf, ObjLongTable counts, StateVec states,
+    public final boolean doNext(TLCState curState, FP128 cfp, boolean isLeaf, ObjLongTable counts, StateVec states,
             LongVec fps) throws Throwable
     {
         boolean deadLocked = true;
@@ -392,7 +392,7 @@ public class DFIDModelChecker extends AbstractChecker
                     int status = FPIntSet.NEW;
                     if (inModel)
                     {
-                        FP64 fp = succState.fingerPrint();
+                        FP128 fp = succState.fingerPrint();
                         status = this.theFPSet.setStatus(fp.getInternal(), FPIntSet.NEW);
                         allSuccDone = allSuccDone && FPIntSet.isDone(status);
                         allSuccNonLeaf = allSuccNonLeaf && !FPIntSet.isLeaf(status);
@@ -533,7 +533,7 @@ public class DFIDModelChecker extends AbstractChecker
             if (this.checkLiveness && isLeaf)
             {
                 // Add a stuttering step for curState:
-                FP64 curStateFP = curState.fingerPrint();
+                FP128 curStateFP = curState.fingerPrint();
                 liveNextStates.addElement(curState);
                 liveNextFPs.addElement(curStateFP);
                 // Add curState to the behavior graph:

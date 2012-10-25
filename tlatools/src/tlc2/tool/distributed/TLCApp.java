@@ -17,7 +17,7 @@ import tlc2.tool.Tool;
 import tlc2.tool.WorkerException;
 import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.FPSetConfiguration;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.value.Value;
 import util.FileUtil;
 import util.FilenameToStream;
@@ -233,7 +233,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long)
 	 */
-	public final TLCStateInfo getState(FP64 fp) {
+	public final TLCStateInfo getState(FP128 fp) {
 		return this.tool.getState(fp);
 	}
 
@@ -241,7 +241,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long, tlc2.tool.TLCState)
 	 */
-	public final TLCStateInfo getState(FP64 fp, TLCState s) {
+	public final TLCStateInfo getState(FP128 fp, TLCState s) {
 		return this.tool.getState(fp, s);
 	}
 
@@ -384,9 +384,9 @@ public class TLCApp extends DistApp {
 				if (index < args.length) {
 					try {
 						fpIndex = Integer.parseInt(args[index]);
-						if (fpIndex < 0 || fpIndex >= FP64.numPolys) {
+						if (fpIndex < 0 || fpIndex >= FP128.numPolys) {
 							printErrorMsg("Error: The number for -fp must be between 0 and "
-									+ (FP64.numPolys - 1) + " (inclusive).");
+									+ (FP128.numPolys - 1) + " (inclusive).");
 							return null;
 						}
 						index++;
@@ -504,7 +504,7 @@ public class TLCApp extends DistApp {
 			// We must recover the intern table as early as possible
 			UniqueString.internTbl.recover(fromChkpt);
 		}
-		FP64.Init(fpIndex);
+		FP128.Init(fpIndex);
 
 		return new TLCApp(specFile, configFile, deadlock, fromChkpt, fpSetConfig);
 	}

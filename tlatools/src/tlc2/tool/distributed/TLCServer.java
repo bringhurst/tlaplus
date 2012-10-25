@@ -46,7 +46,7 @@ import tlc2.tool.fp.FPSetFactory;
 import tlc2.tool.management.TLCStandardMBean;
 import tlc2.tool.queue.DiskStateQueue;
 import tlc2.tool.queue.IStateQueue;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 import util.FileUtil;
 import util.SimpleFilenameToStream;
@@ -214,7 +214,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	 * @see tlc2.tool.distributed.TLCServerRMI#getIrredPolyForFP()
 	 */
 	public final int getIrredPolyForFP() {
-		return FP64.indexLower;
+		return FP128.indexLower;
 	}
 
 	/* (non-Javadoc)
@@ -362,9 +362,9 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	/**
 	 * @throws Exception
 	 */
-	private final Set<FP64> doInit() throws Exception {
+	private final Set<FP128> doInit() throws Exception {
 		//TODO Does a SortedSet handle long[] correctly in this case?
-		final SortedSet<FP64> set = new TreeSet<FP64>();
+		final SortedSet<FP128> set = new TreeSet<FP128>();
 		TLCState curState = null;
 		try {
 			TLCState[] initStates = work.getInitStates();
@@ -373,7 +373,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 				boolean inConstraints = work.isInModel(curState);
 				boolean seen = false;
 				if (inConstraints) {
-					FP64 fps = curState.fingerPrint();
+					FP128 fps = curState.fingerPrint();
 					seen = !set.add(fps);
 					if (!seen) {
 						initStates[i].uid = trace.writeState(fps);
@@ -434,7 +434,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 		 */
 
 		//TODO if init states is huge, this might go OOM
-		Set<FP64> initFPs = new TreeSet<FP64>();
+		Set<FP128> initFPs = new TreeSet<FP128>();
 		if (!recovered) {
 			// Initialize with the initial states:
 			try {
@@ -482,7 +482,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 		waitForFPSetManager();
 		
 		// Add the init state(s) to the local FPSet or distributed servers 
-		for (FP64 fp : initFPs) {
+		for (FP128 fp : initFPs) {
 			fpSetManager.put(fp);
 		}
 		

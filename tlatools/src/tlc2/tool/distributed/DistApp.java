@@ -11,7 +11,7 @@ import tlc2.tool.TLCState;
 import tlc2.tool.TLCStateInfo;
 import tlc2.tool.TraceApp;
 import tlc2.tool.WorkerException;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 
 /**
  * @author Simon Zambrovski
@@ -60,14 +60,14 @@ public abstract class DistApp implements TraceApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.TraceApp#getState(long)
 	 */
-	public abstract TLCStateInfo getState(FP64 fp);
+	public abstract TLCStateInfo getState(FP128 fp);
 
 	// Reconstruct the next state of state s whose fingerprint is fp.
 	// TLCTrace
 	/* (non-Javadoc)
 	 * @see tlc2.tool.TraceApp#getState(long, tlc2.tool.TLCState)
 	 */
-	public abstract TLCStateInfo getState(FP64 fp, TLCState s);
+	public abstract TLCStateInfo getState(FP128 fp, TLCState s);
 
 	// Reconstruct the info for the transition from s to s1. /
 	// TLCTrace

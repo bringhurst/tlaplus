@@ -33,7 +33,7 @@ import tlc2.tool.WorkerException;
 import tlc2.tool.distributed.fp.IFPSetManager;
 import tlc2.util.BitVector;
 import tlc2.util.Cache;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 import tlc2.util.SimpleCache;
 import util.ToolIO;
@@ -99,7 +99,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 				statesComputed += nstates.length;
 				// add all succ states/fps to the array designated for the corresponding fp server
 				for (int j = 0; j < nstates.length; j++) {
-					FP64 fp = nstates[j].fingerPrint();
+					FP128 fp = nstates[j].fingerPrint();
 					if (!cache.hit(fp)) {
 						treeSet.add(new Holder(fp, nstates[j], state1));
 					}
@@ -133,7 +133,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			// on the invariant of sorted fingerprints.
 			for (final Holder holder : treeSet) {
 				// make sure invariant is followed
-				FP64 fp = holder.getFp();
+				FP128 fp = holder.getFp();
 
 				int fpIndex = fpSetManager.getFPSetIndex(fp);
 				pvv[fpIndex].addElement(holder.getParentState());
@@ -303,7 +303,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			}
 
 			int irredPolyIdx = server.getIrredPolyForFP();
-			FP64.Init(irredPolyIdx);
+			FP128.Init(irredPolyIdx);
 
 			// this call has to be made before the first UniqueString gets
 			// created! Otherwise workers and server end up creating different
@@ -420,11 +420,11 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 	
 	public static class Holder implements Comparable<Holder> {
 
-		private final FP64 fp;
+		private final FP128 fp;
 		private final TLCState successor;
 		private final TLCState predecessor;
 
-		public Holder(FP64 fp, TLCState successor, TLCState predecessor) {
+		public Holder(FP128 fp, TLCState successor, TLCState predecessor) {
 			this.fp = fp;
 			this.successor = successor;
 			this.predecessor = predecessor;
@@ -433,7 +433,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 		/**
 		 * @return the fp
 		 */
-		public FP64 getFp() {
+		public FP128 getFp() {
 			return fp;
 		}
 

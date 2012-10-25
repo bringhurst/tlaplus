@@ -6,7 +6,7 @@
 package tlc2.value;
 
 import tlc2.TLCGlobals;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 
 public class SetOfFcnsValue extends Value implements Enumerable {
@@ -131,7 +131,7 @@ public class SetOfFcnsValue extends Value implements Enumerable {
   }
 
   /* The fingerprint  */
-  public final FP64 fingerPrint(FP64 fp) {
+  public final FP128 fingerPrint(FP128 fp) {
     this.convertAndCache();
     return this.fcnSet.fingerPrint(fp);
   }

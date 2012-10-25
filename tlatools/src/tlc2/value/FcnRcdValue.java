@@ -8,7 +8,7 @@ package tlc2.value;
 import java.util.Arrays;
 
 import tlc2.tool.EvalControl;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 
 public class FcnRcdValue extends Value implements Applicable {
@@ -480,11 +480,11 @@ public class FcnRcdValue extends Value implements Applicable {
   }
 
   /* The fingerprint method.  */
-  public final FP64 fingerPrint(FP64 fp) {
+  public final FP128 fingerPrint(FP128 fp) {
     this.normalize();
     int flen = this.values.length;
-    fp = FP64.Extend(fp, FCNRCDVALUE);
-    fp = FP64.Extend(fp, flen);
+    fp = FP128.Extend(fp, FCNRCDVALUE);
+    fp = FP128.Extend(fp, flen);
     if (this.intv == null) {
       for (int i = 0; i < flen; i++) {
 	fp = this.domain[i].fingerPrint(fp);
@@ -493,8 +493,8 @@ public class FcnRcdValue extends Value implements Applicable {
     }
     else {
       for (int i = 0; i < flen; i++) {
-	fp = FP64.Extend(fp, INTVALUE);
-	fp = FP64.Extend(fp, i + this.intv.low);
+	fp = FP128.Extend(fp, INTVALUE);
+	fp = FP128.Extend(fp, i + this.intv.low);
 	fp = this.values[i].fingerPrint(fp);
       }
     }

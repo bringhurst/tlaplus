@@ -7,7 +7,7 @@ import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.output.StatePrinter;
 import tlc2.tool.fp.dfid.FPIntSet;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
 import tlc2.util.ObjLongTable;
@@ -167,7 +167,7 @@ public class DFIDWorker extends IdThread implements IWorker {
 	this.succStateStack[0].reset();
 	this.succFPStack[0].reset();
 	boolean isLeaf = this.toLevel < 2;
-	boolean noLeaf = this.tlc.doNext(curState, new FP64(cfp), isLeaf,
+	boolean noLeaf = this.tlc.doNext(curState, new FP128(cfp), isLeaf,
 					 this.astCounts,
 					 this.succStateStack[0],
 					 this.succFPStack[0]);
@@ -193,7 +193,7 @@ public class DFIDWorker extends IdThread implements IWorker {
 	    this.succStateStack[this.curLevel].reset();
 	    this.succFPStack[this.curLevel].reset();
 	    isLeaf = (this.curLevel >= this.toLevel-1);
-	    noLeaf = this.tlc.doNext(curState, new FP64(cfp), isLeaf,
+	    noLeaf = this.tlc.doNext(curState, new FP128(cfp), isLeaf,
 				     this.astCounts,
 				     this.succStateStack[this.curLevel],
 				     this.succFPStack[this.curLevel]);

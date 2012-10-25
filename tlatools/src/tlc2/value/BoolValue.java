@@ -5,7 +5,7 @@
 
 package tlc2.value;
 
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 
 public class BoolValue extends Value {
@@ -88,9 +88,9 @@ public class BoolValue extends Value {
   }
 
   /* The fingerprint method */
-  public final FP64 fingerPrint(FP64 fp) {
-    fp = FP64.Extend(fp, BOOLVALUE) ;
-    fp = FP64.Extend(fp, (this.val) ? 't' : 'f') ;
+  public final FP128 fingerPrint(FP128 fp) {
+    fp = FP128.Extend(fp, BOOLVALUE) ;
+    fp = FP128.Extend(fp, (this.val) ? 't' : 'f') ;
     return fp ;
   }
 

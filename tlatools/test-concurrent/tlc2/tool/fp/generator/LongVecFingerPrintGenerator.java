@@ -7,7 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.MultiThreadedFPSetTest;
 import tlc2.util.BitVector;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import tlc2.util.LongVec;
 
 public class LongVecFingerPrintGenerator extends FingerPrintGenerator {
@@ -34,7 +34,7 @@ public class LongVecFingerPrintGenerator extends FingerPrintGenerator {
 
 				// Fill new fingerprints and sort them
 				for (int i = 0; i < batch; i++) {
-					predecessors.setElement(i, new FP64(rnd.nextLong(), 0L));
+					predecessors.setElement(i, new FP128(rnd.nextLong(), 0L));
 				}
 				initialized = true;
 				predecessors.sort();

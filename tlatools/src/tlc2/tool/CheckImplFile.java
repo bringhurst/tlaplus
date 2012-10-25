@@ -19,7 +19,7 @@ import tlc2.TLCGlobals;
 import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.tool.fp.FPSetConfiguration;
-import tlc2.util.FP64;
+import tlc2.util.FP128;
 import util.Assert;
 import util.FileUtil;
 import util.ToolIO;
@@ -305,7 +305,7 @@ public class CheckImplFile extends CheckImpl
         // We must recover the intern var table as early as possible
         UniqueString.internTbl.recover(fromChkpt);
       }
-      FP64.Init(0);
+      FP128.Init(0);
       
       // Start the checker:
       CheckImplFile checker = new CheckImplFile(mainFile, configFile, deadlock,
