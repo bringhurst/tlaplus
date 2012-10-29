@@ -32,23 +32,15 @@ public class FP128 implements Serializable, Comparable<FP128> {
 	 */
 	public static FP128 Extend(FP128 fps, String s) {
 		
-		// lower 64 bit
-		long fp = fps.IrredPolyLower; 
 		final int mask = 0xFF;
 		final int len = s.length();
 		for (int i = 0; i < len; i++) {
 			char c = s.charAt(i);
-			fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fp)) & mask]));
+			fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fps.IrredPolyLower))
+					& mask]));
+			fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fps.IrredPolyHigher))
+					& mask]));
 		}
-		fps.IrredPolyLower = fp;
-		
-		// higher 64 bit
-		fp = fps.IrredPolyHigher; 
-		for (int i = 0; i < len; i++) {
-			char c = s.charAt(i);
-			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & mask]));
-		}
-		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -59,20 +51,11 @@ public class FP128 implements Serializable, Comparable<FP128> {
 	 */
 	private static FP128 Extend(FP128 fps, byte[] bytes, int start, int len) {
 
-		// lower 64 bit
-		long fp = fps.IrredPolyLower;
 		int end = start + len;
 		for (int i = start; i < end; i++) {
-			fp = (fp >>> 8) ^ ByteModTable_7Lower[(bytes[i] ^ (int) fp) & 0xFF];
+			fps.IrredPolyLower = (fps.IrredPolyLower >>> 8) ^ ByteModTable_7Lower[(bytes[i] ^ (int) fps.IrredPolyLower) & 0xFF];
+			fps.IrredPolyHigher = (fps.IrredPolyHigher >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fps.IrredPolyHigher) & 0xFF];
 		}
-		fps.IrredPolyLower = fp;
-		
-		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		for (int i = start; i < end; i++) {
-			fp = (fp >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fp) & 0xFF];
-		}
-		fps.IrredPolyHigher = fp;
 		
 		return fps;
 	}
@@ -83,14 +66,9 @@ public class FP128 implements Serializable, Comparable<FP128> {
 	public static FP128 Extend(FP128 fps, char c) {
 			
 		// lower 64 bit
-		long fp = fps.IrredPolyLower;
-		fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fp)) & 0xFF]));
-		fps.IrredPolyLower = fp;
-
+		fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fps.IrredPolyLower)) & 0xFF]));
 		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fp)) & 0xFF]));
-		fps.IrredPolyHigher = fp;
+		fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fps.IrredPolyHigher)) & 0xFF]));
 	
 		return fps;
 	}
@@ -101,14 +79,9 @@ public class FP128 implements Serializable, Comparable<FP128> {
 	public static FP128 Extend(FP128 fps, byte b) {
 			
 		// lower 64 bit
-		long fp = fps.IrredPolyLower;
-		fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fp)) & 0xFF]));
-		fps.IrredPolyLower = fp;
-			
+		fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fps.IrredPolyLower)) & 0xFF]));
 		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
-		fps.IrredPolyHigher = fp;
+		fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fps.IrredPolyHigher)) & 0xFF]));
 		
 		return fps;
 	}
@@ -118,23 +91,12 @@ public class FP128 implements Serializable, Comparable<FP128> {
 	 */
 	public static FP128 Extend(FP128 fps, int x) {
 			
-		// lower 64 bit
-		long fp = fps.IrredPolyLower;
 		for (int i = 0; i < 4; i++) {
 			byte b = (byte) (x & 0xFF);
-			fp = ((fp >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fp)) & 0xFF]));
+			fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fps.IrredPolyLower)) & 0xFF]));
+			fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fps.IrredPolyHigher)) & 0xFF]));
 			x = x >>> 8;
 		}
-		fps.IrredPolyLower = fp;
-
-		// higher 64 bit
-		fp = fps.IrredPolyHigher;
-		for (int i = 0; i < 4; i++) {
-			byte b = (byte) (x & 0xFF);
-			fp = ((fp >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fp)) & 0xFF]));
-			x = x >>> 8;
-		}
-		fps.IrredPolyHigher = fp;
 
 		return fps;
 	}
