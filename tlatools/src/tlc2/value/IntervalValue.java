@@ -5,7 +5,7 @@
 
 package tlc2.value;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 
 public class IntervalValue extends Value
@@ -133,12 +133,12 @@ implements Enumerable, Reducible {
   }
 
   /* The fingerprint method */
-  public final FP128 fingerPrint(FP128 fp) {
-    fp = FP128.Extend(fp, SETENUMVALUE);
-    fp = FP128.Extend(fp, this.size()) ;
+  public final Fingerprint fingerPrint(Fingerprint fp) {
+    fp.extend(SETENUMVALUE);
+    fp.extend(this.size()) ;
     for (int i = this.low; i <= this.high; i++) {
-      fp = FP128.Extend(fp, INTVALUE);
-      fp = FP128.Extend(fp, i);
+      fp.extend(INTVALUE);
+      fp.extend(i);
     }
     return fp;
   }

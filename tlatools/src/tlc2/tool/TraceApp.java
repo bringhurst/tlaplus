@@ -5,15 +5,15 @@
 
 package tlc2.tool;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 
 public interface TraceApp {
 
   /* Reconstruct the initial state whose fingerprint is fp. */
-  public TLCStateInfo getState(FP128 fp);
+  public TLCStateInfo getState(Fingerprint fp);
   
   /* Reconstruct the next state of state s whose fingerprint is fp. */
-  public TLCStateInfo getState(FP128 fp, TLCState s);
+  public TLCStateInfo getState(Fingerprint fp, TLCState s);
 
   /* Reconstruct the info for the transition from s to s1. */
   public TLCStateInfo getState(TLCState s1, TLCState s);

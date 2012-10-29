@@ -47,6 +47,7 @@ import tlc2.tool.management.TLCStandardMBean;
 import tlc2.tool.queue.DiskStateQueue;
 import tlc2.tool.queue.IStateQueue;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 import util.FileUtil;
 import util.SimpleFilenameToStream;
@@ -362,9 +363,9 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	/**
 	 * @throws Exception
 	 */
-	private final Set<FP128> doInit() throws Exception {
+	private final Set<Fingerprint> doInit() throws Exception {
 		//TODO Does a SortedSet handle long[] correctly in this case?
-		final SortedSet<FP128> set = new TreeSet<FP128>();
+		final SortedSet<Fingerprint> set = new TreeSet<Fingerprint>();
 		TLCState curState = null;
 		try {
 			TLCState[] initStates = work.getInitStates();
@@ -373,7 +374,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 				boolean inConstraints = work.isInModel(curState);
 				boolean seen = false;
 				if (inConstraints) {
-					FP128 fps = curState.fingerPrint();
+					Fingerprint fps = curState.fingerPrint();
 					seen = !set.add(fps);
 					if (!seen) {
 						initStates[i].uid = trace.writeState(fps);
@@ -434,7 +435,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 		 */
 
 		//TODO if init states is huge, this might go OOM
-		Set<FP128> initFPs = new TreeSet<FP128>();
+		Set<Fingerprint> initFPs = new TreeSet<Fingerprint>();
 		if (!recovered) {
 			// Initialize with the initial states:
 			try {
@@ -482,7 +483,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 		waitForFPSetManager();
 		
 		// Add the init state(s) to the local FPSet or distributed servers 
-		for (FP128 fp : initFPs) {
+		for (Fingerprint fp : initFPs) {
 			fpSetManager.put(fp);
 		}
 		

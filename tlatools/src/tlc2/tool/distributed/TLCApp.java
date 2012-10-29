@@ -18,6 +18,7 @@ import tlc2.tool.WorkerException;
 import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.value.Value;
 import util.FileUtil;
 import util.FilenameToStream;
@@ -233,7 +234,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long)
 	 */
-	public final TLCStateInfo getState(FP128 fp) {
+	public final TLCStateInfo getState(Fingerprint fp) {
 		return this.tool.getState(fp);
 	}
 
@@ -241,7 +242,7 @@ public class TLCApp extends DistApp {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.DistApp#getState(long, tlc2.tool.TLCState)
 	 */
-	public final TLCStateInfo getState(FP128 fp, TLCState s) {
+	public final TLCStateInfo getState(Fingerprint fp, TLCState s) {
 		return this.tool.getState(fp, s);
 	}
 

@@ -14,91 +14,89 @@ import java.io.Serializable;
  * 
  * Written by Allan Heydon and Marc Najork.
  */
-public class FP128 implements Serializable, Comparable<FP128> {
+public class FP128 implements Serializable, Comparable<FP128>, Fingerprint {
 
-	/** Return the fingerprint of the empty string. */
-	public static FP128 New() {
-		return new FP128();
-	}
-
-	/** Return the fingerprint of the bytes in the array <code>bytes</code>. */
-	public static FP128 New(byte[] bytes) {
-		return Extend(New(), bytes, 0, bytes.length);
-	}
-
-	/**
-	 * Extend the fingerprint <code>fp</code> by the characters of
-	 * <code>s</code>.
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#extend(java.lang.String)
 	 */
-	public static FP128 Extend(FP128 fps, String s) {
+	public Fingerprint extend(String s) {
 		
 		final int mask = 0xFF;
 		final int len = s.length();
 		for (int i = 0; i < len; i++) {
 			char c = s.charAt(i);
-			fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fps.IrredPolyLower))
+			IrredPolyLower = ((IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) IrredPolyLower))
 					& mask]));
-			fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fps.IrredPolyHigher))
+			IrredPolyHigher = ((IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) IrredPolyHigher))
 					& mask]));
 		}
 		
-		return fps;
+		return this;
 	}
 
-	/**
-	 * Extend the fingerprint <code>fp</code> by the bytes in the array
-	 * <code>bytes</code>.
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#extend(byte[])
 	 */
-	private static FP128 Extend(FP128 fps, byte[] bytes, int start, int len) {
+	public Fingerprint extend(byte[] bytes) {
+		return extend(bytes, 0, bytes.length);
+	}
+	
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#extend(byte[], int, int)
+	 */
+	public Fingerprint extend(byte[] bytes, int start, int len) {
 
 		int end = start + len;
 		for (int i = start; i < end; i++) {
-			fps.IrredPolyLower = (fps.IrredPolyLower >>> 8) ^ ByteModTable_7Lower[(bytes[i] ^ (int) fps.IrredPolyLower) & 0xFF];
-			fps.IrredPolyHigher = (fps.IrredPolyHigher >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) fps.IrredPolyHigher) & 0xFF];
+			IrredPolyLower = (IrredPolyLower >>> 8) ^ ByteModTable_7Lower[(bytes[i] ^ (int) IrredPolyLower) & 0xFF];
+			IrredPolyHigher = (IrredPolyHigher >>> 8) ^ ByteModTable_7Higher[(bytes[i] ^ (int) IrredPolyHigher) & 0xFF];
 		}
 		
-		return fps;
+		return this;
 	}
 
-	/**
-	 * Extend the fingerprint <code>fp</code> by a character <code>c</code>.
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#extend(char)
 	 */
-	public static FP128 Extend(FP128 fps, char c) {
+	public Fingerprint extend(char c) {
 			
 		// lower 64 bit
-		fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) fps.IrredPolyLower)) & 0xFF]));
+		IrredPolyLower = ((IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(((int) c) ^ ((int) IrredPolyLower)) & 0xFF]));
 		// higher 64 bit
-		fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) fps.IrredPolyHigher)) & 0xFF]));
+		IrredPolyHigher = ((IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(((int) c) ^ ((int) IrredPolyHigher)) & 0xFF]));
 	
-		return fps;
+		return this;
 	}
 
-	/**
-	 * Extend the fingerprint <code>fp</code> by a byte <code>c</code>.
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#extend(byte)
 	 */
-	public static FP128 Extend(FP128 fps, byte b) {
+	public Fingerprint extend(byte b) {
 			
 		// lower 64 bit
-		fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fps.IrredPolyLower)) & 0xFF]));
+		IrredPolyLower = ((IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) IrredPolyLower)) & 0xFF]));
 		// higher 64 bit
-		fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fps.IrredPolyHigher)) & 0xFF]));
+		IrredPolyHigher = ((IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) IrredPolyHigher)) & 0xFF]));
 		
-		return fps;
+		return this;
 	}
 
 	/*
 	 * Extend the fingerprint <code>fp</code> by an integer <code>x</code>.
 	 */
-	public static FP128 Extend(FP128 fps, int x) {
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#extend(int)
+	 */
+	public FP128 extend(int x) {
 			
 		for (int i = 0; i < 4; i++) {
 			byte b = (byte) (x & 0xFF);
-			fps.IrredPolyLower = ((fps.IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) fps.IrredPolyLower)) & 0xFF]));
-			fps.IrredPolyHigher = ((fps.IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) fps.IrredPolyHigher)) & 0xFF]));
+			IrredPolyLower = ((IrredPolyLower >>> 8) ^ (ByteModTable_7Lower[(b ^ ((int) IrredPolyLower)) & 0xFF]));
+			IrredPolyHigher = ((IrredPolyHigher >>> 8) ^ (ByteModTable_7Higher[(b ^ ((int) IrredPolyHigher)) & 0xFF]));
 			x = x >>> 8;
 		}
 
-		return fps;
+		return this;
 	}
 
 	/** Unlikely fingerprint? */
@@ -175,7 +173,7 @@ public class FP128 implements Serializable, Comparable<FP128> {
 	// Initialization code
 	public static void Init(int n) {
 		indexLower = n;
-		indexHigher = indexLower +  1 % numPolys;
+		indexHigher = indexLower + 1 % numPolys;
 		
 		ByteModTable_7Lower = getByteModTable(Polys[indexLower]);
 		ByteModTable_7Higher = getByteModTable(Polys[indexHigher]);
@@ -223,6 +221,9 @@ public class FP128 implements Serializable, Comparable<FP128> {
 		IrredPolyHigher = Polys[indexHigher];
 	}
 
+	/**
+	 * @deprecated Do not use!!!
+	 */
 	public FP128(long low) {
 		IrredPolyLower = low;
 		IrredPolyHigher = 0L;
@@ -278,6 +279,9 @@ public class FP128 implements Serializable, Comparable<FP128> {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#getIndex(long)
+	 */
 	public int getIndex(final long mask) {
 		// TODO something like the following:
 		//return this.long[0] and long[1] & mask
@@ -296,11 +300,17 @@ public class FP128 implements Serializable, Comparable<FP128> {
 		return new FP128(raf.readLong(), raf.readLong());
 	}
 
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#write(tlc2.util.BufferedRandomAccessFile)
+	 */
 	public void write(final BufferedRandomAccessFile raf) throws IOException {
 		raf.writeLong(IrredPolyLower);
 		raf.writeLong(IrredPolyHigher);
 	}
 
+	/* (non-Javadoc)
+	 * @see tlc2.util.Fingerprint#write(java.io.ObjectOutputStream)
+	 */
 	public void write(final ObjectOutputStream oos) throws IOException {
 		oos.writeLong(IrredPolyLower);
 		oos.writeLong(IrredPolyHigher);

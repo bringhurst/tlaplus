@@ -26,7 +26,7 @@ import tlc2.TLCGlobals;
 import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.util.Context;
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.Vect;
 import tlc2.value.Applicable;
 import tlc2.value.BoolValue;
@@ -2682,11 +2682,11 @@ public class Tool
   }
   
   /* Reconstruct the initial state whose fingerprint is fp. */
-  public final TLCStateInfo getState(FP128 fp) {
+  public final TLCStateInfo getState(Fingerprint fp) {
     StateVec initStates = this.getInitStates();
     for (int i = 0; i < initStates.size(); i++) {
       TLCState state = initStates.elementAt(i);
-      FP128 nfp = state.fingerPrint();
+      Fingerprint nfp = state.fingerPrint();
       if (fp.equals(nfp)) {
         String info = "<Initial predicate>";
         return new TLCStateInfo(state, info);
@@ -2696,13 +2696,13 @@ public class Tool
   }
   
   /* Reconstruct the next state of state s whose fingerprint is fp. */
-  public final TLCStateInfo getState(FP128 fp, TLCState s) {
+  public final TLCStateInfo getState(Fingerprint fp, TLCState s) {
     for (int i = 0; i < this.actions.length; i++) {
       Action curAction = this.actions[i];
       StateVec nextStates = this.getNextStates(curAction, s);
       for (int j = 0; j < nextStates.size(); j++) {
         TLCState state = nextStates.elementAt(j);
-        FP128 nfp = state.fingerPrint();
+        Fingerprint nfp = state.fingerPrint();
         if (fp.equals(nfp)) {
           return new TLCStateInfo(state, curAction.getLocation());
         }

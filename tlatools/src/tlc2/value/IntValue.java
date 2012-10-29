@@ -5,7 +5,7 @@
 
 package tlc2.value;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 
 public class IntValue extends Value {
@@ -115,8 +115,9 @@ public class IntValue extends Value {
   }
 
   /* The fingerprint methods */
-  public final FP128 fingerPrint(FP128 fp) {
-    return FP128.Extend(FP128.Extend(fp, INTVALUE), this.val);
+  public final Fingerprint fingerPrint(Fingerprint fp) {
+		fp.extend(INTVALUE);
+		return fp.extend(this.val);
   }
 
   public final Value permute(MVPerm perm) { return this; }

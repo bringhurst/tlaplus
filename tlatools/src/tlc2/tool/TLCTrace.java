@@ -16,6 +16,7 @@ import tlc2.output.MP;
 import tlc2.output.StatePrinter;
 import tlc2.util.BufferedRandomAccessFile;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 import util.FileUtil;
 
@@ -39,7 +40,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final FP128 aFingerprint)
+  public final synchronized long writeState(final Fingerprint aFingerprint)
   throws IOException {
 	  return writeState(1, aFingerprint);
   }
@@ -50,7 +51,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  public final synchronized long writeState(final TLCState predecessor, final FP128 aFingerprint)
+  public final synchronized long writeState(final TLCState predecessor, final Fingerprint aFingerprint)
   throws IOException {
 	  return writeState(predecessor.uid, aFingerprint);
   }
@@ -61,7 +62,7 @@ public class TLCTrace {
    * @return The new location (pointer) for the given finger print (state)
    * @throws IOException
    */
-  private final synchronized long writeState(long predecessorLoc, FP128 fps)
+  private final synchronized long writeState(long predecessorLoc, Fingerprint fps)
   throws IOException {
 	//TODO Remove synchronization as all threads content for this lock
     this.lastPtr = this.raf.getFilePointer();
@@ -172,7 +173,7 @@ public class TLCTrace {
 		int len = fps.size();
 		TLCStateInfo[] res = new TLCStateInfo[len];
 		if (len > 0) {
-			FP128 fp = fps.elementAt(len - 1);
+			Fingerprint fp = fps.elementAt(len - 1);
 			TLCStateInfo sinfo = this.tool.getState(fp);
 			if (sinfo == null) {
 				MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);

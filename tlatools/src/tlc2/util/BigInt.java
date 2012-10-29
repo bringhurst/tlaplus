@@ -22,8 +22,8 @@ public class BigInt extends BigInteger implements Cloneable, ExternalSortable {
   public BigInt(int numBits, Random rnd) { super(numBits, rnd); }
 
   /* Returns the fingerprint of this. */
-  public final FP128 fingerPrint() {
-    return FP128.New(this.toByteArray());
+  public final Fingerprint fingerPrint() {
+    return new FP128().extend(this.toByteArray());
   }
 
   /**

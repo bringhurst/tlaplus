@@ -5,7 +5,7 @@
 
 package tlc2.value;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 
 public class SetCupValue extends Value implements Enumerable {
@@ -82,7 +82,7 @@ public class SetCupValue extends Value implements Enumerable {
   }
 
   /* The fingerprint methods */
-  public final FP128 fingerPrint(FP128 fp) {
+  public final Fingerprint fingerPrint(Fingerprint fp) {
     this.convertAndCache();
     return this.cupSet.fingerPrint(fp);
   }

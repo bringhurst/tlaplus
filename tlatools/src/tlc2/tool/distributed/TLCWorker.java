@@ -34,6 +34,7 @@ import tlc2.tool.distributed.fp.IFPSetManager;
 import tlc2.util.BitVector;
 import tlc2.util.Cache;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 import tlc2.util.SimpleCache;
 import util.ToolIO;
@@ -99,7 +100,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 				statesComputed += nstates.length;
 				// add all succ states/fps to the array designated for the corresponding fp server
 				for (int j = 0; j < nstates.length; j++) {
-					FP128 fp = nstates[j].fingerPrint();
+					Fingerprint fp = nstates[j].fingerPrint();
 					if (!cache.hit(fp)) {
 						treeSet.add(new Holder(fp, nstates[j], state1));
 					}
@@ -133,7 +134,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			// on the invariant of sorted fingerprints.
 			for (final Holder holder : treeSet) {
 				// make sure invariant is followed
-				FP128 fp = holder.getFp();
+				Fingerprint fp = holder.getFp();
 
 				int fpIndex = fpSetManager.getFPSetIndex(fp);
 				pvv[fpIndex].addElement(holder.getParentState());
@@ -420,11 +421,11 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 	
 	public static class Holder implements Comparable<Holder> {
 
-		private final FP128 fp;
+		private final Fingerprint fp;
 		private final TLCState successor;
 		private final TLCState predecessor;
 
-		public Holder(FP128 fp, TLCState successor, TLCState predecessor) {
+		public Holder(Fingerprint fp, TLCState successor, TLCState predecessor) {
 			this.fp = fp;
 			this.successor = successor;
 			this.predecessor = predecessor;
@@ -433,7 +434,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 		/**
 		 * @return the fp
 		 */
-		public FP128 getFp() {
+		public Fingerprint getFp() {
 			return fp;
 		}
 

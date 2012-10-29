@@ -60,7 +60,7 @@ public class LongVec implements Cloneable, Serializable {
 			if (newCapacity < minCapacity) {
 				newCapacity = minCapacity;
 			}
-			FP128[] oldBuffer = this.elementData;
+			Fingerprint[] oldBuffer = this.elementData;
 			this.elementData = new FP128[newCapacity];
 
 			System.arraycopy(oldBuffer, 0, elementData, 0, elementCount);
@@ -82,7 +82,7 @@ public class LongVec implements Cloneable, Serializable {
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		oos.writeInt(this.elementCount);
 		for (int i = 0; i < this.elementCount; i++) {
-			FP128 fp = this.elementData[i];
+			Fingerprint fp = this.elementData[i];
 			fp.write(oos);
 		}
 	}

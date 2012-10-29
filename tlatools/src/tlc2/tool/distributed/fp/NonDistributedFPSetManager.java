@@ -8,6 +8,7 @@ import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.util.BitVector;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 
 @SuppressWarnings("serial")
@@ -80,7 +81,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(FP64)
 	 */
-	public int getFPSetIndex(FP128 fp) {
+	public int getFPSetIndex(Fingerprint fp) {
 		return 0;
 	}
 

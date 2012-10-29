@@ -5,7 +5,7 @@
 
 package tlc2.tool;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 
 public class TLCStateInfo {
   public TLCStateInfo predecessorState;
@@ -18,7 +18,7 @@ public class TLCStateInfo {
     this.info = info;
   }
 
-  public final FP128 fingerPrint() {
+  public final Fingerprint fingerPrint() {
     return this.state.fingerPrint();
   }
 

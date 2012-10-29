@@ -9,7 +9,7 @@ public class SimpleCache implements Cache {
 	private volatile long cacheMiss = 1L;
 	
 	private final long mask;
-	private final FP128[] cache;
+	private final Fingerprint[] cache;
 	
 	/**
 	 * A {@link SimpleCache} with room for 2^10 (1024) fingerprints
@@ -25,15 +25,15 @@ public class SimpleCache implements Cache {
 	public SimpleCache(final int size) {
 		final int capacity = 1 << size;
 		this.mask = capacity - 1;
-		this.cache = new FP128[capacity];
+		this.cache = new Fingerprint[capacity];
 	}
 
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.Cache#hit(long)
 	 */
-	public boolean hit(final FP128 fp) {
+	public boolean hit(final Fingerprint fp) {
 	    final int index = fp.getIndex(this.mask);
-	    FP128 hit = this.cache[index];
+	    Fingerprint hit = this.cache[index];
 	    if (fp.equals(hit)) {
 	    	cacheHit++;
 	    	return true;

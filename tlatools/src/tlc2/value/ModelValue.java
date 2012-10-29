@@ -38,7 +38,7 @@ package tlc2.value;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 import util.UniqueString;
 
@@ -210,8 +210,8 @@ public class ModelValue extends Value {
   }
 
   /* The fingerprint methods */
-  public final FP128 fingerPrint(FP128 fp) {
-    return this.val.fingerPrint(FP128.Extend(fp, MODELVALUE));
+  public final Fingerprint fingerPrint(Fingerprint fp) {
+    return this.val.fingerPrint(fp.extend(MODELVALUE));
   }
 
   public final Value permute(MVPerm perm) {

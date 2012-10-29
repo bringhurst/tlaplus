@@ -10,7 +10,7 @@ import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.tool.EvalControl;
 import tlc2.util.Context;
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 
 public class TupleValue extends Value implements Applicable {
@@ -239,13 +239,13 @@ public class TupleValue extends Value implements Applicable {
   }
   
   /* The fingerprint method: tuples are functions. */
-  public final FP128 fingerPrint(FP128 fp) {
+  public final Fingerprint fingerPrint(Fingerprint fp) {
     int len = this.elems.length;
-    fp = FP128.Extend(fp, FCNRCDVALUE);
-    fp = FP128.Extend(fp, len);
+    fp.extend(FCNRCDVALUE);
+    fp.extend(len);
     for (int i = 0; i < len; i++) {
-      fp = FP128.Extend(fp, INTVALUE);
-      fp = FP128.Extend(fp, i+1);
+      fp.extend(INTVALUE);
+      fp.extend(i+1);
       fp = this.elems[i].fingerPrint(fp);
     }
     return fp;

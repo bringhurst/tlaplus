@@ -29,6 +29,7 @@ import tlc2.tool.distributed.fp.callable.ContainsBlockCallable;
 import tlc2.tool.distributed.fp.callable.PutBlockCallable;
 import tlc2.util.BitVector;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 import util.Assert;
 import util.ToolIO;
@@ -199,7 +200,7 @@ public abstract class FPSetManager implements IFPSetManager {
 		return hostname;
 	}
 
-	protected int getIndex(FP128 fp) {
+	protected int getIndex(Fingerprint fp) {
 		long l = fp.getIndex(mask);
 		return (int) (l % this.fpSets.size());
 	}
@@ -249,7 +250,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#getFPSetIndex(FP64)
 	 */
-	public int getFPSetIndex(FP128 fp) {
+	public int getFPSetIndex(Fingerprint fp) {
 		int index = fp.getIndex(mask);
 		return index % numOfServers();
 	}

@@ -13,6 +13,7 @@ import tla2sany.semantic.SymbolNode;
 import tlc2.TLCGlobals;
 import tlc2.util.Context;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.value.MVPerm;
 import tlc2.value.Value;
 import tlc2.value.ValueInputStream;
@@ -145,7 +146,7 @@ public final class TLCStateMut extends TLCState implements Cloneable, Serializab
    * via the state queue. They have to be normalized before adding to
    * the state queue.  We do that here.
    */
-  public final FP128 fingerPrint() {
+  public final Fingerprint fingerPrint() {
     int sz = this.values.length;
 
     Value[] minVals = this.values;
@@ -174,7 +175,7 @@ public final class TLCStateMut extends TLCState implements Cloneable, Serializab
       }
     }
     // Fingerprint the state:
-    FP128 fp = FP128.New();
+    Fingerprint fp = new FP128();
 		if (viewMap == null) {
 			for (int i = 0; i < sz; i++) {
 				fp = minVals[i].fingerPrint(fp);

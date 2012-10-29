@@ -5,7 +5,7 @@
 
 package tlc2.value;
 
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import util.Assert;
 
 public class SetEnumValue extends Value
@@ -304,11 +304,11 @@ implements Enumerable, Reducible {
   public final boolean assignable(Value val) { return this.equals(val); }
 
   /* The fingerprint methods */
-  public final FP128 fingerPrint(FP128 fp) {
+  public final Fingerprint fingerPrint(Fingerprint fp) {
     this.normalize();
     int sz = this.elems.size();    
-    fp = FP128.Extend(fp, SETENUMVALUE);
-    fp = FP128.Extend(fp, sz);
+    fp.extend(SETENUMVALUE);
+    fp.extend(sz);
     for (int i = 0; i < sz; i++) {
       Value elem = this.elems.elementAt(i);
       fp = elem.fingerPrint(fp);

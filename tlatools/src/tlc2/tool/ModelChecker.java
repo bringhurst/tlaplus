@@ -20,6 +20,7 @@ import tlc2.tool.liveness.LiveCheck;
 import tlc2.tool.queue.DiskStateQueue;
 import tlc2.tool.queue.IStateQueue;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
 import tlc2.util.ObjLongTable;
@@ -306,7 +307,7 @@ public class ModelChecker extends AbstractChecker
                 boolean seen = false;
                 if (inModel)
                 {
-                	FP128 fp = curState.fingerPrint();
+                	Fingerprint fp = curState.fingerPrint();
                     seen = this.theFPSet.put(fp);
                     if (!seen)
                     {
@@ -437,7 +438,7 @@ public class ModelChecker extends AbstractChecker
                     boolean seen = false;
                     if (inModel)
                     {
-                    	FP128 fp = succState.fingerPrint();
+                    	Fingerprint fp = succState.fingerPrint();
                         seen = this.theFPSet.put(fp);
                         if (!seen)
                         {
@@ -591,7 +592,7 @@ public class ModelChecker extends AbstractChecker
             if (this.checkLiveness)
             {
                 // Add the stuttering step:
-            	FP128 curStateFP = curState.fingerPrint();
+            	Fingerprint curStateFP = curState.fingerPrint();
                 liveNextStates.addElement(curState);
                 liveNextFPs.addElement(curStateFP);
                 LiveCheck.addNextState(curState, curStateFP, liveNextStates, liveNextFPs);
