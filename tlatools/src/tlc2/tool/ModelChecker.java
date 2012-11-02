@@ -19,7 +19,6 @@ import tlc2.tool.fp.FPSetFactory;
 import tlc2.tool.liveness.LiveCheck;
 import tlc2.tool.queue.DiskStateQueue;
 import tlc2.tool.queue.IStateQueue;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
@@ -321,7 +320,7 @@ public class ModelChecker extends AbstractChecker
                         // build behavior graph for liveness checking
                         if (this.checkLiveness)
                         {
-                            LiveCheck.addInitState(curState, fp);
+                            LiveCheck.addInitState(curState, fp.longValue());
                         }
                     }
                 }
@@ -456,7 +455,7 @@ public class ModelChecker extends AbstractChecker
                         if (this.checkLiveness)
                         {
                             liveNextStates.addElement(succState);
-                            liveNextFPs.addElement(fp);
+                            liveNextFPs.addElement(fp.longValue());
                         }
                     }
                     // Check if succState violates any invariant:
@@ -594,8 +593,8 @@ public class ModelChecker extends AbstractChecker
                 // Add the stuttering step:
             	Fingerprint curStateFP = curState.fingerPrint();
                 liveNextStates.addElement(curState);
-                liveNextFPs.addElement(curStateFP);
-                LiveCheck.addNextState(curState, curStateFP, liveNextStates, liveNextFPs);
+                liveNextFPs.addElement(curStateFP.longValue());
+                LiveCheck.addNextState(curState, curStateFP.longValue(), liveNextStates, liveNextFPs);
             }
             return false;
         } catch (Throwable e)

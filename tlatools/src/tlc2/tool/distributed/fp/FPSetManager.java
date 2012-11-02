@@ -28,9 +28,7 @@ import tlc2.tool.distributed.fp.callable.CheckFPsCallable;
 import tlc2.tool.distributed.fp.callable.ContainsBlockCallable;
 import tlc2.tool.distributed.fp.callable.PutBlockCallable;
 import tlc2.util.BitVector;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
-import tlc2.util.LongVec;
 import util.Assert;
 import util.ToolIO;
 
@@ -208,7 +206,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.IFPSetManager#put(FP64)
 	 */
-	public boolean put(FP128 fp) {
+	public boolean put(Fingerprint fp) {
 		int fpIdx = getIndex(fp);
 		while (true) {
 			try {
@@ -229,7 +227,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.IFPSetManager#contains(FP64)
 	 */
-	public boolean contains(FP128 fp) {
+	public boolean contains(Fingerprint fp) {
 		int fpIdx = getIndex(fp);
 		while (true) {
 			try {
@@ -258,12 +256,12 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.IFPSetManager#putBlock(tlc2.util.LongVec[])
 	 */
-	public BitVector[] putBlock(LongVec[] fps) {
+	public BitVector[] putBlock(List<List<Fingerprint>> fps) {
 		int len = this.fpSets.size();
 		BitVector[] res = new BitVector[len];
 		for (int i = 0; i < len; i++) {
 			try {
-				res[i] = this.fpSets.get(i).putBlock(fps[i]);
+				res[i] = this.fpSets.get(i).putBlock(fps.get(i));
 			} catch (Exception e) {
 				ToolIO.out.println("Warning: Failed to connect from "
 						+ this.getHostName() + " to the fp server at "
@@ -273,7 +271,7 @@ public abstract class FPSetManager implements IFPSetManager {
 							.println("Warning: there is no fp server available.");
 					// Indicate for all fingerprints of the lost fpset that they are
 					// new. This is achieved by setting all bits in BitVector.
-					res[i] = new BitVector(fps[i].size(), true);
+					res[i] = new BitVector(fps.get(i).size(), true);
 				} else {
 					// Cause for loop to retry the current fps[i] to the newly
 					// assigned fingerprint set
@@ -287,7 +285,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#putBlock(tlc2.util.LongVec[], java.util.concurrent.ExecutorService)
 	 */
-	public BitVector[] putBlock(final LongVec[] fps, final ExecutorService executorService) {
+	public BitVector[] putBlock(final List<List<Fingerprint>> fps, final ExecutorService executorService) {
 		// Create a Callable for each fingerprint set
 		final int len = this.fpSets.size();
 		final List<Callable<BitVectorWrapper>> solvers = new ArrayList<Callable<BitVectorWrapper>>();
@@ -301,12 +299,12 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.IFPSetManager#containsBlock(tlc2.util.LongVec[])
 	 */
-	public BitVector[] containsBlock(LongVec[] fps) {
+	public BitVector[] containsBlock(List<List<Fingerprint>> fps) {
 		int len = this.fpSets.size();
 		BitVector[] res = new BitVector[len];
 		for (int i = 0; i < len; i++) {
 			try {
-				res[i] = this.fpSets.get(i).containsBlock(fps[i]);
+				res[i] = this.fpSets.get(i).containsBlock(fps.get(i));
 			} catch (Exception e) {
 				ToolIO.out.println("Warning: Failed to connect from "
 						+ this.getHostName() + " to the fp server at "
@@ -316,7 +314,7 @@ public abstract class FPSetManager implements IFPSetManager {
 							.println("Warning: there is no fp server available.");
 					// Indicate for all fingerprints of the lost fpset that they are
 					// new. This is achieved by setting all bits in BitVector.
-					res[i] = new BitVector(fps[i].size(), true);
+					res[i] = new BitVector(fps.get(i).size(), true);
 				} else {
 					// Cause for loop to retry the current fps[i] to the newly
 					// assigned fingerprint set
@@ -330,7 +328,7 @@ public abstract class FPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.IFPSetManager#containsBlock(tlc2.util.LongVec[], java.util.concurrent.ExecutorService)
 	 */
-	public BitVector[] containsBlock(final LongVec[] fps, final ExecutorService executorService) {
+	public BitVector[] containsBlock(final List<List<Fingerprint>> fps, final ExecutorService executorService) {
 		// Create a Callable for each fingerprint set
 		final int len = this.fpSets.size();
 		final List<Callable<BitVectorWrapper>> solvers = new ArrayList<Callable<BitVectorWrapper>>();
@@ -611,19 +609,19 @@ public abstract class FPSetManager implements IFPSetManager {
 			return fpset.size();
 		}
 
-		public BitVector containsBlock(LongVec longVec) throws IOException {
+		public BitVector containsBlock(List<Fingerprint> longVec) throws IOException {
 			return fpset.containsBlock(longVec);
 		}
 
-		public BitVector putBlock(LongVec longVec) throws IOException {
+		public BitVector putBlock(List<Fingerprint> longVec) throws IOException {
 			return fpset.putBlock(longVec);
 		}
 
-		public boolean put(FP128 fp) throws IOException {
+		public boolean put(Fingerprint fp) throws IOException {
 			return fpset.put(fp);
 		}
 
-		public boolean contains(FP128 fp) throws IOException {
+		public boolean contains(Fingerprint fp) throws IOException {
 			return fpset.contains(fp);
 		}
 		

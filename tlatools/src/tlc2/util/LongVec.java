@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class LongVec implements Cloneable, Serializable {
 	private static final long serialVersionUID = 2406899362740899071L;
-	private FP128[] elementData;
+	private long[] elementData;
 	private int elementCount;
 
 	public LongVec() {
@@ -22,22 +22,22 @@ public class LongVec implements Cloneable, Serializable {
 
 	public LongVec(int initialCapacity) {
 		this.elementCount = 0;
-		this.elementData = new FP128[initialCapacity];
+		this.elementData = new long[initialCapacity];
 	}
 
-	public final void addElement(FP128 x) {
+	public final void addElement(long x) {
 		if (this.elementCount == this.elementData.length) {
 			ensureCapacity(this.elementCount + 1);
 		}
 		this.elementData[this.elementCount++] = x;
 	}
 
-	public final void setElement(int index, FP128 x) {
+	public final void setElement(int index, long x) {
 		this.elementData[index] = x;
 		this.elementCount = ++elementCount % elementData.length + 1;
 	}
 
-	public final FP128 elementAt(int index) {
+	public final long elementAt(int index) {
 		return this.elementData[index];
 	}
 
@@ -60,8 +60,8 @@ public class LongVec implements Cloneable, Serializable {
 			if (newCapacity < minCapacity) {
 				newCapacity = minCapacity;
 			}
-			Fingerprint[] oldBuffer = this.elementData;
-			this.elementData = new FP128[newCapacity];
+			long[] oldBuffer = this.elementData;
+			this.elementData = new long[newCapacity];
 
 			System.arraycopy(oldBuffer, 0, elementData, 0, elementCount);
 		}
@@ -73,17 +73,17 @@ public class LongVec implements Cloneable, Serializable {
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		this.elementCount = ois.readInt();
-		this.elementData = new FP128[this.elementCount];
+		this.elementData = new long[this.elementCount];
 		for (int i = 0; i < this.elementCount; i++) {
-			this.elementData[i] = FP128.read(ois);
+			this.elementData[i] = ois.readLong();
 		}
 	}
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		oos.writeInt(this.elementCount);
 		for (int i = 0; i < this.elementCount; i++) {
-			Fingerprint fp = this.elementData[i];
-			fp.write(oos);
+			long fp = this.elementData[i];
+			oos.writeLong(fp);
 		}
 	}
 

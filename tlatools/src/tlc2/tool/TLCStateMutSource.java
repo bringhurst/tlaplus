@@ -202,7 +202,7 @@ implements Cloneable, Serializable {
       }
     }
     // Fingerprint the state:
-    Fingerprint fp = new FP128();
+    Fingerprint fp = fpFactory.newFingerprint();
 		if (viewMap == null) {
 			for (int i = 0; i < sz; i++) {
 				fp = minVals[i].fingerPrint(fp);

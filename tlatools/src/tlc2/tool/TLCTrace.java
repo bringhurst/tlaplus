@@ -10,6 +10,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import tlc2.output.EC;
 import tlc2.output.MP;
@@ -23,6 +25,7 @@ import util.FileUtil;
 public class TLCTrace {
 
   private static String filename;
+  private static final Fingerprint.FPFactory fpFactory = Fingerprint.FPFactory.getInstance();
   private BufferedRandomAccessFile raf;
   private long lastPtr;
   private TraceApp tool;
@@ -80,10 +83,10 @@ public class TLCTrace {
     return this.raf.readLongNat();
   }
 
-  private synchronized FP128 getFP(long loc) throws IOException {
+  private synchronized Fingerprint getFP(long loc) throws IOException {
     this.raf.seek(loc);
     this.raf.readLongNat();    /*drop*/
-    return FP128.read(this.raf);
+    return fpFactory.newFingerprint(this.raf);
   }
 
   /**
@@ -158,13 +161,13 @@ public class TLCTrace {
    * @throws IOException
    */
 	public final TLCStateInfo[] getTrace(long loc, boolean included) throws IOException {
-		LongVec fps = new LongVec();
-
+		final List<Fingerprint> fps = new ArrayList<Fingerprint>();
+		
 		synchronized (this) {
 			long curLoc = this.raf.getFilePointer();
 			long loc1 = (included) ? loc : this.getPrev(loc);
 			for (long ploc = loc1; ploc != 1; ploc = this.getPrev(ploc)) {
-				fps.addElement(this.getFP(ploc));
+				fps.add(this.getFP(ploc));
 			}
 			this.raf.seek(curLoc);
 		}
@@ -173,7 +176,7 @@ public class TLCTrace {
 		int len = fps.size();
 		TLCStateInfo[] res = new TLCStateInfo[len];
 		if (len > 0) {
-			Fingerprint fp = fps.elementAt(len - 1);
+			Fingerprint fp = fps.get(len - 1);
 			TLCStateInfo sinfo = this.tool.getState(fp);
 			if (sinfo == null) {
 				MP.printError(EC.TLC_FAILED_TO_RECOVER_INIT);
@@ -182,7 +185,7 @@ public class TLCTrace {
 			}
 			res[stateNum++] = sinfo;
 			for (int i = len - 2; i >= 0; i--) {
-				fp = fps.elementAt(i);
+				fp = fps.get(i);
 				sinfo = this.tool.getState(fp, sinfo.state);
 				if (sinfo == null) {
 					/*

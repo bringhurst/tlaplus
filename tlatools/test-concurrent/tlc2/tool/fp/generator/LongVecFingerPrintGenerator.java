@@ -2,13 +2,16 @@
 package tlc2.tool.fp.generator;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import tlc2.tool.fp.DummyFP128;
 import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.MultiThreadedFPSetTest;
 import tlc2.util.BitVector;
-import tlc2.util.FP128;
-import tlc2.util.LongVec;
+import tlc2.util.Fingerprint;
 
 public class LongVecFingerPrintGenerator extends FingerPrintGenerator {
 
@@ -22,7 +25,7 @@ public class LongVecFingerPrintGenerator extends FingerPrintGenerator {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		LongVec predecessors = new LongVec(batch);
+		List<Fingerprint> predecessors = new ArrayList<Fingerprint>(batch);
 		boolean initialized = false;
 		while (fpSet.size() < insertions) {
 			try {
@@ -34,10 +37,14 @@ public class LongVecFingerPrintGenerator extends FingerPrintGenerator {
 
 				// Fill new fingerprints and sort them
 				for (int i = 0; i < batch; i++) {
-					predecessors.setElement(i, new FP128(rnd.nextLong(), 0L));
+					predecessors.add(i, new DummyFP128(rnd.nextLong(), 0L));
 				}
 				initialized = true;
-				predecessors.sort();
+				
+				Fingerprint[] array = predecessors.toArray(new Fingerprint[predecessors.size()]);
+				Arrays.sort(array);
+				predecessors.clear();
+				predecessors.addAll(Arrays.asList(array));
 
 				// Add sorted batch to fpset
 				final BitVector bitVector = fpSet.putBlock(predecessors);

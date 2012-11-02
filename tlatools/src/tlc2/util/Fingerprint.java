@@ -1,43 +1,64 @@
+// Copyright (c) 2012 Markus Alexander Kuppe. All rights reserved.
 package tlc2.util;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public interface Fingerprint {
+public abstract class Fingerprint implements Serializable, Comparable<Fingerprint> {
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by the characters of
 	 * <code>s</code>.
 	 */
-	public abstract Fingerprint extend(String s);
+	public abstract Fingerprint extend(final String s);
 
-	public abstract Fingerprint extend(byte[] bytes);
+	/**
+	 * Extend the fingerprint <code>fp</code> by the bytes in the array
+	 * <code>bytes</code>.
+	 * 
+	 * @see Fingerprint#extend(byte[], int, int)
+	 */
+	public abstract Fingerprint extend(final byte[] bytes);
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by the bytes in the array
 	 * <code>bytes</code>.
 	 */
-	public abstract Fingerprint extend(byte[] bytes, int start, int len);
+	public abstract Fingerprint extend(final byte[] bytes, int start, int len);
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by a character <code>c</code>.
 	 */
-	public abstract Fingerprint extend(char c);
+	public abstract Fingerprint extend(final char c);
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by a byte <code>c</code>.
 	 */
-	public abstract Fingerprint extend(byte b);
+	public abstract Fingerprint extend(final byte b);
 
-	/*
+	/**
 	 * Extend the fingerprint <code>fp</code> by an integer <code>x</code>.
 	 */
-	public abstract Fingerprint extend(int x);
+	public abstract Fingerprint extend(final int x);
 
 	public abstract int getIndex(long mask);
 
 	public abstract void write(BufferedRandomAccessFile raf) throws IOException;
 
-	public abstract void write(ObjectOutputStream oos) throws IOException;
+	/**
+	 * Return the fingerprint represented as a long value. It depends on the
+	 * underlying implementation, if the fingerprint has a long representation.
+	 * Throws a runtime exception otherwise.
+	 */
+	public abstract long longValue();
 
+	public static abstract class FPFactory {
+		public static FPFactory getInstance() {
+			return new FP128.Factory();
+		}
+
+		public abstract Fingerprint newFingerprint();
+
+		public abstract Fingerprint newFingerprint(final BufferedRandomAccessFile raf) throws IOException;
+	}
 }

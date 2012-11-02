@@ -3,11 +3,11 @@ package tlc2.tool.distributed.fp;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import tlc2.tool.distributed.fp.FPSetManager.FPSets;
 import tlc2.util.BitVector;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 
@@ -40,7 +40,7 @@ public interface IFPSetManager extends Serializable {
 	/**
 	 * @see FPSetRMI#contains(long)
 	 */
-	boolean contains(FP128 fp);
+	boolean contains(Fingerprint fp);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as
@@ -55,7 +55,7 @@ public interface IFPSetManager extends Serializable {
 	 * @see IFPSetManager#getFPSetIndex(long)
 	 * @see FPSetRMI#containsBlock(LongVec)
 	 */
-	BitVector[] containsBlock(LongVec[] fps);
+	BitVector[] containsBlock(List<List<Fingerprint>> fps);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as
@@ -63,7 +63,7 @@ public interface IFPSetManager extends Serializable {
 	 * 
 	 * @see FPSetRMI#containsBlock(LongVec);
 	 */
-	BitVector[] containsBlock(LongVec[] fps, ExecutorService executorService);
+	BitVector[] containsBlock(List<List<Fingerprint>> fps, ExecutorService executorService);
 
 	/**
 	 * The index address of the {@link FPSetRMI} corresponding with the given
@@ -101,7 +101,7 @@ public interface IFPSetManager extends Serializable {
 	/**
 	 * @see FPSetRMI#put(long)
 	 */
-	boolean put(FP128 fp);
+	boolean put(Fingerprint fp);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as
@@ -109,7 +109,7 @@ public interface IFPSetManager extends Serializable {
 	 * 
 	 * @see FPSetRMI#putBlock(LongVec)
 	 */
-	BitVector[] putBlock(LongVec[] fps);
+	BitVector[] putBlock(List<List<Fingerprint>> fps);
 
 	/**
 	 * The given {@link LongVec} has to have the same size as
@@ -117,7 +117,7 @@ public interface IFPSetManager extends Serializable {
 	 * 
 	 * @see FPSetRMI#putBlock(LongVec)
 	 */
-	BitVector[] putBlock(LongVec[] fps, ExecutorService executorService);
+	BitVector[] putBlock(List<List<Fingerprint>> fps, ExecutorService executorService);
 
 	/**
 	 * @see FPSetRMI#recover(String)

@@ -10,7 +10,6 @@ import java.io.Serializable;
 import tla2sany.semantic.SemanticNode;
 import tlc2.TLCGlobals;
 import tlc2.pprint.PrettyPrint;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import util.Assert;
 
@@ -254,7 +253,7 @@ public abstract class Value implements ValueConstants, Serializable {
 
   /* This method returns the hash code of this value. */
   public final int hashCode() {
-    return this.fingerPrint(new FP128()).hashCode();
+	  return Fingerprint.FPFactory.getInstance().newFingerprint().hashCode();
   }
 
   public static boolean expand = true;

@@ -7,10 +7,11 @@ package tlc2.tool.distributed.fp;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 import tlc2.tool.fp.FPSet;
 import tlc2.util.BitVector;
-import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 
 /**
@@ -50,7 +51,7 @@ public interface FPSetRMI extends Remote {
      * Returns <code>true</code> iff the fingerprint <code>fp</code> is
      * in this {@link FPSet}.
      */
-	boolean contains(FP128 fp) throws IOException;
+	boolean contains(Fingerprint fp) throws IOException;
 
 	/**
 	 * Checks existence in the {@link FPSet} for each fingerprints contained in
@@ -62,7 +63,7 @@ public interface FPSetRMI extends Remote {
 	 * 
 	 * @see FPSetRMI#contains(long)
 	 */
-	BitVector containsBlock(LongVec fpv) throws IOException;
+	BitVector containsBlock(List<Fingerprint> fpv) throws IOException;
 
 	/**
 	 * Disposes this {@link FPSet}. The {@link FPSet} will be unusable after
@@ -83,7 +84,7 @@ public interface FPSetRMI extends Remote {
      * in this set. If the fingerprint is not in the set, it is added to
      * the {@link FPSet} as a side-effect.
      */
-	boolean put(FP128 fp) throws IOException;
+	boolean put(Fingerprint fp) throws IOException;
 
 	/**
 	 * Checks existence in the {@link FPSet} for each fingerprints contained in
@@ -96,7 +97,7 @@ public interface FPSetRMI extends Remote {
 	 * 
 	 * @see FPSet#put(long)
 	 */
-	BitVector putBlock(LongVec fpv) throws IOException;
+	BitVector putBlock(List<Fingerprint> fpv) throws IOException;
 
 	void recover() throws IOException;
 

@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import tlc2.util.FP128;
-import tlc2.util.LongVec;
+import tlc2.util.Fingerprint;
 
 public class ShortDiskFPSetTest extends AbstractFPSetTest {
 	
@@ -466,8 +465,8 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		final FPSet putBlockFpSet = (FPSet) getFPSetInitialized();
 		
 		final long fp = 1L;
-		final LongVec fpv = new LongVec();
-		fpv.addElement(new FP128(fp, 0L));
+		final List<Fingerprint> fpv = new ArrayList<Fingerprint>();
+		fpv.add(new DummyFP128(fp, 0L));
 		
 		// put and putBlock have flipped return values %)
 		boolean putBlockRes = !putBlockFpSet.putBlock(fpv).get(0);
@@ -483,8 +482,8 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		final FPSet containsBlockFpSet = (FPSet) getFPSetInitialized();
 		
 		final long fp = 1L;
-		final LongVec fpv = new LongVec();
-		fpv.addElement(new FP128(fp, 0L));
+		final List<Fingerprint> fpv = new ArrayList<Fingerprint>();
+		fpv.add(new DummyFP128(fp, 0L));
 		
 		// put and putBlock have flipped return values %)
 		boolean containsBlockRes = !containsBlockFpSet.containsBlock(fpv).get(0);
@@ -495,8 +494,8 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		final FPSet fpSet = (FPSet) getFPSetInitialized();
 		
 		final long fp = 1L;
-		final LongVec fpv = new LongVec();
-		fpv.addElement(new FP128(fp, 0L));
+		final List<Fingerprint> fpv = new ArrayList<Fingerprint>();
+		fpv.add(new DummyFP128(fp, 0L));
 		
 		// BitVector is true if fp not in set 
 		assertTrue(fpSet.containsBlock(fpv).get(0));
@@ -511,8 +510,8 @@ public class ShortDiskFPSetTest extends AbstractFPSetTest {
 		final FPSet fpSet = (FPSet) getFPSetInitialized();
 		
 		final long fp = 1L;
-		final LongVec fpv = new LongVec();
-		fpv.addElement(new FP128(fp, 0L));
+		final List<Fingerprint> fpv = new ArrayList<Fingerprint>();
+		fpv.add(new DummyFP128(fp, 0L));
 		
 		// BitVector is true if fp not in set 
 		assertTrue(fpSet.putBlock(fpv).get(0));

@@ -23,7 +23,7 @@ public class BigInt extends BigInteger implements Cloneable, ExternalSortable {
 
   /* Returns the fingerprint of this. */
   public final Fingerprint fingerPrint() {
-    return new FP128().extend(this.toByteArray());
+    return Fingerprint.FPFactory.getInstance().newFingerprint()	.extend(this.toByteArray());
   }
 
   /**
