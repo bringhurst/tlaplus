@@ -4,18 +4,21 @@ package tlc2.tool.distributed.fp;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import junit.framework.TestCase;
+import tlc2.tool.fp.DummyFP128;
 import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.MemFPSet;
 import tlc2.util.BitVector;
 import tlc2.util.FP128;
-import tlc2.util.LongVec;
+import tlc2.util.Fingerprint;
 
 public class DynamicFPSetManagerTest extends TestCase {
 
@@ -162,7 +165,7 @@ public class DynamicFPSetManagerTest extends TestCase {
 		
 		for (Entry<Long, Integer> pair : pairs.entrySet()) {
 			long fp = pair.getKey();
-			int index = dfm.getIndex(new FP128(fp, 0L));
+			int index = dfm.getIndex(new DummyFP128(fp, 0L));
 			int expected = pair.getValue();
 			assertEquals(expected, index);
 		}
@@ -275,7 +278,7 @@ public class DynamicFPSetManagerTest extends TestCase {
 		dfm.register(new FaultyFPSet(), "TestFPSet");
 		dfm.register(new MemFPSet(), "RegularFPSet");
 		
-		final FP128 fp = new FP128(2L);
+		final FP128 fp = new DummyFP128(2L, 0L);
 		
 		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(fp));
 		
@@ -303,13 +306,13 @@ public class DynamicFPSetManagerTest extends TestCase {
 
 		// LongVec has to have same size of IFPSetManager#numServers (putBlock
 		// method contract)
-		final LongVec[] fps = new LongVec[numOfServers]; 
-		fps[0] = new LongVec();
-		fps[0].addElement(new FP128(0L));
-		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(new FP128(0L)));
-		fps[1] = new LongVec();
-		fps[1].addElement(new FP128(1L));
-		assertEquals("Assert fingerprint corresponds to TestFPSet", 1, dfm.getIndex(new FP128(1L)));
+		final List<List<Fingerprint>> fps = new ArrayList<List<Fingerprint>>(numOfServers);
+		fps.add(0, new ArrayList<Fingerprint>());
+		fps.get(0).add(new DummyFP128(0L));
+		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(new DummyFP128(0L)));
+		fps.add(1, new ArrayList<Fingerprint>());
+		fps.get(1).add(new DummyFP128(1L));
+		assertEquals("Assert fingerprint corresponds to TestFPSet", 1, dfm.getIndex(new DummyFP128(1L)));
 		
 		/* Test DFM correctly behaves first time when TestFPSet works as expected */
 
@@ -356,13 +359,13 @@ public class DynamicFPSetManagerTest extends TestCase {
 
 		// LongVec has to have same size of IFPSetManager#numServers (putBlock
 		// method contract)
-		final LongVec[] fps = new LongVec[numOfServers]; 
-		fps[0] = new LongVec();
-		fps[0].addElement(new FP128(0L));
-		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(new FP128(0L)));
-		fps[1] = new LongVec();
-		fps[1].addElement(new FP128(1L));
-		assertEquals("Assert fingerprint corresponds to TestFPSet", 1, dfm.getIndex(new FP128(1L)));
+		final List<List<Fingerprint>> fps = new ArrayList<List<Fingerprint>>(numOfServers);
+		fps.add(0, new ArrayList<Fingerprint>());
+		fps.get(0).add(new DummyFP128(0L));
+		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(new DummyFP128(0L)));
+		fps.add(1, new ArrayList<Fingerprint>());
+		fps.get(1).add(new DummyFP128(1L));
+		assertEquals("Assert fingerprint corresponds to TestFPSet", 1, dfm.getIndex(new DummyFP128(1L)));
 		
 		/* Test DFM correctly behaves first time when TestFPSet works as expected */
 
@@ -409,13 +412,13 @@ public class DynamicFPSetManagerTest extends TestCase {
 
 		// LongVec has to have same size of IFPSetManager#numServers (putBlock
 		// method contract)
-		final LongVec[] fps = new LongVec[numOfServers]; 
-		fps[0] = new LongVec();
-		fps[0].addElement(new FP128(0L));
-		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(new FP128(0L)));
-		fps[1] = new LongVec();
-		fps[1].addElement(new FP128(1L));
-		assertEquals("Assert fingerprint corresponds to TestFPSet", 1, dfm.getIndex(new FP128(1L)));
+		final List<List<Fingerprint>> fps = new ArrayList<List<Fingerprint>>(numOfServers);
+		fps.add(0, new ArrayList<Fingerprint>());
+		fps.get(0).add(new DummyFP128(0L));
+		assertEquals("Assert fingerprint corresponds to TestFPSet", 0, dfm.getIndex(new DummyFP128(0L)));
+		fps.add(1, new ArrayList<Fingerprint>());
+		fps.get(1).add(new DummyFP128(1L));
+		assertEquals("Assert fingerprint corresponds to TestFPSet", 1, dfm.getIndex(new DummyFP128(1L)));
 		
 		/* Test DFM correctly behaves first time when TestFPSet works as expected */
 		final ExecutorService es = Executors.newCachedThreadPool();
@@ -479,10 +482,10 @@ public class DynamicFPSetManagerTest extends TestCase {
 		dfm.register(nonEmptyFPSet, "localhost");
 		
 		
-		final LongVec[] fps = new LongVec[expectedNumOfServers]; 
+		final List<List<Fingerprint>> fps = new ArrayList<List<Fingerprint>>(expectedNumOfServers);
 		for (int i = 0; i < expectedNumOfServers; i++) {
-			fps[i] = new LongVec();
-			fps[i].addElement(new FP128(fp, 0L));
+			fps.add(i, new ArrayList<Fingerprint>());
+			fps.get(i).add(new DummyFP128(fp, 0L));
 		}
 		
 		// Check if the last element in the resulting bitvector has the bit for the fp set

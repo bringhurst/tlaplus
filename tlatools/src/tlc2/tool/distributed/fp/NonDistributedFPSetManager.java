@@ -2,14 +2,13 @@
 package tlc2.tool.distributed.fp;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.util.BitVector;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
-import tlc2.util.LongVec;
 
 @SuppressWarnings("serial")
 public class NonDistributedFPSetManager implements IFPSetManager {
@@ -53,9 +52,9 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.fp.FPSetManager#put(FP64)
+	 * @see tlc2.tool.distributed.fp.FPSetManager#put(Fingerprint)
 	 */
-	public boolean put(FP128 fp) {
+	public boolean put(Fingerprint fp) {
 		try {
 			return this.fpSet.put(fp);
 		} catch (IOException e) {
@@ -66,9 +65,9 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.fp.FPSetManager#contains(FP64)
+	 * @see tlc2.tool.distributed.fp.FPSetManager#contains(Fingerprint)
 	 */
-	public boolean contains(FP128 fp) {
+	public boolean contains(Fingerprint fp) {
 		try {
 			return this.fpSet.contains(fp);
 		} catch (IOException e) {
@@ -88,10 +87,10 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#putBlock(tlc2.util.LongVec[])
 	 */
-	public BitVector[] putBlock(LongVec[] fps) {
-		final BitVector[] res = new BitVector[fps.length];
-		for (int i = 0; i < fps.length; i++) {
-			LongVec longVec = fps[i];
+	public BitVector[] putBlock(List<List<Fingerprint>> fps) {
+		final BitVector[] res = new BitVector[fps.size()];
+		for (int i = 0; i < fps.size(); i++) {
+			List<Fingerprint> longVec = fps.get(i);
 			try {
 				res[i] = this.fpSet.putBlock(longVec);
 			} catch (IOException e) {
@@ -106,17 +105,17 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#putBlock(tlc2.util.LongVec[], java.util.concurrent.ExecutorService)
 	 */
-	public BitVector[] putBlock(LongVec[] fps, ExecutorService executorService) {
+	public BitVector[] putBlock(List<List<Fingerprint>> fps, ExecutorService executorService) {
 		return putBlock(fps);
 	}
 
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#containsBlock(tlc2.util.LongVec[])
 	 */
-	public BitVector[] containsBlock(LongVec[] fps) {
-		final BitVector[] res = new BitVector[fps.length];
-		for (int i = 0; i < fps.length; i++) {
-			LongVec longVec = fps[i];
+	public BitVector[] containsBlock(List<List<Fingerprint>> fps) {
+		final BitVector[] res = new BitVector[fps.size()];
+		for (int i = 0; i < fps.size(); i++) {
+			List<Fingerprint> longVec = fps.get(i);
 			try {
 				res[i] = this.fpSet.containsBlock(longVec);
 			} catch (IOException e) {
@@ -131,7 +130,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	/* (non-Javadoc)
 	 * @see tlc2.tool.distributed.fp.FPSetManager#containsBlock(tlc2.util.LongVec[], java.util.concurrent.ExecutorService)
 	 */
-	public BitVector[] containsBlock(LongVec[] fps,
+	public BitVector[] containsBlock(List<List<Fingerprint>> fps,
 			ExecutorService executorService) {
 		return containsBlock(fps);
 	}

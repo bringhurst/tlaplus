@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.rmi.RemoteException;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -29,7 +30,6 @@ import tlc2.tool.queue.StateQueue;
 import tlc2.util.BitVector;
 import tlc2.util.Fingerprint;
 import tlc2.util.IdThread;
-import tlc2.util.LongVec;
 
 public class TLCServerThread extends IdThread {
 	private static int COUNT = 0;
@@ -157,7 +157,7 @@ public class TLCServerThread extends IdThread {
 	public void run() {
 		TLCGlobals.incNumWorkers();
 		TLCStateVec[] newStates = null;
-		LongVec[] newFps = null;
+		List<List<Fingerprint>> newFps = null;
 
 		final IStateQueue stateQueue = this.tlcServer.stateQueue;
 		try {
@@ -246,7 +246,7 @@ public class TLCServerThread extends IdThread {
 						TLCState state = newStates[i].elementAt(index);
 						// write state id and state fp to .st file for
 						// checkpointing
-						Fingerprint fp = newFps[i].elementAt(index);
+						Fingerprint fp = newFps.get(i).get(index);
 						state.uid = this.tlcServer.trace.writeState(state, fp);
 						// add state to state queue for further processing
 						stateQueue.sEnqueue(state);

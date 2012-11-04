@@ -2714,6 +2714,19 @@ public class Tool
     }
     return null;
   }
+
+  public final TLCStateInfo getState(long fp) {
+	    StateVec initStates = this.getInitStates();
+	    for (int i = 0; i < initStates.size(); i++) {
+	      TLCState state = initStates.elementAt(i);
+	      long nfp = state.fingerPrint().longValue();
+	      if (fp == nfp) {
+	        String info = "<Initial predicate>";
+	        return new TLCStateInfo(state, info);
+	      }
+	    }
+	    return null;
+	  }
   
   /* Reconstruct the next state of state s whose fingerprint is fp. */
   public final TLCStateInfo getState(Fingerprint fp, TLCState s) {
@@ -2730,6 +2743,21 @@ public class Tool
     }
     return null;
   }
+  
+  public final TLCStateInfo getState(long fp, TLCState s) {
+	    for (int i = 0; i < this.actions.length; i++) {
+	      Action curAction = this.actions[i];
+	      StateVec nextStates = this.getNextStates(curAction, s);
+	      for (int j = 0; j < nextStates.size(); j++) {
+	        TLCState state = nextStates.elementAt(j);
+	        long nfp = state.fingerPrint().longValue();
+	        if (fp == nfp) {
+	          return new TLCStateInfo(state, curAction.getLocation());
+	        }
+	      }
+	    }
+	    return null;
+	  }
 
   /* Reconstruct the info for s1.   */
   public final TLCStateInfo getState(TLCState s1, TLCState s) {

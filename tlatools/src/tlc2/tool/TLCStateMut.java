@@ -12,7 +12,6 @@ import tla2sany.semantic.SemanticNode;
 import tla2sany.semantic.SymbolNode;
 import tlc2.TLCGlobals;
 import tlc2.util.Context;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import tlc2.value.MVPerm;
 import tlc2.value.Value;
@@ -175,7 +174,7 @@ public final class TLCStateMut extends TLCState implements Cloneable, Serializab
       }
     }
     // Fingerprint the state:
-    Fingerprint fp = new FP128();
+    Fingerprint fp = fpFactory.newFingerprint();
 		if (viewMap == null) {
 			for (int i = 0; i < sz; i++) {
 				fp = minVals[i].fingerPrint(fp);

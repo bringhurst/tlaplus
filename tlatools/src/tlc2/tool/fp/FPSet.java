@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 
 import tlc2.tool.distributed.fp.FPSetRMI;
 import tlc2.util.BitVector;
-import tlc2.util.FP128;
-import tlc2.util.LongVec;
+import tlc2.util.Fingerprint;
 
 /**
  * An <code>FPSet</code> is a set of 64-bit fingerprints.
@@ -66,17 +66,17 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
     public abstract boolean contains(long fp) throws IOException;
 
     /* (non-Javadoc)
-     * @see tlc2.tool.distributed.fp.FPSetRMI#put(long)
+     * @see tlc2.tool.distributed.fp.FPSetRMI#put(Fingerprint)
      */
-    public boolean put(FP128 fp) throws IOException {
-    	return put(fp.getInternal());
+    public boolean put(Fingerprint fp) throws IOException {
+    	return put(fp.longValue());
     }
 
     /* (non-Javadoc)
-     * @see tlc2.tool.distributed.fp.FPSetRMI#contains(long)
+     * @see tlc2.tool.distributed.fp.FPSetRMI#contains(Fingerprint)
      */
-    public boolean contains(FP128 fp) throws IOException {
-    	return contains(fp.getInternal());
+    public boolean contains(Fingerprint fp) throws IOException {
+    	return contains(fp.longValue());
     }
    
    /* (non-Javadoc)
@@ -163,7 +163,7 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
     /* (non-Javadoc)
      * @see tlc2.tool.distributed.fp.FPSetRMI#putBlock(tlc2.util.LongVec)
      */
-    public BitVector putBlock(LongVec fpv) throws IOException
+    public BitVector putBlock(List<Fingerprint> fpv) throws IOException
     {
         int size = fpv.size();
 		BitVector bv = new BitVector(size);
@@ -171,7 +171,7 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
         {
 			// TODO Figure out why corresponding value in BitVector is inverted
 			// compared to put(long)
-            if (!this.put(fpv.elementAt(i)))
+            if (!this.put(fpv.get(i)))
             {
                 bv.set(i);
             }
@@ -182,7 +182,7 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
     /* (non-Javadoc)
      * @see tlc2.tool.distributed.fp.FPSetRMI#containsBlock(tlc2.util.LongVec)
      */
-    public BitVector containsBlock(LongVec fpv) throws IOException
+    public BitVector containsBlock(List<Fingerprint> fpv) throws IOException
     {
     	statesSeen += fpv.size();
         BitVector bv = new BitVector(fpv.size());
@@ -190,7 +190,7 @@ public abstract class FPSet extends UnicastRemoteObject implements FPSetRMI
         {
 			// TODO Figure out why corresponding value in BitVector is inverted
 			// compared to contains(long)
-            if (!this.contains(fpv.elementAt(i)))
+            if (!this.contains(fpv.get(i)))
             {
                 bv.set(i);
             }

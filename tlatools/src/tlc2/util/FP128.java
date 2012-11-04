@@ -3,9 +3,6 @@
 package tlc2.util;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
 /**
  * A 128-bit fingerprint is stored in an instance of the type <code>long</code>.
@@ -14,7 +11,23 @@ import java.io.Serializable;
  * 
  * Written by Allan Heydon and Marc Najork.
  */
-public class FP128 implements Serializable, Comparable<FP128>, Fingerprint {
+public class FP128 extends Fingerprint {
+
+	public static class Factory extends FPFactory {
+		/* (non-Javadoc)
+		 * @see tlc2.util.Fingerprint.FPFactory#newFingerprint()
+		 */
+		public Fingerprint newFingerprint() {
+			return new FP128();
+		}
+
+		/* (non-Javadoc)
+		 * @see tlc2.util.Fingerprint.FPFactory#newFingerprint(tlc2.util.BufferedRandomAccessFile)
+		 */
+		public Fingerprint newFingerprint(BufferedRandomAccessFile raf) throws IOException {
+			return new FP128().read(raf);
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see tlc2.util.Fingerprint#extend(java.lang.String)
@@ -213,25 +226,12 @@ public class FP128 implements Serializable, Comparable<FP128>, Fingerprint {
 	}
 	
 	/* These are the irreducible polynomials used as seeds => 128bit */
-	private long IrredPolyLower;
-	private long IrredPolyHigher;
+	protected long IrredPolyLower;
+	protected long IrredPolyHigher;
 	
-	public FP128() {
+	protected FP128() {
 		IrredPolyLower = Polys[indexLower];
 		IrredPolyHigher = Polys[indexHigher];
-	}
-
-	/**
-	 * @deprecated Do not use!!!
-	 */
-	public FP128(long low) {
-		IrredPolyLower = low;
-		IrredPolyHigher = 0L;
-	}
-	
-	public FP128(long low, long hi) {
-		IrredPolyLower = low;
-		IrredPolyHigher = hi;
 	}
 
 	public long[] getIrredPoly() {
@@ -270,34 +270,30 @@ public class FP128 implements Serializable, Comparable<FP128>, Fingerprint {
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	public int compareTo(final FP128 other) {
-		int compareTo = Long.valueOf(IrredPolyLower).compareTo(other.IrredPolyLower);
-		if (compareTo != 0) {
-			return compareTo;
-		} else {
-			return Long.valueOf(IrredPolyHigher).compareTo(other.IrredPolyHigher);
-		}
+	public int compareTo(final Fingerprint other) {
+		if (other instanceof FP128) {
+			FP128 fp = (FP128) other;
+			int compareTo = Long.valueOf(IrredPolyLower).compareTo(fp.IrredPolyLower);
+			if (compareTo != 0) {
+				return compareTo;
+			} else {
+				return Long.valueOf(IrredPolyHigher).compareTo(fp.IrredPolyHigher);
+			}
+		} 
+		throw new IllegalArgumentException(); 
 	}
 
 	/* (non-Javadoc)
 	 * @see tlc2.util.Fingerprint#getIndex(long)
 	 */
 	public int getIndex(final long mask) {
-		// TODO something like the following:
-		//return this.long[0] and long[1] & mask
-		return (int) (getInternal() & mask);
+		return (int) ((IrredPolyLower ^ IrredPolyHigher) & mask);
 	}
 
-	/**
-	 * @deprecated Do not use
-	 */
-	public long getInternal() {
-		//TODO hack to reuse old FPSet impl that only support 64 bit long
-		return IrredPolyLower ^ IrredPolyHigher;
-	}
-
-	public static FP128 read(final BufferedRandomAccessFile raf) throws IOException {
-		return new FP128(raf.readLong(), raf.readLong());
+	private Fingerprint read(final BufferedRandomAccessFile raf) throws IOException {
+		IrredPolyLower = raf.readLong();
+		IrredPolyHigher = raf.readLong();
+		return this;
 	}
 
 	/* (non-Javadoc)
@@ -309,14 +305,18 @@ public class FP128 implements Serializable, Comparable<FP128>, Fingerprint {
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.util.Fingerprint#write(java.io.ObjectOutputStream)
+	 * @see tlc2.util.Fingerprint#longValue()
 	 */
-	public void write(final ObjectOutputStream oos) throws IOException {
-		oos.writeLong(IrredPolyLower);
-		oos.writeLong(IrredPolyHigher);
+	public long longValue() {
+		return IrredPolyLower ^ IrredPolyHigher;
+//		throw new UnsupportedOperationException("Not applicable for 128bit fingerprints");
 	}
 
-	public static FP128 read(final ObjectInputStream ois) throws IOException {
-		return new FP128(ois.readLong(), ois.readLong());
+	public long getLower() {
+		return IrredPolyLower;
+	}
+
+	public long getHigher() {
+		return IrredPolyHigher;
 	}
 }

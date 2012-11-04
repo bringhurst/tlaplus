@@ -16,8 +16,10 @@ import java.rmi.Naming;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TreeSet;
@@ -35,7 +37,6 @@ import tlc2.util.BitVector;
 import tlc2.util.Cache;
 import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
-import tlc2.util.LongVec;
 import tlc2.util.SimpleCache;
 import util.ToolIO;
 import util.UniqueString;
@@ -117,11 +118,11 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			// container for all succ states
 			TLCStateVec[] nvv = new TLCStateVec[fpServerCnt];
 			// container for all succ state fingerprints
-			final LongVec[] fpvv = new LongVec[fpServerCnt];
+			final List<List<Fingerprint>> fpvv = new ArrayList<List<Fingerprint>>(fpServerCnt);
 			for (int i = 0; i < fpServerCnt; i++) {
 				pvv[i] = new TLCStateVec();
 				nvv[i] = new TLCStateVec();
-				fpvv[i] = new LongVec();
+				fpvv.add(i, new ArrayList<Fingerprint>());
 			}
 			
 			// Add elements of treeSet in sorted order to pvv, nvv, fpvv.
@@ -139,7 +140,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 				int fpIndex = fpSetManager.getFPSetIndex(fp);
 				pvv[fpIndex].addElement(holder.getParentState());
 				nvv[fpIndex].addElement(holder.getNewState());
-				fpvv[fpIndex].addElement(fp);
+				fpvv.get(fpIndex).add(fp);
 			}
 
 			BitVector[] visited = this.fpSetManager.containsBlock(fpvv, executorService);
@@ -147,10 +148,10 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			// Remove the states that have already been seen, check if the
 			// remaining new states are valid and inModel.
 			TLCStateVec[] newStates = new TLCStateVec[fpServerCnt];
-			LongVec[] newFps = new LongVec[fpServerCnt];
+			final List<List<Fingerprint>> newFps = new ArrayList<List<Fingerprint>>(fpServerCnt);
 			for (int i = 0; i < fpServerCnt; i++) {
 				newStates[i] = new TLCStateVec();
-				newFps[i] = new LongVec();
+				newFps.add(i, new ArrayList<Fingerprint>());
 			}
 
 			for (int i = 0; i < fpServerCnt; i++) {
@@ -164,7 +165,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 							&& this.work.isInActions(state1, state2)) {
 						state2.uid = state1.uid;
 						newStates[i].addElement(state2);
-						newFps[i].addElement(fpvv[i].elementAt(index));
+						newFps.get(i).add(fpvv.get(i).get(index));
 					}
 				}
 			}
