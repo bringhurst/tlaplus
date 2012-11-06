@@ -96,7 +96,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 			} catch (IOException e) {
 				// not expected to happen
 				MP.printError(EC.GENERAL, e);
-				res[i] = new BitVector();
+				res[i] = new BitVector(0);
 			}
 		}
 		return res;
@@ -121,7 +121,7 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 			} catch (IOException e) {
 				// not expected to happen
 				MP.printError(EC.GENERAL, e);
-				res[i] = new BitVector();
+				res[i] = new BitVector(0);
 			}
 		}
 		return res;
@@ -179,13 +179,6 @@ public class NonDistributedFPSetManager implements IFPSetManager {
 	 */
 	public long getMask() {
 		return Long.MAX_VALUE;
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.fp.IFPSetManager#addThread()
-	 */
-	public void addThread() throws IOException {
-		this.fpSet.addThread();
 	}
 
 	/* (non-Javadoc)

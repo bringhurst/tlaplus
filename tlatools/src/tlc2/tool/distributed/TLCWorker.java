@@ -336,7 +336,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			keepAliveTimer = new Timer("TLCWorker KeepAlive Timer", true);
 			keepAliveTimer.schedule(new TLCTimerTask(keepAliveTimer, runnables, url), 10000, 60000);
 			
-			ToolIO.out.println("TLC worker ready at: "
+			ToolIO.out.println("TLC worker with " + numCores + " threads ready at: "
 					+ new Date());
 		} catch (Throwable e) {
 			// Assert.printStack(e);
