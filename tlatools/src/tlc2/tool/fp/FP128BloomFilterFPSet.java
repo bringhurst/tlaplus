@@ -3,7 +3,6 @@ package tlc2.tool.fp;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -11,30 +10,59 @@ import tlc2.util.BitVector;
 import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 
-public class FP128BloomFilterFPSet extends FPSet {
+@SuppressWarnings("serial")
+public class FP128BloomFilterFPSet extends NoBackupFP128FPSet {
 
-	private final BitSet bitSet;
+	private static final int k = 3;
+
+	private final long[] bitSet;
 	private final ReentrantReadWriteLock lock;
-	private final int m;
-	private final int k;
+	private final long m;
+	
 	private long size;
 	
 	protected FP128BloomFilterFPSet(FPSetConfiguration fpSetConfig) throws RemoteException {
 		super(fpSetConfig);
-		k = 1;
-		m = (1 << 31) - 1; // mersenne prime
-		bitSet = new BitSet(m); // ~270mb
+		
+		m = 4L * ((1 << 31) - 1);
+		// wmake sure bitshift can be used as replacement for mod operation
+		assert Long.bitCount(m) == 1;
+		
+		bitSet = new long[bitsToWords(m)];
 		lock = new ReentrantReadWriteLock();
 		size = 0L;
 	}
 
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#init(int, java.lang.String, java.lang.String)
+	/**
+	 * @param bits The amount of bits to hold.
+	 * @return The number of 64bit longs it takes to hold <code>bits</code> 
 	 */
-	@Override
-	public void init(int numThreads, String metadir, String filename) throws IOException {
+	private int bitsToWords(long bits) {
+		return (int) (bits / Long.SIZE);
 	}
 
+	private boolean get(long bitIndex) {
+		// Index for the corresponding long in bitSet[]
+		final int i = (int) (bitIndex >> 6); // div 64
+
+		// Index for the corresponding bit in bitSet[i]
+		final int bit = (int) bitIndex & 0x3f; // mod 64
+		final long mask = 1L << bit;
+		
+		return (bitSet[i] & mask) != 0;
+	}
+
+	private void set(long bitIndex) {
+		// Index for the corresponding long in bitSet[]
+		final int i = (int) (bitIndex >> 6); // div 64
+
+		// Index for the corresponding bit in bitSet[i]
+		final int bit = (int) bitIndex & 0x3f; // mod 64
+		final long mask = 1L << bit;
+
+		bitSet[i] |= mask;
+	}
+	
 	/* (non-Javadoc)
 	 * @see tlc2.tool.fp.FPSet#size()
 	 */
@@ -44,36 +72,20 @@ public class FP128BloomFilterFPSet extends FPSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#put(long)
-	 */
-	@Override
-	public boolean put(long fp) throws IOException {
-		throw new UnsupportedOperationException("Not applicable for FP128 FPSet");
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#contains(long)
-	 */
-	@Override
-	public boolean contains(long fp) throws IOException {
-		throw new UnsupportedOperationException("Not applicable for FP128 FPSet");
-	}
-
-	/* (non-Javadoc)
 	 * @see tlc2.tool.fp.FPSet#put(tlc2.util.Fingerprint)
 	 */
 	@Override
 	public boolean put(final Fingerprint fp) throws IOException {
-		final int[] f = getIndices(fp); 
+		final long[] f = getIndices(fp); 
 
 		boolean result = true;
 
 		lock.writeLock().lock();
 		try {
 			for (int i = 0; i < f.length; i++) {
-				int bitIndex = f[i];
-				if(!bitSet.get(bitIndex)) {
-					bitSet.set(bitIndex);
+				long bitIndex = f[i];
+				if(!get(bitIndex)) {
+					set(bitIndex);
 					result = false;
 				}
 			}
@@ -86,13 +98,13 @@ public class FP128BloomFilterFPSet extends FPSet {
 		return result;
 	}
 
-	private int[] getIndices(final Fingerprint fp) {
+	private long[] getIndices(final Fingerprint fp) {
 		final FP128 fp128 = (FP128) fp;
 
-		int x = (int) (fp128.getLower() % m);
-		int y = (int) (fp128.getHigher() % m);
+		long x = fp128.getLower() % m;
+		long y = fp128.getHigher() % m;
 		
-		final int[] f = new int[k];
+		final long[] f = new long[k];
 		f[0] = x < 0 ? x * -1 : x;
 		
 		// Enhanced Double Hashing
@@ -109,13 +121,13 @@ public class FP128BloomFilterFPSet extends FPSet {
 	 */
 	@Override
 	public boolean contains(final Fingerprint fp) throws IOException {
-		final int[] f = getIndices(fp);
+		final long[] f = getIndices(fp);
 
 		lock.writeLock().lock();
 		try {
 			for (int i = 0; i < f.length; i++) {
-				int bitIndex = f[i];
-				if(!bitSet.get(bitIndex)) {
+				long bitIndex = f[i];
+				if(!get(bitIndex)) {
 					return false;
 				}
 			}
@@ -150,81 +162,15 @@ public class FP128BloomFilterFPSet extends FPSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#exit(boolean)
-	 */
-	@Override
-	public void exit(boolean cleanup) throws IOException {
-	}
-
-	/* (non-Javadoc)
 	 * @see tlc2.tool.fp.FPSet#checkFPs()
 	 */
 	@Override
 	public double checkFPs() throws IOException {
-		// Not applicable for BloomFilter
-		return -1;
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#beginChkpt()
-	 */
-	@Override
-	public void beginChkpt() throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#commitChkpt()
-	 */
-	@Override
-	public void commitChkpt() throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#recover()
-	 */
-	@Override
-	public void recover() throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#recoverFP(long)
-	 */
-	@Override
-	public void recoverFP(long fp) throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#prepareRecovery()
-	 */
-	@Override
-	public void prepareRecovery() throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#completeRecovery()
-	 */
-	@Override
-	public void completeRecovery() throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#beginChkpt(java.lang.String)
-	 */
-	@Override
-	public void beginChkpt(String filename) throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#commitChkpt(java.lang.String)
-	 */
-	@Override
-	public void commitChkpt(String filename) throws IOException {
-	}
-
-	/* (non-Javadoc)
-	 * @see tlc2.tool.fp.FPSet#recover(java.lang.String)
-	 */
-	@Override
-	public void recover(String filename) throws IOException {
+		// Intuitively, the higher the 1bit count in bitSet is, the more likely is a collision.
+		long occupied = 0L;
+		for(long l = 0L; l < m; l++) {
+			occupied += get(l) ? 1 : 0;
+		}
+		return occupied / m;
 	}
 }
