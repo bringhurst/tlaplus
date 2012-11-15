@@ -693,7 +693,10 @@ public class MP
 			b.append("Worker: %1% Sent: %2% Rcvd: %3% CacheRatio: %4% (").append(SDF.format(new Date())).append(")");
             break;
         case EC.TLC_DISTRIBUTED_SERVER_NOT_RUNNING:
-            b.append("TLCServer is gone, exiting worker... (").append(SDF.format(new Date())).append(")");
+            b.append("TLCServer is gone due to %1%, exiting worker... (").append(SDF.format(new Date())).append(")");
+            break;
+        case EC.TLC_DISTRIBUTED_SERVER_FINISHED:
+            b.append("TLCServer has finished, exiting worker... (").append(SDF.format(new Date())).append(")");
             break;
 		case EC.TLC_DISTRIBUTED_VM_VERSION:
 			b.append(
@@ -711,9 +714,6 @@ public class MP
 			break;
 		case EC.TLC_DISTRIBUTED_SERVER_FPSET_WAITING:
 			b.append("Waiting for %1% FPSet server(s) to register (").append(SDF.format(new Date())).append(")");
-			break;
-		case EC.TLC_DISTRIBUTED_SERVER_FPSET_DONE:
-			b.append("Done waiting for FPSet server(s) (").append(SDF.format(new Date())).append(")");
 			break;
             
         /*------------------------------------------- */
@@ -1179,7 +1179,8 @@ public class MP
         msg = msg
                 + "\nThis was probably caused by an error in the spec or model.";
         if (cause.equals("")) {
-            msg = msg + "\nSee the TLC Console for clues to what happened.";
+            // On 10 Nov 2012, LL added "User Output or" to the following message.
+            msg = msg + "\nSee the User Output or TLC Console for clues to what happened.";
         } else {
             msg = msg + "\nThe error occurred when TLC was " + cause + ".";
         }

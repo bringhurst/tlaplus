@@ -11,6 +11,9 @@ import tlc2.util.BitVector;
 import tlc2.util.Fingerprint;
 import tlc2.util.LongVec;
 
+/**
+ *
+ */
 public interface IFPSetManager extends Serializable {
 
 	/**
