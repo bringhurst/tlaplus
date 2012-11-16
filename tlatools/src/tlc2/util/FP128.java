@@ -24,7 +24,7 @@ public class FP128 extends Fingerprint {
 		/* (non-Javadoc)
 		 * @see tlc2.util.Fingerprint.FPFactory#newFingerprint(tlc2.util.BufferedRandomAccessFile)
 		 */
-		public Fingerprint newFingerprint(BufferedRandomAccessFile raf) throws IOException {
+		public Fingerprint newFingerprint(java.io.RandomAccessFile raf) throws IOException {
 			return new FP128().read(raf);
 		}
 	}
@@ -290,7 +290,7 @@ public class FP128 extends Fingerprint {
 		return (int) ((IrredPolyLower ^ IrredPolyHigher) & mask);
 	}
 
-	private Fingerprint read(final BufferedRandomAccessFile raf) throws IOException {
+	private Fingerprint read(final java.io.RandomAccessFile raf) throws IOException {
 		IrredPolyLower = raf.readLong();
 		IrredPolyHigher = raf.readLong();
 		return this;
@@ -299,7 +299,7 @@ public class FP128 extends Fingerprint {
 	/* (non-Javadoc)
 	 * @see tlc2.util.Fingerprint#write(tlc2.util.BufferedRandomAccessFile)
 	 */
-	public void write(final BufferedRandomAccessFile raf) throws IOException {
+	public void write(final java.io.RandomAccessFile raf) throws IOException {
 		raf.writeLong(IrredPolyLower);
 		raf.writeLong(IrredPolyHigher);
 	}

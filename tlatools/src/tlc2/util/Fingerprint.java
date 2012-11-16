@@ -43,7 +43,7 @@ public abstract class Fingerprint implements Serializable, Comparable<Fingerprin
 
 	public abstract int getIndex(long mask);
 
-	public abstract void write(BufferedRandomAccessFile raf) throws IOException;
+	public abstract void write(java.io.RandomAccessFile raf) throws IOException;
 
 	/**
 	 * Return the fingerprint represented as a long value. It depends on the
@@ -59,6 +59,6 @@ public abstract class Fingerprint implements Serializable, Comparable<Fingerprin
 
 		public abstract Fingerprint newFingerprint();
 
-		public abstract Fingerprint newFingerprint(final BufferedRandomAccessFile raf) throws IOException;
+		public abstract Fingerprint newFingerprint(final java.io.RandomAccessFile raf) throws IOException;
 	}
 }
