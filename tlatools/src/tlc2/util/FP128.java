@@ -4,6 +4,8 @@ package tlc2.util;
 
 import java.io.IOException;
 
+import sun.misc.Unsafe;
+
 /**
  * A 128-bit fingerprint is stored in an instance of the type <code>long</code>.
  * The static methods of <code>FP64</code> are used to initialize 64-bit
@@ -11,6 +13,7 @@ import java.io.IOException;
  * 
  * Written by Allan Heydon and Marc Najork.
  */
+@SuppressWarnings("restriction")
 public class FP128 extends Fingerprint {
 
 	public static class Factory extends FPFactory {
@@ -21,6 +24,13 @@ public class FP128 extends Fingerprint {
 			return new FP128();
 		}
 
+		public Fingerprint newFingerprint(sun.misc.Unsafe unsafe, long position) {
+			FP128 fp128 = new FP128();
+			fp128.IrredPolyLower = unsafe.getAddress(position);
+			fp128.IrredPolyHigher = unsafe.getAddress(position+1);
+			return fp128;
+		}
+		
 		/* (non-Javadoc)
 		 * @see tlc2.util.Fingerprint.FPFactory#newFingerprint(tlc2.util.BufferedRandomAccessFile)
 		 */
@@ -304,6 +314,11 @@ public class FP128 extends Fingerprint {
 		raf.writeLong(IrredPolyHigher);
 	}
 
+	public void write(Unsafe u, long position) {
+		u.putAddress(position, IrredPolyLower);
+		u.putAddress(position + 1, IrredPolyHigher);
+	}
+	
 	/* (non-Javadoc)
 	 * @see tlc2.util.Fingerprint#longValue()
 	 */
@@ -311,12 +326,44 @@ public class FP128 extends Fingerprint {
 		return IrredPolyLower ^ IrredPolyHigher;
 //		throw new UnsupportedOperationException("Not applicable for 128bit fingerprints");
 	}
+	
+	//TDOO implement once flushing to disk is supported
+	private static final boolean onDisk = false;
 
+	public boolean isOnDisk()  {
+		// onDisk state could be saved in OffHeapDiskFPSet. The upper n bits
+		// used for indexing into the hash table can easily be recovered from
+		// the index in which the fingerprint is found.
+		return onDisk;
+	}
+	
 	public long getLower() {
 		return IrredPolyLower;
 	}
 
 	public long getHigher() {
 		return IrredPolyHigher;
+	}
+//
+//	public static FP128 zeroMSB(Fingerprint fp) {
+//		final FP128 fp128 = (FP128) fp;
+//		fp128.IrredPolyHigher = fp128.IrredPolyHigher & 0x7FFFFFFFFFFFL;
+//		return fp128;
+//	}
+
+//	/**
+//	 * @param fp
+//	 * @return The index bits for the given fp
+//	 */
+//	public static long getIndex(FP128 fp) {
+//		return fp.IrredPolyHigher & 0x7FFFFFFFFFFFL;
+//	}
+
+	public static FP128 max(final FP128 a, final FP128 b) {
+		if (a.compareTo(b) < 0) {
+			return b;
+		} else {
+			return a;
+		}
 	}
 }

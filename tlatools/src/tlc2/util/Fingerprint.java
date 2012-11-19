@@ -46,6 +46,11 @@ public abstract class Fingerprint implements Serializable, Comparable<Fingerprin
 	public abstract void write(java.io.RandomAccessFile raf) throws IOException;
 
 	/**
+	 * @return true iff the {@link Fingerprint} has been flushed to disk
+	 */
+	public abstract boolean isOnDisk();
+	
+	/**
 	 * Return the fingerprint represented as a long value. It depends on the
 	 * underlying implementation, if the fingerprint has a long representation.
 	 * Throws a runtime exception otherwise.
