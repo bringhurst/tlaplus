@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.nio.LongBuffer;
-import java.nio.channels.UnsupportedAddressTypeException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -19,7 +18,6 @@ import java.util.logging.Level;
 import sun.misc.Unsafe;
 import tlc2.output.EC;
 import tlc2.output.MP;
-import tlc2.tool.fp.DiskFPSet;
 import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.FPSetStatistic;
@@ -28,7 +26,6 @@ import tlc2.tool.fp.MSBDiskFPSet;
 import tlc2.tool.fp.management.DiskFPSetMXWrapper;
 import tlc2.util.FP128;
 import tlc2.util.FP128.Factory;
-import tlc2.util.Fingerprint.FPFactory;
 import util.Assert;
 
 @SuppressWarnings({ "serial", "restriction" })
@@ -783,19 +780,19 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		// bucket
 		private void sortNextBucket() {
 			if (indexer.isBucketBasePosition(logicalPosition)) {
-				FP128[] buffer = new FP128[bucketCapacity];
-				int i = 0;
-				for (; i < bucketCapacity; i++) {
+				FP128[] buffer = new FP128[bucketCapacity / 2];
+				int k = 0;
+				for (int i = 0; i < bucketCapacity; i+=2) {
 					FP128 l = getFP128(logicalPosition + i, 0);
 					if (l == null || l.isOnDisk()) {
 						break;
 					} else {
-						buffer[i] = l;
+						buffer[k++] = l;
 					}
 				}
-				if (i > 0) {
-					Arrays.sort(buffer, 0, i);
-					for (int j = 0; j < i; j++) {
+				if (k > 0) {
+					Arrays.sort(buffer, 0, k);
+					for (int j = 0; j < k; j++) {
 						putFP128(logicalPosition, j, buffer[j]);
 					}
 				}
