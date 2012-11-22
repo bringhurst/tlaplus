@@ -24,11 +24,14 @@ public class FP128 extends Fingerprint {
 			return new FP128();
 		}
 
-		public Fingerprint newFingerprint(sun.misc.Unsafe unsafe, long position) {
-			FP128 fp128 = new FP128();
-			fp128.IrredPolyLower = unsafe.getAddress(position);
-			fp128.IrredPolyHigher = unsafe.getAddress(position+1);
-			return fp128;
+		public Fingerprint newFingerprint(sun.misc.Unsafe unsafe, long posLower, long posHigher) {
+			long lower = unsafe.getAddress(posLower);
+			long higher = unsafe.getAddress(posHigher);
+			if (lower == 0L && higher == 0L) {
+				return null;
+			} else {
+				return new FP128(lower, higher);
+			}
 		}
 		
 		/* (non-Javadoc)
@@ -243,6 +246,11 @@ public class FP128 extends Fingerprint {
 		IrredPolyLower = Polys[indexLower];
 		IrredPolyHigher = Polys[indexHigher];
 	}
+	
+	private FP128(long lower, long higher) {
+		IrredPolyLower = lower;
+		IrredPolyHigher = higher;
+	}
 
 	public long[] getIrredPoly() {
 		return new long[] {IrredPolyLower, IrredPolyHigher};
@@ -267,7 +275,7 @@ public class FP128 extends Fingerprint {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof FP128))
 			return false;
 		FP128 other = (FP128) obj;
 		if (IrredPolyHigher != other.IrredPolyHigher)
@@ -314,9 +322,9 @@ public class FP128 extends Fingerprint {
 		raf.writeLong(IrredPolyHigher);
 	}
 
-	public void write(Unsafe u, long position) {
-		u.putAddress(position, IrredPolyLower);
-		u.putAddress(position + 1, IrredPolyHigher);
+	public void write(Unsafe u, long posLower, long posHigher) {
+		u.putAddress(posLower, IrredPolyLower);
+		u.putAddress(posHigher, IrredPolyHigher);
 	}
 	
 	/* (non-Javadoc)
