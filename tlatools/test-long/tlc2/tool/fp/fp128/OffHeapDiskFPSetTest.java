@@ -28,6 +28,7 @@ public class OffHeapDiskFPSetTest extends TestCase {
 		
 		// FPSet under test
 		final OffHeapDiskFPSet fpSet = new OffHeapDiskFPSet(new FPSetConfiguration());
+		fpSet.init(1, System.getProperty("java.io.tmpdir"), System.currentTimeMillis() + "Test.fp");
 		
 		// Fill FPSet with random fingerprints
 		for (long l = 0; l < limit; l++) {
