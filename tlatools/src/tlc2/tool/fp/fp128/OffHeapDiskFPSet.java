@@ -701,10 +701,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		private long readElements = 0L;
 
 		private FP128 cache = null;
-		private final Unsafe unsafe;
 
 		public ByteBufferIterator(Unsafe u, long baseAddress, CollisionBucket collisionBucket, long expectedElements) {
-			this.unsafe = u;
 			this.logicalPosition = 0L;
 			this.totalElements = expectedElements;
 			
@@ -760,20 +758,22 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		private FP128 getNextFromBuffer() {
 			sortNextBucket();
 			
-			long l = unsafe.getAddress(log2phy(logicalPosition));
-			if (l > 0L) {
-				unsafe.putAddress(log2phy(logicalPosition++), l | 0x8000000000000000L);
+			FP128 l = getFP128(logicalPosition, 0);
+			if (!l.isOnDisk()) {
+				putFP128(logicalPosition++, 0, l); //TODO l | 0x8000000000000000L??
+//				unsafe.putAddress(log2phy(logicalPosition++), l | 0x8000000000000000L);
 				return l;
 			}
 			
-			while ((l = unsafe.getAddress(log2phy(logicalPosition))) <= 0L && logicalPosition < maxTblCnt) {
+			while (((l = getFP128(logicalPosition, 0)) == null || l.isOnDisk() == true) && logicalPosition < maxTblCnt) {
 				// increment position to next bucket
 				logicalPosition = indexer.getNextBucketBasePosition(logicalPosition);
 				sortNextBucket();
 			}
 			
-			if (l > 0L) {
-				unsafe.putAddress(log2phy(logicalPosition++), l | 0x8000000000000000L);
+			if (!l.isOnDisk()) {
+				putFP128(logicalPosition++, 0, l); //TODO l | 0x8000000000000000L??
+//				unsafe.putAddress(log2phy(logicalPosition++), l | 0x8000000000000000L);
 				return l;
 			}
 			throw new NoSuchElementException();
@@ -783,21 +783,20 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		// bucket
 		private void sortNextBucket() {
 			if (indexer.isBucketBasePosition(logicalPosition)) {
-				long[] longBuffer = new long[bucketCapacity];
+				FP128[] buffer = new FP128[bucketCapacity];
 				int i = 0;
 				for (; i < bucketCapacity; i++) {
-					long l = unsafe.getAddress(log2phy(logicalPosition + i));
-					if (l <= 0L) {
+					FP128 l = getFP128(logicalPosition + i, 0);
+					if (l == null || l.isOnDisk()) {
 						break;
 					} else {
-						longBuffer[i] = l;
+						buffer[i] = l;
 					}
 				}
 				if (i > 0) {
-					Arrays.sort(longBuffer, 0, i);
+					Arrays.sort(buffer, 0, i);
 					for (int j = 0; j < i; j++) {
-						unsafe.putAddress(log2phy(logicalPosition, j),
-								longBuffer[j]);
+						putFP128(logicalPosition, j, buffer[j]);
 					}
 				}
 			}
@@ -830,8 +829,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			// Reverse the current bucket to obtain last element (More elegantly
 			// this could be achieved recursively, but this can cause a
 			// stack overflow).
-			long l = 1L;
-			while ((l = unsafe.getAddress(log2phy(logicalPosition-- + bucketCapacity - 1))) <= 0L) {
+			FP128 l = null;
+			while ((l = getFP128(logicalPosition-- + bucketCapacity - 1, 0)) == null || l.isOnDisk()) {
 				sortNextBucket();
 			}
 			
@@ -842,22 +841,14 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			// Compare max element found in main in-memory buffer to man
 			// element in collisionBucket. Return max of the two.
 			if (!cs.isEmpty()) {
-				l = Math.max(cs.last(), l);
+				l = FP128.max(cs.last(), l);
 			}
 			
 			// Either return the maximum element or fail fast.
-			if (l > 0L) {
+			if (!l.isOnDisk()) {
 				return l;
 			}
 			throw new NoSuchElementException();
-		}
-		
-		// prevent synthetic methods
-		private long log2phy(long logicalAddress) {
-			return OffHeapDiskFPSetTest.this.log2phy(logicalAddress);
-		}
-		private long log2phy(long bucketAddress, long inBucketAddress) {
-			return OffHeapDiskFPSetTest.this.log2phy(bucketAddress, inBucketAddress);
 		}
 	}
 	
