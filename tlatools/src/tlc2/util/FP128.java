@@ -300,6 +300,15 @@ public class FP128 extends Fingerprint {
 		} 
 		throw new IllegalArgumentException(); 
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "FP128 [IrredPolyLower=" + IrredPolyLower + ", IrredPolyHigher="
+				+ IrredPolyHigher + "]";
+	}
 
 	/* (non-Javadoc)
 	 * @see tlc2.util.Fingerprint#getIndex(long)
