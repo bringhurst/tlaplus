@@ -25,6 +25,7 @@ import java.util.Timer;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import tlc2.TLCGlobals;
 import tlc2.output.EC;
@@ -183,6 +184,8 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			throw e;
 		} catch (OutOfMemoryError e) {
 			throw new RemoteException("OutOfMemoryError occurred at worker: " + uri.toASCIIString(), e);
+		} catch (RejectedExecutionException e) {
+			throw new RemoteException("Executor rejected task at worker: " + uri.toASCIIString(), e);
 		} catch (Throwable e) {
 			throw new WorkerException(e.getMessage(), e, state1, state2, true);
 		} finally {
@@ -335,8 +338,12 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 
 			final IFPSetManager fpSetManager = server.getFPSetManager();
 			
-			// spawn as many worker threads as we have cores
-			final int numCores = Runtime.getRuntime().availableProcessors();
+			// spawn twice as many worker threads as we have cores unless user
+			// explicitly passes thread count
+			final int numCores = Integer.getInteger(TLCWorker.class.getName()
+					+ ".threadCount", Runtime.getRuntime()
+					.availableProcessors());
+			
 			runnables = new TLCWorkerRunnable[numCores];
 			for (int j = 0; j < numCores; j++) {
 				runnables[j] = new TLCWorkerRunnable(j, server, fpSetManager, work);
