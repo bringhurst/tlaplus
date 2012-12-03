@@ -743,7 +743,9 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			}
 			
 			// hand out strictly monotonic increasing elements
-			Assert.check(previous.compareTo(result) == -1, EC.GENERAL);
+			if(previous != null) {
+				Assert.check(previous.compareTo(result) == -1, EC.GENERAL);
+			}
 			previous = result;
 			
 			// maintain read statistics
@@ -781,19 +783,19 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		private void sortNextBucket() {
 			if (indexer.isBucketBasePosition(logicalPosition)) {
 				FP128[] buffer = new FP128[bucketCapacity / 2];
-				int k = 0;
-				for (int i = 0; i < bucketCapacity; i+=2) {
-					FP128 l = getFP128(logicalPosition + i, 0);
+				int i = 0;
+				for (; i < bucketCapacity; i++) {
+					FP128 l = getFP128(logicalPosition + (i * 2), 0);
 					if (l == null || l.isOnDisk()) {
 						break;
 					} else {
-						buffer[k++] = l;
+						buffer[i] = l;
 					}
 				}
-				if (k > 0) {
-					Arrays.sort(buffer, 0, k);
-					for (int j = 0; j < k; j++) {
-						putFP128(logicalPosition, j, buffer[j]);
+				if (i > 0) {
+					Arrays.sort(buffer, 0, i);
+					for (int j = 0; j < i; j++) {
+						putFP128(logicalPosition, (j * 2), buffer[j]);
 					}
 				}
 			}
