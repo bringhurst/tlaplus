@@ -30,7 +30,9 @@ import tlc2.tool.management.TLCStandardMBean;
 import tlc2.util.BufferedRandomAccessFile;
 import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
+import tlc2.util.IdThread;
 import tlc2.util.Striped;
+import tlc2.util.FP128.Factory;
 import util.Assert;
 import util.FileUtil;
 
@@ -39,6 +41,8 @@ import util.FileUtil;
 public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSetStatistic {
 
 	protected final static Logger LOGGER = Logger.getLogger(FP128DiskFPSet.class.getName());
+	
+	protected static final FP128.Factory instance = (Factory) FP128.Factory.getInstance();
 
 	// fields
 	/**
@@ -490,138 +494,142 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 	 * @return true iff fp is on disk
 	 */
 	final boolean diskLookup(FP128 fp) throws IOException {
-//		if (this.index == null)
+		if (this.index == null)
 			return false;
-//		
-//		// Increment disk lookup counter
-//		this.diskLookupCnt.getAndIncrement();
-//		
-//		// search in index for position to seek to
-//		// do interpolated binary search
-//		final int indexLength = this.index.length;
-//		int loPage = 0, hiPage = indexLength - 1;
-//		FP128 loVal = this.index[loPage];
-//		FP128 hiVal = this.index[hiPage];
-//
-//		// Test boundary cases (if not inside interval)
-//		if (fp < loVal || fp > hiVal)
-//			return false;
-//		if (fp == hiVal) // why not check loVal? memLookup would have found it already!	
-//			return true;
-//		double dfp = (double) fp;
-//
-//		// a) find disk page that would potentially contain the fp. this.index contains 
-//		// the first fp of each disk page
-//		while (loPage < hiPage - 1) {
-//			/*
-//			 * Invariant: If "fp" exists in the file, the (zero-based) page
-//			 * number within the file on which it occurs is in the half-open
-//			 * interval "[loPage, hiPage)".
-//			 * 
-//			 * loVal <= fp < hiVal exists x: loPage < x < hiPage
-//			 */
-//			double dhi = (double) hiPage;
-//			double dlo = (double) loPage;
-//			double dhiVal = (double) hiVal;
-//			double dloVal = (double) loVal;
-//			
-//			int midPage = (loPage + 1)
-//					+ (int) ((dhi - dlo - 1.0) * (dfp - dloVal) / (dhiVal - dloVal));
-//			if (midPage == hiPage)
-//				midPage--; // Needed due to limited precision of doubles
-//
-//			Assert.check(loPage < midPage && midPage < hiPage,
-//					EC.SYSTEM_INDEX_ERROR);
-//			FP128 v = this.index[midPage];
-//			if (fp < v) {
-//				hiPage = midPage;
-//				hiVal = v;
-//			} else if (fp > v) {
-//				loPage = midPage;
-//				loVal = v;
-//			} else {
-//				// given fp happens to be in index file
-//				return true;
-//			}
-//		}
-//		// no page is in between loPage and hiPage at this point
-//		Assert.check(hiPage == loPage + 1, EC.SYSTEM_INDEX_ERROR);
-//
-//		boolean diskHit = false;
-//		long midEntry = -1L;
-//		// lower bound for the interval search in 
-//		long loEntry = ((long) loPage) * NumEntriesPerPage;
-//		// upper bound for the interval search in 
-//		long hiEntry = ((loPage == indexLength - 2) ? this.fileCnt - 1
-//				: ((long) hiPage) * NumEntriesPerPage);
-//		try {
-//			// b0) open file for reading that is associated with current thread
-//			BufferedRandomAccessFile raf;
-//			int id = IdThread.GetId(this.braf.length);
-//			if (id < this.braf.length) {
-//				raf = this.braf[id];
-//			} else {
-//				synchronized (this.brafPool) {
-//					if (this.poolIndex < this.brafPool.length) {
-//						raf = this.brafPool[this.poolIndex++];
-//					} else {
-//						raf = new BufferedRandomAccessFile(
-//								this.fpFilename, "r");
-//					}
-//				}
-//			}
-//			
-//			// b1) do interpolated binary search on disk page determined by a)
-//
-//			while (loEntry < hiEntry) {
-//				/*
-//				 * Invariant: If "fp" exists in the file, its (zero-based)
-//				 * position within the file is in the half-open interval
-//				 * "[loEntry, hiEntry)".
-//				 */
-//				midEntry = calculateMidEntry(loVal, hiVal, dfp, loEntry, hiEntry);
-//
-//				Assert.check(loEntry <= midEntry && midEntry < hiEntry,
-//						EC.SYSTEM_INDEX_ERROR);
-//				// midEntry calculation done on logical indices,
-//				// addressing done on bytes, thus convert to long-addressing (* LongSize)
-//				if (raf.seeek(midEntry * LongSize)) {
-//					diskSeekCnt.getAndIncrement();
-//				} else {
-//					diskSeekCache.getAndIncrement();
-//				}
-//				long v = raf.readLong();
-//
-//				if (fp < v) {
-//					hiEntry = midEntry;
-//					hiVal = v;
-//				} else if (fp > v) {
-//					loEntry = midEntry + 1;
-//					loVal = v;
-//				} else {
-//					diskHit = true;
-//					break;
-//				}
-//			}
-//			// b2) done doing disk search -> close file (finally candidate? => not really because if we exit with error, TLC exits)
-//			if (id >= this.braf.length) {
-//				synchronized (this.brafPool) {
-//					if (this.poolIndex > 0) {
-//						this.brafPool[--this.poolIndex] = raf;
-//					} else {
-//						raf.close();
-//					}
-//				}
-//			}
-//		} catch (IOException e) {
-//			if(midEntry * LongSize < 0) {
-//			 // LL modified error message on 7 April 2012
-//				MP.printError(EC.GENERAL, new String[]{"looking up a fingerprint"}, e);
-//			}
-//			MP.printError(EC.SYSTEM_DISKGRAPH_ACCESS, e);
-//			throw e;
-//		}
-//		return diskHit;
+		
+		// Increment disk lookup counter
+		this.diskLookupCnt.getAndIncrement();
+		
+		// search in index for position to seek to
+		// do interpolated binary search
+		final int indexLength = this.index.length;
+		int loPage = 0, hiPage = indexLength - 1;
+		FP128 loVal = this.index[loPage];
+		FP128 hiVal = this.index[hiPage];
+
+		// Test boundary cases (if not inside interval)
+		if (fp.compareTo(loVal) == -1 || fp.compareTo(hiVal) == 1)
+			return false;
+		if (fp.compareTo(hiVal) == 0) // why not check loVal? memLookup would have found it already!	
+			return true;
+		double dfp = (double) fp.getHigher();
+
+		// a) find disk page that would potentially contain the fp. this.index contains 
+		// the first fp of each disk page
+		while (loPage < hiPage - 1) {
+			/*
+			 * Invariant: If "fp" exists in the file, the (zero-based) page
+			 * number within the file on which it occurs is in the half-open
+			 * interval "[loPage, hiPage)".
+			 * 
+			 * loVal <= fp < hiVal exists x: loPage < x < hiPage
+			 */
+			double dhi = (double) hiPage;
+			double dlo = (double) loPage;
+			double dhiVal = (double) hiVal.getHigher();
+			double dloVal = (double) loVal.getHigher();
+			
+			int midPage = (loPage + 1)
+					+ (int) ((dhi - dlo - 1.0) * (dfp - dloVal) / (dhiVal - dloVal));
+			if (midPage == hiPage)
+				midPage--; // Needed due to limited precision of doubles
+
+			Assert.check(loPage < midPage && midPage < hiPage,
+					EC.SYSTEM_INDEX_ERROR);
+			FP128 v = this.index[midPage];
+			if (fp.compareTo(v) == -1) {
+				hiPage = midPage;
+				hiVal = v;
+			} else if (fp.compareTo(v) > 1) {
+				loPage = midPage;
+				loVal = v;
+			} else {
+				// given fp happens to be in index file
+				return true;
+			}
+		}
+		// no page is in between loPage and hiPage at this point
+		Assert.check(hiPage == loPage + 1, EC.SYSTEM_INDEX_ERROR);
+
+		boolean diskHit = false;
+		long midEntry = -1L;
+		// lower bound for the interval search in 
+		long loEntry = ((long) loPage) * NumEntriesPerPage;
+		// upper bound for the interval search in 
+		long hiEntry = ((loPage == indexLength - 2) ? this.fileCnt - 1
+				: ((long) hiPage) * NumEntriesPerPage);
+		try {
+			// b0) open file for reading that is associated with current thread
+			BufferedRandomAccessFile raf;
+			int id = IdThread.GetId(this.braf.length);
+			if (id < this.braf.length) {
+				raf = this.braf[id];
+			} else {
+				synchronized (this.brafPool) {
+					if (this.poolIndex < this.brafPool.length) {
+						raf = this.brafPool[this.poolIndex++];
+					} else {
+						raf = new BufferedRandomAccessFile(
+								this.fpFilename, "r");
+					}
+				}
+			}
+			
+			// b1) do interpolated binary search on disk page determined by a)
+
+			while (loEntry < (hiEntry + 1)) {
+				/*
+				 * Invariant: If "fp" exists in the file, its (zero-based)
+				 * position within the file is in the half-open interval
+				 * "[loEntry, hiEntry)".
+				 */
+				midEntry = calculateMidEntry(loVal.getHigher(), hiVal.getHigher(), dfp, loEntry, hiEntry);
+				
+				Assert.check(
+						loEntry <= midEntry && midEntry < (hiEntry + 2),
+						EC.SYSTEM_INDEX_ERROR,
+						new String[] { Long.toString(loEntry),
+								Long.toString(midEntry), Long.toString(hiEntry + 2) });
+				
+				// midEntry calculation done on logical indices,
+				// addressing done on bytes, thus convert to long-addressing (* LongSize)
+				if (raf.seeek(midEntry * LongSize)) {
+					diskSeekCnt.getAndIncrement();
+				} else {
+					diskSeekCache.getAndIncrement();
+				}
+				final FP128 v = (FP128) instance.newFingerprint(raf);
+
+				if (fp.compareTo(v) == -1) {
+					hiEntry = midEntry;
+					hiVal = v;
+				} else if (fp.compareTo(v) == 1) {
+					loEntry = midEntry + 1;
+					loVal = v;
+				} else {
+					diskHit = true;
+					break;
+				}
+			}
+			// b2) done doing disk search -> close file (finally candidate? => not really because if we exit with error, TLC exits)
+			if (id >= this.braf.length) {
+				synchronized (this.brafPool) {
+					if (this.poolIndex > 0) {
+						this.brafPool[--this.poolIndex] = raf;
+					} else {
+						raf.close();
+					}
+				}
+			}
+		} catch (IOException e) {
+			if(midEntry * LongSize < 0) {
+			 // LL modified error message on 7 April 2012
+				MP.printError(EC.GENERAL, new String[]{"looking up a fingerprint"}, e);
+			}
+			MP.printError(EC.SYSTEM_DISKGRAPH_ACCESS, e);
+			throw e;
+		}
+		return diskHit;
 	}
 
 	/**
@@ -647,6 +655,12 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 		
 		if (midEntry == hiEntry) {
 			midEntry--;
+		}
+
+		// adjust midEntry to 128bit fingerprints which are always stored on an even index
+		midEntry = midEntry & 0xFFFFFFFEL;
+		if (midEntry < loEntry) {
+			midEntry += 2;
 		}
 
 		return midEntry;
@@ -1166,6 +1180,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 			if (tblCnt.get() == 0)
 				return;
 			
+			LOGGER.log(Level.FINE, "Preparing to flush table");
 			prepareTable();
 			
 //			// reset statistic counters
@@ -1177,6 +1192,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 //			this.diskLookupCnt = 0;
 
 			// merge array with disk file
+			LOGGER.log(Level.FINE, "Merging new entries to disc");
 			try {
 				this.mergeNewEntries();
 			} catch (IOException e) {

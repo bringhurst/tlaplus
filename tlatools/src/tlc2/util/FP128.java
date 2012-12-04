@@ -320,6 +320,7 @@ public class FP128 extends Fingerprint {
 	private Fingerprint read(final java.io.RandomAccessFile raf) throws IOException {
 		IrredPolyLower = raf.readLong();
 		IrredPolyHigher = raf.readLong();
+		onDisk = true;
 		return this;
 	}
 
@@ -345,13 +346,17 @@ public class FP128 extends Fingerprint {
 	}
 	
 	//TDOO implement once flushing to disk is supported
-	private static final boolean onDisk = false;
+	private boolean onDisk = false;
 
 	public boolean isOnDisk()  {
 		// onDisk state could be saved in OffHeapDiskFPSet. The upper n bits
 		// used for indexing into the hash table can easily be recovered from
 		// the index in which the fingerprint is found.
 		return onDisk;
+	}
+
+	public void setIsOnDisk() {
+		this.onDisk = true;
 	}
 	
 	public long getLower() {

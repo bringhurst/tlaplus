@@ -380,8 +380,6 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		}
 	}
 	
-	private static final FP128.Factory instance = (Factory) FP128.Factory.getInstance();
-
 	private FP128 getFP128(long position, int index) {
 		return (FP128) instance.newFingerprint(u, log2phy(position, index), log2phy(position, index+1));
 	}
@@ -629,7 +627,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			boolean eol = false;
 			FP128 fp = itr.next();
 			while (!eof || !eol) {
-				if ((value.compareTo(fp) == -1 || eol) && !eof) {
+				if ((value != null && value.compareTo(fp) == -1 || eol) && !eof) {
 					writeFP(outRAF, value);
 					try {
 						value = (FP128) FP128.Factory.getInstance().newFingerprint(inRAF);
@@ -719,6 +717,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		public FP128 next() {
 			FP128 result = null;
 
+			// As long a cache is null (see next comment) and there are still
+			// elements in the buffer, read elements from it.
 			if (cache == null && bufferElements > 0) {
 				result = getNextFromBuffer();
 				bufferElements--;
@@ -727,6 +727,10 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 				cache = null;
 			}
 
+			// If collision set isn't empty, check if the first element (sorted
+			// set invariant) is larger compared to the result read from the buffer.
+			// In case the collision set element is smaller than the result, cache the result
+			// and use the element read from the collision set (remove element from cs too).
 			if (!cs.isEmpty()) {
 				FP128 first = cs.first();
 				if (result.compareTo(first) == 1 || result == null) {
@@ -758,9 +762,10 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			sortNextBucket();
 			
 			FP128 l = getFP128(logicalPosition, 0);
-			if (!l.isOnDisk()) {
-				putFP128(logicalPosition++, 0, l); //TODO l | 0x8000000000000000L??
-//				unsafe.putAddress(log2phy(logicalPosition++), l | 0x8000000000000000L);
+			if (l!= null && !l.isOnDisk()) {
+				l.setIsOnDisk();
+				putFP128(logicalPosition, 0, l);
+				logicalPosition += 2;
 				return l;
 			}
 			
@@ -771,8 +776,9 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			}
 			
 			if (!l.isOnDisk()) {
-				putFP128(logicalPosition++, 0, l); //TODO l | 0x8000000000000000L??
-//				unsafe.putAddress(log2phy(logicalPosition++), l | 0x8000000000000000L);
+				l.setIsOnDisk();
+				putFP128(logicalPosition, 0, l);
+				logicalPosition += 2;
 				return l;
 			}
 			throw new NoSuchElementException();
@@ -784,15 +790,21 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			if (indexer.isBucketBasePosition(logicalPosition)) {
 				FP128[] buffer = new FP128[bucketCapacity / 2];
 				int i = 0;
-				for (; i < bucketCapacity; i++) {
-					FP128 l = getFP128(logicalPosition + (i * 2), 0);
+				boolean isSorted = true;
+				for (; i < buffer.length; i++) {
+					FP128 l = getFP128(logicalPosition, (i * 2));
 					if (l == null || l.isOnDisk()) {
 						break;
 					} else {
+						// Check if buffer happens to be sorted already. If it
+						// is sorted, we don't have to rewrite the buffer.
+						if (isSorted && i > 0) {
+							isSorted = buffer[i - 1].compareTo(l) < 1;
+						}
 						buffer[i] = l;
 					}
 				}
-				if (i > 0) {
+				if (!isSorted && i > 0) {
 					Arrays.sort(buffer, 0, i);
 					for (int j = 0; j < i; j++) {
 						putFP128(logicalPosition, (j * 2), buffer[j]);
@@ -828,8 +840,11 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			// Reverse the current bucket to obtain last element (More elegantly
 			// this could be achieved recursively, but this can cause a
 			// stack overflow).
+			// With 128bit fingerprints, that we correctly index the last
+			// fingerprint slot, meaning we reduce the bucketCap by 2 (instead
+			// of 1 with 64bit fps).
 			FP128 l = null;
-			while ((l = getFP128(logicalPosition-- + bucketCapacity - 1, 0)) == null || l.isOnDisk()) {
+			while ((l = getFP128(logicalPosition-- + bucketCapacity - 2, 0)) == null || l.isOnDisk()) {
 				sortNextBucket();
 			}
 			
