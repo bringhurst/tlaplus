@@ -252,7 +252,11 @@ public class MP
             break;
 
         case EC.SYSTEM_INDEX_ERROR:
-            b.append("Index error.");
+        	if (parameters != null && parameters.length == 3){
+        		b.append("Index error (%1% <= %2% < %3%).");
+        	} else {
+        		b.append("Index error.");
+        	}
             break;
 
         case EC.SYSTEM_STREAM_EMPTY:
