@@ -144,7 +144,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 	protected static final int InitialBucketCapacity = (1 << LogMaxLoad);
 
 	/* Number of fingerprints per braf buffer. */
-	public static final int NumEntriesPerPage = 8192 / LongSize;
+	public static final int NumEntriesPerPage = 8192 / (2 * LongSize);
 	
 	/**
 	 * This is (assumed to be) the auxiliary storage for a fingerprint that need
@@ -276,6 +276,9 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 		return this.tblCnt.get() + this.fileCnt;
 	}
 
+	/* (non-Javadoc)
+	 * @see tlc2.tool.fp.FPSetStatistic#sizeof()
+	 */
 	public abstract long sizeof();
 
 	/* (non-Javadoc)
@@ -336,10 +339,9 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
      * 
 	 */
 	public final boolean put(Fingerprint fp) throws IOException {
-		
-		final FP128 fp128 = (FP128) fp;
+		final FP128 fp128 = checkValid(fp);
 
-		fp = checkValid(fp128);
+		fp128.zeroMSB();
 		
 		final Lock readLock = rwLock.getAt(getLockIndex(fp128)).readLock();
 		readLock.lock();
@@ -432,8 +434,8 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
      * 0 and {@link Long#MIN_VALUE} always return false
 	 */
 	public final boolean contains(Fingerprint fp) throws IOException {
-		final FP128 fp128 = (FP128) fp;
-		fp = checkValid(fp128);
+		final FP128 fp128 = checkValid(fp); 
+		fp128.zeroMSB();
 		final Lock readLock = this.rwLock.getAt(getLockIndex(fp128)).readLock();
 		readLock.lock();
 		// First, look in in-memory buffer
@@ -465,14 +467,15 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 	 * @param fp The fingerprint to check validity for.
 	 * @return An alternative fingerprint value to map the invalid to.
 	 */
-	protected FP128 checkValid(FP128 fp) {
+	protected FP128 checkValid(Fingerprint fp) {
 		//TODO Decide on strategy:
 		// - Throw exception
 		// - Raise warning (a 0L fp causes all subsequent states to be
 		// explored twice, unless cycle)
 		// - Map to a unused fp value
 		// - use a dedicated boolean class member to hold 0L
-		return fp;
+		// - Check with instanceof
+		return (FP128) fp;
 	}
 
 	/**
@@ -540,7 +543,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 			if (fp.compareTo(v) == -1) {
 				hiPage = midPage;
 				hiVal = v;
-			} else if (fp.compareTo(v) > 1) {
+			} else if (fp.compareTo(v) == 1) {
 				loPage = midPage;
 				loVal = v;
 			} else {
@@ -577,7 +580,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 			
 			// b1) do interpolated binary search on disk page determined by a)
 
-			while (loEntry < (hiEntry + 1)) {
+			while (loEntry < hiEntry) {
 				/*
 				 * Invariant: If "fp" exists in the file, its (zero-based)
 				 * position within the file is in the half-open interval
@@ -586,14 +589,16 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 				midEntry = calculateMidEntry(loVal.getHigher(), hiVal.getHigher(), dfp, loEntry, hiEntry);
 				
 				Assert.check(
-						loEntry <= midEntry && midEntry < (hiEntry + 2),
+						loEntry <= midEntry && midEntry < hiEntry,
 						EC.SYSTEM_INDEX_ERROR,
 						new String[] { Long.toString(loEntry),
-								Long.toString(midEntry), Long.toString(hiEntry + 2) });
+								Long.toString(midEntry), Long.toString(hiEntry) });
 				
 				// midEntry calculation done on logical indices,
 				// addressing done on bytes, thus convert to long-addressing (* LongSize)
-				if (raf.seeek(midEntry * LongSize)) {
+				long address = midEntry * (2 * LongSize);
+				
+				if (raf.seeek(address)) {
 					diskSeekCnt.getAndIncrement();
 				} else {
 					diskSeekCache.getAndIncrement();
@@ -655,12 +660,6 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 		
 		if (midEntry == hiEntry) {
 			midEntry--;
-		}
-
-		// adjust midEntry to 128bit fingerprints which are always stored on an even index
-		midEntry = midEntry & 0xFFFFFFFEL;
-		if (midEntry < loEntry) {
-			midEntry += 2;
 		}
 
 		return midEntry;
@@ -792,7 +791,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 		RandomAccessFile currRAF = new BufferedRandomAccessFile(
 				this.fpFilename, "rw");
 
-		this.fileCnt = chkptRAF.length() / LongSize;
+		this.fileCnt = chkptRAF.length() / (2 * LongSize);
 		int indexLen = (int) ((this.fileCnt - 1) / NumEntriesPerPage) + 2;
 		this.index = new FP128[indexLen];
 		this.currIndex = 0;
