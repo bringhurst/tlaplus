@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.nio.LongBuffer;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
@@ -24,8 +25,9 @@ import tlc2.tool.fp.FPSetStatistic;
 import tlc2.tool.fp.LSBDiskFPSet;
 import tlc2.tool.fp.MSBDiskFPSet;
 import tlc2.tool.fp.management.DiskFPSetMXWrapper;
+import tlc2.util.BufferedRandomAccessFile;
 import tlc2.util.FP128;
-import tlc2.util.FP128.Factory;
+import tlc2.util.Fingerprint;
 import util.Assert;
 
 @SuppressWarnings({ "serial", "restriction" })
@@ -108,14 +110,15 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 
 		// Allocate non-heap memory for maxInMemoryCapacity fingerprints
 		long bytes = memoryInFingerprintCnt << logAddressSize;
+		bytes *= 2; // double memory requirements due to 128bit fingerprints
 		
 		baseAddress = u.allocateMemory(bytes);
 		
 		// Null memory (could be done in parallel on segments when bottleneck).
 		// This is essential as allocateMemory returns uninitialized memory and
 		// memInsert/memLockup utilize 0L as a mark for an unused fingerprint slot.
-		// Otherwise memory garbage wouldn't be distinguishable from a true fp. 
-		for (long i = 0; i < memoryInFingerprintCnt; i++) {
+		// Otherwise memory garbage wouldn't be distinguishable from a true fp.
+		for (long i = 0; i < memoryInFingerprintCnt * 2; i++) {
 			u.putAddress(log2phy(i), 0L);
 		}
 
@@ -158,11 +161,11 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			}
 			
 			// Extra memory that cannot be addressed by BitshiftingIndexer
-			final long extraMem = (memoryInFingerprintCnt * LongSize) - (long) Math.pow(2, cnt);
+			final long extraMem = (memoryInFingerprintCnt * (2*LongSize)) - (long) Math.pow(2, cnt);
 			
 			// Divide extra memory across addressable buckets
 			int x = (int) (extraMem / ((n + 1) / InitialBucketCapacity));
-			bucketCapacity = InitialBucketCapacity + (x / LongSize) ;
+			bucketCapacity = InitialBucketCapacity + (x / (2*LongSize)) ;
 			// Twice InitialBucketCapacity would mean we could have used one
 			// more bit for addressing.
 			Assert.check(bucketCapacity < (2 * InitialBucketCapacity), EC.GENERAL);
@@ -232,7 +235,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	
 	public final boolean put(FP128 fp) throws IOException {
 		fp = checkValid(fp);
-		
+		fp.zeroMSB();
 		final Lock readLock = rwLock.getAt(getLockIndex(fp)).readLock();
 		readLock.lock();
 		// First, look in in-memory buffer
@@ -378,6 +381,16 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			}
 			return !success;
 		}
+	}
+	
+
+	private FP128 getFP128(long i) {
+		// 0 -> 0
+		// 1 -> 2
+		// 2 -> 4
+		// 3 -> 6
+		long position = i * 2;
+		return getFP128(position, 0);
 	}
 	
 	private FP128 getFP128(long position, int index) {
@@ -733,7 +746,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			// and use the element read from the collision set (remove element from cs too).
 			if (!cs.isEmpty()) {
 				FP128 first = cs.first();
-				if (result.compareTo(first) == 1 || result == null) {
+				if (result == null || result.compareTo(first) == 1) {
 					cs.remove(first);
 					cache = result;
 					result = first;
@@ -889,6 +902,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		boolean contains(FP128 fp);
 
 		long size();
+
+		Iterator<FP128> iterator();
 	}
 	
 	public class TreeSetCollisionBucket implements CollisionBucket {
@@ -898,6 +913,13 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			this.set = new TreeSet<FP128>();
 		}
 
+		/* (non-Javadoc)
+		 * @see tlc2.tool.fp.fp128.OffHeapDiskFPSet.CollisionBucket#iterator()
+		 */
+		public Iterator<FP128> iterator() {
+			return this.set.iterator();
+		}
+		
 		/* (non-Javadoc)
 		 * @see tlc2.tool.fp.OffHeapDiskFPSet.CollisionBucket#clear()
 		 */
@@ -963,5 +985,44 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		public long size() {
 			return set.size();
 		}
+	}
+
+	public String printContent() throws IOException {
+		
+		// primary memory buffer
+		String res = "=== Mem ===\n";
+		for(long i = 0; i < maxTblCnt; i++) {
+			FP128 fp128 = getFP128(i);
+			if (fp128 != null) {
+				res += i + ": " + fp128.toString() + "\n"; 
+			}
+		}
+		
+		// collision bucket
+		res += "=== CS ===\n";
+		final Iterator<FP128> itr = collisionBucket.iterator();
+		int i = 0;
+		while (itr.hasNext()) {
+			FP128 next = itr.next();
+			res += i++ + ": " + next.toString() + "\n"; 
+		}
+		
+		// Disk
+		res += "=== Disk ===\n";
+		final RandomAccessFile braf = new BufferedRandomAccessFile(
+				this.fpFilename, "r");
+		try {
+			if (braf.length() > 0) {
+				i = 0;
+				while (braf.getFilePointer() < braf.length()) {
+					Fingerprint fp = instance.newFingerprint(braf);
+					res += i++ + ": " + fp.toString() + "\n"; 
+				}
+			}
+		} finally {
+			braf.close();
+		}
+		
+		return res;
 	}
 }
