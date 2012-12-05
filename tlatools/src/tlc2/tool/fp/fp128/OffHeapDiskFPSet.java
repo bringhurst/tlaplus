@@ -853,9 +853,9 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			// Reverse the current bucket to obtain last element (More elegantly
 			// this could be achieved recursively, but this can cause a
 			// stack overflow).
-			// With 128bit fingerprints, that we correctly index the last
+			// With 128bit fingerprints, we correctly index the last
 			// fingerprint slot, meaning we reduce the bucketCap by 2 (instead
-			// of 1 with 64bit fps).
+			// of 1 compared to 64bit fps).
 			FP128 l = null;
 			while ((l = getFP128(logicalPosition-- + bucketCapacity - 2, 0)) == null || l.isOnDisk()) {
 				sortNextBucket();
