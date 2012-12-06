@@ -291,11 +291,11 @@ public class FP128 extends Fingerprint {
 	public int compareTo(final Fingerprint other) {
 		if (other instanceof FP128) {
 			FP128 fp = (FP128) other;
-			int compareTo = Long.valueOf(IrredPolyLower).compareTo(fp.IrredPolyLower);
+			int compareTo = Long.valueOf(IrredPolyHigher).compareTo(fp.IrredPolyHigher);
 			if (compareTo != 0) {
 				return compareTo;
 			} else {
-				return Long.valueOf(IrredPolyHigher).compareTo(fp.IrredPolyHigher);
+				return Long.valueOf(IrredPolyLower).compareTo(fp.IrredPolyLower);
 			}
 		} 
 		throw new IllegalArgumentException(); 
