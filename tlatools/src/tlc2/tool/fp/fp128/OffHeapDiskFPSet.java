@@ -677,8 +677,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			}
 			
 			// hand out strictly monotonic increasing elements
-			if(previous != null) {
-				Assert.check(previous.compareTo(result) == -1, EC.GENERAL,
+			if(previous != null && previous.compareTo(result) != -1) {
+				Assert.fail(EC.GENERAL,
 						new String[] { previous.toString(), result.toString() });
 			}
 			previous = result;
