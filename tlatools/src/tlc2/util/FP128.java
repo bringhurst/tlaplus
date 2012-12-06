@@ -306,8 +306,8 @@ public class FP128 extends Fingerprint {
 	 */
 	@Override
 	public String toString() {
-		return "FP128 [IrredPolyLower=" + IrredPolyLower + ", IrredPolyHigher="
-				+ IrredPolyHigher + "]";
+		return "FP128 [IrredPolyLower=" + IrredPolyLower + " (" +Long.toBinaryString(IrredPolyLower) + "), IrredPolyHigher="
+				+ IrredPolyHigher + " (" + Long.toBinaryString(IrredPolyHigher) + ")]";
 	}
 
 	/* (non-Javadoc)
@@ -357,6 +357,11 @@ public class FP128 extends Fingerprint {
 
 	public void setIsOnDisk() {
 		this.onDisk = true;
+	}
+
+	public FP128 zeroMSB() {
+		IrredPolyHigher = IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL;
+		return this;
 	}
 	
 	public long getLower() {
