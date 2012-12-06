@@ -11,10 +11,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
 
 import sun.misc.Unsafe;
 import tlc2.output.EC;
@@ -24,7 +22,6 @@ import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.FPSetStatistic;
 import tlc2.tool.fp.LSBDiskFPSet;
 import tlc2.tool.fp.MSBDiskFPSet;
-import tlc2.tool.fp.management.DiskFPSetMXWrapper;
 import tlc2.util.BufferedRandomAccessFile;
 import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
@@ -233,81 +230,6 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		return this.indexer.getLockIndex(fp);
 	}
 	
-	public final boolean put(FP128 fp) throws IOException {
-		fp = checkValid(fp);
-		fp.zeroMSB();
-		final Lock readLock = rwLock.getAt(getLockIndex(fp)).readLock();
-		readLock.lock();
-		// First, look in in-memory buffer
-		if (this.memLookup(fp)) {
-			readLock.unlock();
-			this.memHitCnt.getAndIncrement();
-			return true;
-		}
-		
-		// blocks => wait() if disk is being re-written 
-		// (means the current thread returns rwLock monitor)
-		// Why not return monitor first and then acquire read lock?
-		// => prevent deadlock by acquiring threads in same order? 
-		
-		// next, look on disk
-		boolean diskHit = this.diskLookup(fp);
-		
-		// In event of disk hit, return
-		if (diskHit) {
-			readLock.unlock();
-			this.diskHitCnt.getAndIncrement();
-			return true;
-		}
-		
-		readLock.unlock();
-		
-		// Another writer could write the same fingerprint here if it gets
-		// interleaved. This is no problem though, because memInsert again
-		// checks existence for fp to be inserted
-		
-		final Lock w = rwLock.getAt(getLockIndex(fp)).writeLock();
-		w.lock();
-		
-		// if disk lookup failed, add to memory buffer
-		if (this.memInsert(fp)) {
-			w.unlock();
-			this.memHitCnt.getAndIncrement();
-			return true;
-		}
-		
-		// test if buffer is full && block until there are no more readers 
-		if (needsDiskFlush() && this.flusherChosen.compareAndSet(false, true)) {
-			
-			// statistics
-			growDiskMark++;
-			long timestamp = System.currentTimeMillis();
-			
-			// acquire _all_ write locks
-			rwLock.acquireAllLocks();
-			
-			// flush memory entries to disk
-			flusher.flushTable();
-			
-			// release _all_ write locks
-			rwLock.releaseAllLocks();
-			
-			// reset forceFlush to false
-			forceFlush = false;
-			
-			// finish writing
-			this.flusherChosen.set(false);
-
-			long l = System.currentTimeMillis() - timestamp;
-			flushTime += l;
-			
-			LOGGER.log(Level.FINE, "Flushed disk {0} {1}. tine, in {2} sec", new Object[] {
-					((DiskFPSetMXWrapper) diskFPSetMXWrapper).getObjectName(), getGrowDiskMark(), l});
-		}
-		w.unlock();
-		return false;
-	}
-
 	/* (non-Javadoc)
 	 * @see tlc2.tool.fp.DiskFPSet#memLookup(FP128)
 	 */
@@ -382,15 +304,9 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			return !success;
 		}
 	}
-	
 
-	private FP128 getFP128(long i) {
-		// 0 -> 0
-		// 1 -> 2
-		// 2 -> 4
-		// 3 -> 6
-		long position = i * 2;
-		return getFP128(position, 0);
+	private FP128 getFP128(long index) {
+		return getFP128(index * 2, 0);
 	}
 	
 	private FP128 getFP128(long position, int index) {
@@ -761,7 +677,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			
 			// hand out strictly monotonic increasing elements
 			if(previous != null) {
-				Assert.check(previous.compareTo(result) == -1, EC.GENERAL);
+				Assert.check(previous.compareTo(result) == -1, EC.GENERAL,
+						new String[] { previous.toString(), result.toString() });
 			}
 			previous = result;
 			
