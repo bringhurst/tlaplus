@@ -401,8 +401,9 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		}
 		
 		public int getLockIndex(final FP128 fp) {
-			// TODO Auto-generated method stub
-			return 0;
+			final long idx = (fp.getHigher() & prefixMask) >> lockMoveBy;
+			Assert.check(0 <= idx && idx < lockCnt, EC.GENERAL);
+			return (int) idx;
 		}
 
 		public long getLogicalPosition(final FP128 fp) {
