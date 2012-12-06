@@ -144,7 +144,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 	protected static final int InitialBucketCapacity = (1 << LogMaxLoad);
 
 	/* Number of fingerprints per braf buffer. */
-	public static final int NumEntriesPerPage = 8192 / (2 * LongSize);
+	public static final int NumEntriesPerPage = 8192 / FP128.BYTES;
 	
 	/**
 	 * This is (assumed to be) the auxiliary storage for a fingerprint that need
@@ -596,7 +596,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 				
 				// midEntry calculation done on logical indices,
 				// addressing done on bytes, thus convert to long-addressing (* LongSize)
-				long address = midEntry * (2 * LongSize);
+				long address = midEntry * FP128.BYTES;
 				
 				if (raf.seeek(address)) {
 					diskSeekCnt.getAndIncrement();
@@ -627,7 +627,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 				}
 			}
 		} catch (IOException e) {
-			if(midEntry * LongSize < 0) {
+			if(midEntry * FP128.BYTES < 0) {
 			 // LL modified error message on 7 April 2012
 				MP.printError(EC.GENERAL, new String[]{"looking up a fingerprint"}, e);
 			}
@@ -791,7 +791,7 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 		RandomAccessFile currRAF = new BufferedRandomAccessFile(
 				this.fpFilename, "rw");
 
-		this.fileCnt = chkptRAF.length() / (2 * LongSize);
+		this.fileCnt = chkptRAF.length() / FP128.BYTES;
 		int indexLen = (int) ((this.fileCnt - 1) / NumEntriesPerPage) + 2;
 		this.index = new FP128[indexLen];
 		this.currIndex = 0;

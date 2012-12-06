@@ -158,11 +158,11 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			}
 			
 			// Extra memory that cannot be addressed by BitshiftingIndexer
-			final long extraMem = (memoryInFingerprintCnt * (2*LongSize)) - (long) Math.pow(2, cnt);
+			final long extraMem = (memoryInFingerprintCnt * FP128.BYTES) - (long) Math.pow(2, cnt);
 			
 			// Divide extra memory across addressable buckets
 			int x = (int) (extraMem / ((n + 1) / InitialBucketCapacity));
-			bucketCapacity = InitialBucketCapacity + (x / (2*LongSize)) ;
+			bucketCapacity = InitialBucketCapacity + (x / FP128.BYTES) ;
 			// Twice InitialBucketCapacity would mean we could have used one
 			// more bit for addressing.
 			Assert.check(bucketCapacity < (2 * InitialBucketCapacity), EC.GENERAL);
@@ -177,9 +177,9 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	 */
 	public long sizeof() {
 		long size = 44; // approx size of this DiskFPSet object
-		size += maxTblCnt * (long) LongSize;
+		size += maxTblCnt * (long) FP128.BYTES;
 		size += getIndexCapacity() * 4;
-		size += getCollisionBucketCnt() * (long) LongSize; // ignoring the internal TreeSet overhead here
+		size += getCollisionBucketCnt() * (long) FP128.BYTES; // ignoring the internal TreeSet overhead here
 		return size;
 	}
 

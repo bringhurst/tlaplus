@@ -184,6 +184,8 @@ public class FP128 extends Fingerprint {
 			0xa3cd71299c8b3bfdL, 0x845b8031ef886f35L, 0x91f5a5fa9c5515a5L };
 
 	public static final int numPolys = Polys.length;
+
+	public static final int BYTES = 16; // 16 * 8 = 128bit
 	
 	/*
 	 * This is the table used for computing fingerprints. The ByteModTable could
