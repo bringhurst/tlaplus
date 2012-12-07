@@ -296,14 +296,21 @@ public class FP128 extends Fingerprint {
 	public int compareTo(final Fingerprint other) {
 		if (other instanceof FP128) {
 			FP128 fp = (FP128) other;
-			int compareTo = Long.compare(IrredPolyHigher, fp.IrredPolyHigher);
+			int compareTo = /*Long.*/compare(IrredPolyHigher, fp.IrredPolyHigher);
 			if (compareTo != 0) {
 				return compareTo;
 			} else {
-				return Long.compare(IrredPolyLower, fp.IrredPolyLower);
+				return /*Long.*/compare(IrredPolyLower, fp.IrredPolyLower);
 			}
 		} 
 		throw new IllegalArgumentException(); 
+	}
+	
+	/**
+	 * @see Long#compare(long, long) in Java 1.7
+	 */
+	private int compare(long x, long y) {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
 	}
 	
 	/* (non-Javadoc)
