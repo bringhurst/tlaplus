@@ -187,8 +187,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	 */
 	protected boolean needsDiskFlush() {
 		// Only flush due to collision ratio when primary hash table is at least
-		// 25% full. Otherwise a second flush potentially immediately follows a
-		// first one, when both values for tblCnt and collision size can be small.
+		// 25% full. Otherwise a second flush potentially follows a
+		// first one immediately, iff both values for tblCnt and collision size happen to be small.
 		return (collisionRatioExceeds(COLLISION_BUCKET_RATIO) && loadFactorExceeds(.25d)) 
 				|| loadFactorExceeds(1d) || forceFlush;
 	}
