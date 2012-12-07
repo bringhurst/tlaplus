@@ -63,7 +63,7 @@ public abstract class MultiThreadedFPSetTest extends AbstractFPSetTest {
 	 * @throws IllegalArgumentException
 	 * @throws InvocationTargetException
 	 */
-	private void doTest(Class<? extends FingerPrintGenerator> fpgClass) throws IOException, InterruptedException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	protected void doTest(Class<? extends FingerPrintGenerator> fpgClass) throws IOException, InterruptedException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		final FPSet fpSet = getFPSetInitialized(NUM_THREADS);
 		final CountDownLatch latch = new CountDownLatch(NUM_THREADS);
 
