@@ -73,7 +73,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	 * 
 	 * <p>
 	 * Open addressing - contrary to separate chaining - is not an option for an
-	 * {@link OffHeapDiskFPSetTest}, because it does not support the invariant of
+	 * {@link OffHeapDiskFPSet}, because it does not support the invariant of
 	 * monotonic increasing buckets required by the {@link Indexer}. Adhering to
 	 * this invariant has the benefit, that only the elements in a bucket have
 	 * to be sorted, but they don't change buckets during sort. Thus, a
@@ -251,7 +251,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	}
 	
 	/**
-	 * Probes {@link OffHeapDiskFPSetTest#collisionBucket} for the given fingerprint.
+	 * Probes {@link OffHeapDiskFPSet#collisionBucket} for the given fingerprint.
 	 * @param fp
 	 * @return true iff fp is in the collision bucket
 	 */
@@ -318,7 +318,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	}
 
 	/**
-	 * Inserts the given fingerprint into the {@link OffHeapDiskFPSetTest#collisionBucket}.
+	 * Inserts the given fingerprint into the {@link OffHeapDiskFPSet#collisionBucket}.
 	 * @param fp
 	 * @return true iff fp has been added to the collision bucket
 	 */
