@@ -1,11 +1,13 @@
 // Copyright (c) 2012 Markus Alexander Kuppe. All rights reserved.
 package tlc2.tool.fp.fp128;
 
+import java.io.File;
 import java.io.IOException;
 
 import junit.framework.TestCase;
 import tlc2.tool.fp.DummyFP128;
 import tlc2.tool.fp.FPSetConfiguration;
+import tlc2.util.BufferedRandomAccessFile;
 import tlc2.util.FP128;
 
 public class ShortOffHeapDiskFPSetTest extends TestCase {
@@ -165,6 +167,32 @@ public class ShortOffHeapDiskFPSetTest extends TestCase {
 		// Check that we have found all elements and that those are _all_
 		// elements in the set
 		assertEquals(fp128Cnt, fpSet.size());
+	}
+	
+	public void testGetLast() throws IOException {
+		final OffHeapDiskFPSet fpSet = new OffHeapDiskFPSet(new FPSetConfiguration(1.0d));
+
+		final String filename = System.currentTimeMillis() + "TestGetLast.fp";
+		final String metaDir = System.getProperty("java.io.tmpdir");
+		fpSet.init(1, metaDir, filename);
+		
+		// Cause the subsequent put to immediately flush to disk
+		fpSet.forceFlush();
+		
+		// Add a single fp which is going to be assigned to the highest hash bucket
+		final FP128 fp = new DummyFP128(Long.MAX_VALUE, Long.MAX_VALUE);
+		assertFalse(fpSet.put(fp));
+		
+		assertTrue(fpSet.contains(fp));
+		
+		final BufferedRandomAccessFile raf = new BufferedRandomAccessFile(new File(
+				metaDir + File.separator + filename + ".fp"), "r");
+		try {
+			FP128 fingerprint = (FP128) FP128.Factory.getInstance().newFingerprint(raf);
+			assertEquals(fp, fingerprint);
+		} finally {
+			raf.close();
+		}
 	}
 	
 	@SuppressWarnings("serial")
