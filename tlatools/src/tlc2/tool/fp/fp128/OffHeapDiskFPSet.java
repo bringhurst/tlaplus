@@ -7,12 +7,20 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.nio.LongBuffer;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 
 import sun.misc.Unsafe;
 import tlc2.output.EC;
@@ -27,6 +35,10 @@ import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import util.Assert;
 
+/**
+ * @author kuppe
+ *
+ */
 @SuppressWarnings({ "serial", "restriction" })
 public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	
@@ -111,14 +123,6 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		
 		baseAddress = u.allocateMemory(bytes);
 		
-		// Null memory (could be done in parallel on segments when bottleneck).
-		// This is essential as allocateMemory returns uninitialized memory and
-		// memInsert/memLockup utilize 0L as a mark for an unused fingerprint slot.
-		// Otherwise memory garbage wouldn't be distinguishable from a true fp.
-		for (long i = 0; i < memoryInFingerprintCnt * 2; i++) {
-			u.putAddress(log2phy(i), 0L);
-		}
-
 		final int csCapacity = (int) (maxTblCnt * COLLISION_BUCKET_RATIO);
 		this.collisionBucket = new TreeSetCollisionBucket(csCapacity);
 		
@@ -169,6 +173,56 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 
 			// non 2^n buckets cannot use a bit shifting indexer
 			this.indexer = new Indexer(moveBy, fpSetConfig.getPrefixBits());
+		}
+
+		LOGGER.log(
+				Level.FINEST,
+				"Allocated FP128OffHeapDiskFPSet with {3}, prefixLengh={4}, bucketCapacity={5}, bucketCnt={6} for {2} fps ({1} bytes) with base address {0}",
+				new Object[] { baseAddress, bytes, memoryInFingerprintCnt,
+						bitCount == 1 ? "BitShitingIndexer" : "ModIndexer",
+						Long.SIZE - moveBy, bucketCapacity,
+						maxTblCnt / bucketCapacity });
+	}
+	
+	public void init(int numThreads, String aMetadir, String filename)
+			throws IOException {
+		super.init(numThreads, aMetadir, filename);
+		
+		// Calculate segment size
+		final long fps = fpSetConfig.getMemoryInFingerprintCnt() * 2;
+		final long segmentSize = fps / numThreads;
+
+		final ExecutorService es = Executors.newFixedThreadPool(numThreads);
+		try {
+			final Collection<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>(numThreads);
+			for (int i = 0; i < numThreads; i++) {
+				final int offset = i;
+				tasks.add(new Callable<Boolean>() {
+
+					public Boolean call() throws Exception {
+						// Null memory (done in parallel on segments).
+						// This is essential as allocateMemory returns
+						// uninitialized memory and
+						// memInsert/memLockup utilize 0L as a mark for an
+						// unused fingerprint slot.
+						// Otherwise memory garbage wouldn't be distinguishable
+						// from a true fp.
+						final long lowerBound = segmentSize * offset;
+						final long upperBound = (1 + offset) * segmentSize;
+						for (long i = lowerBound; i < upperBound; i++) {
+							u.putAddress(log2phy(i), 0L);
+						}
+						return true;
+					}
+				});
+			}
+			final List<Future<Boolean>> invokeAll = es.invokeAll(tasks);
+			Assert.check(!invokeAll.isEmpty(), EC.GENERAL);
+		} catch (InterruptedException e) {
+			// not expected to happen
+			e.printStackTrace();
+		} finally {
+			es.shutdown();
 		}
 	}
 

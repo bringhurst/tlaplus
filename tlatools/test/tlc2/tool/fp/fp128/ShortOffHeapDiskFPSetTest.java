@@ -174,7 +174,7 @@ public class ShortOffHeapDiskFPSetTest extends TestCase {
 
 		final String filename = System.currentTimeMillis() + "TestGetLast.fp";
 		final String metaDir = System.getProperty("java.io.tmpdir");
-		fpSet.init(1, metaDir, filename);
+		fpSet.init(Runtime.getRuntime().availableProcessors(), metaDir, filename);
 		
 		// Cause the subsequent put to immediately flush to disk
 		fpSet.forceFlush();
@@ -182,9 +182,9 @@ public class ShortOffHeapDiskFPSetTest extends TestCase {
 		// Add a single fp which is going to be assigned to the highest hash bucket
 		final FP128 fp = new DummyFP128(Long.MAX_VALUE, Long.MAX_VALUE);
 		assertFalse(fpSet.put(fp));
-		
 		assertTrue(fpSet.contains(fp));
-		
+
+		// Verify by reading the disk store
 		final BufferedRandomAccessFile raf = new BufferedRandomAccessFile(new File(
 				metaDir + File.separator + filename + ".fp"), "r");
 		try {
