@@ -1,16 +1,18 @@
 // Copyright (c) 2012 Markus Alexander Kuppe. All rights reserved.
-package tlc2.tool.fp;
+package tlc2.tool.fp.fp128;
 
 import java.io.IOException;
 
 import junit.framework.TestCase;
+import tlc2.tool.fp.DummyFP128;
+import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.util.FP128;
 
 public class FP128BloomFilterFPSetTest extends TestCase {
 
 	
 	/**
-	 * Test method for {@link tlc2.tool.fp.FP128BloomFilterFPSet#put(tlc2.util.Fingerprint)}.
+	 * Test method for {@link tlc2.tool.fp.fp128.FP128BloomFilterFPSet#put(tlc2.util.Fingerprint)}.
 	 * @throws IOException 
 	 */
 	public void testPutFingerprint() throws IOException {
@@ -33,7 +35,7 @@ public class FP128BloomFilterFPSetTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link tlc2.tool.fp.FP128BloomFilterFPSet#contains(tlc2.util.Fingerprint)}.
+	 * Test method for {@link tlc2.tool.fp.fp128.FP128BloomFilterFPSet#contains(tlc2.util.Fingerprint)}.
 	 */
 	public void testContainsFingerprint() {
 		fail("Not yet implemented");

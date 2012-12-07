@@ -1,11 +1,13 @@
 // Copyright (c) 2012 Markus Alexander Kuppe. All rights reserved.
-package tlc2.tool.fp;
+package tlc2.tool.fp.fp128;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import tlc2.tool.fp.FPSetConfiguration;
+import tlc2.tool.fp.NoBackupFP128FPSet;
 import tlc2.util.BitVector;
 import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
