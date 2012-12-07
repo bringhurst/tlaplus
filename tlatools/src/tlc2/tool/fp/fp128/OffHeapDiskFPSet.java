@@ -4,20 +4,12 @@ package tlc2.tool.fp.fp128;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.Field;
 import java.nio.LongBuffer;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
@@ -30,6 +22,7 @@ import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.FPSetStatistic;
 import tlc2.tool.fp.LSBDiskFPSet;
 import tlc2.tool.fp.MSBDiskFPSet;
+import tlc2.tool.fp.OffHeapDiskFPSetHelper;
 import tlc2.util.BufferedRandomAccessFile;
 import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
@@ -44,18 +37,6 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	
 	protected static final double COLLISION_BUCKET_RATIO = .025d;
 
-	private static sun.misc.Unsafe getUnsafe() {
-		try {
-			final Field f = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-			f.setAccessible(true);
-			return (sun.misc.Unsafe) f.get(null);
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"Trying to use Sun VM specific sun.misc.Unsafe implementation but no Sun based VM detected.",
-					e);
-		}
-	}
-	
 	protected final int bucketCapacity;
 
 	/**
@@ -108,7 +89,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		final long memoryInFingerprintCnt = fpSetConfig.getMemoryInFingerprintCnt();
 		
 		// Determine base address which varies depending on machine architecture.
-		u = getUnsafe();
+		u = OffHeapDiskFPSetHelper.getUnsafe();
 		int addressSize = u.addressSize();
 		int cnt = -1;
 		while (addressSize > 0) {
@@ -187,43 +168,7 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 	public void init(int numThreads, String aMetadir, String filename)
 			throws IOException {
 		super.init(numThreads, aMetadir, filename);
-		
-		// Calculate segment size
-		final long fps = fpSetConfig.getMemoryInFingerprintCnt() * 2;
-		final long segmentSize = fps / numThreads;
-
-		final ExecutorService es = Executors.newFixedThreadPool(numThreads);
-		try {
-			final Collection<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>(numThreads);
-			for (int i = 0; i < numThreads; i++) {
-				final int offset = i;
-				tasks.add(new Callable<Boolean>() {
-
-					public Boolean call() throws Exception {
-						// Null memory (done in parallel on segments).
-						// This is essential as allocateMemory returns
-						// uninitialized memory and
-						// memInsert/memLockup utilize 0L as a mark for an
-						// unused fingerprint slot.
-						// Otherwise memory garbage wouldn't be distinguishable
-						// from a true fp.
-						final long lowerBound = segmentSize * offset;
-						final long upperBound = (1 + offset) * segmentSize;
-						for (long i = lowerBound; i < upperBound; i++) {
-							u.putAddress(log2phy(i), 0L);
-						}
-						return true;
-					}
-				});
-			}
-			final List<Future<Boolean>> invokeAll = es.invokeAll(tasks);
-			Assert.check(!invokeAll.isEmpty(), EC.GENERAL);
-		} catch (InterruptedException e) {
-			// not expected to happen
-			e.printStackTrace();
-		} finally {
-			es.shutdown();
-		}
+		OffHeapDiskFPSetHelper.zeroMemory(u, baseAddress, numThreads, fpSetConfig.getMemoryInFingerprintCnt() * 2);
 	}
 
 	/* (non-Javadoc)
