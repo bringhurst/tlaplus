@@ -588,11 +588,13 @@ public abstract class FP128DiskFPSet extends NoBackupFP128FPSet implements FPSet
 				 */
 				midEntry = calculateMidEntry(loVal.getHigher(), hiVal.getHigher(), dfp, loEntry, hiEntry);
 				
-				Assert.check(
-						loEntry <= midEntry && midEntry < hiEntry,
-						EC.SYSTEM_INDEX_ERROR,
-						new String[] { Long.toString(loEntry),
-								Long.toString(midEntry), Long.toString(hiEntry) });
+				if (!(loEntry <= midEntry && midEntry < hiEntry)) {
+					// Avoid instantiation of Longs for every fingerprint
+					Assert.fail(
+							EC.SYSTEM_INDEX_ERROR,
+							new String[] { Long.toString(loEntry),
+									Long.toString(midEntry), Long.toString(hiEntry) });
+				}
 				
 				// midEntry calculation done on logical indices,
 				// addressing done on bytes, thus convert to long-addressing (* LongSize)
