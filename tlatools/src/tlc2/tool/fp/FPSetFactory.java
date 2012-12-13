@@ -19,7 +19,9 @@ public abstract class FPSetFactory {
 	public static final String IMPL_PROPERTY = FPSet.class.getName() + ".impl";
 	
 	private static boolean allocatesOnHeap(final Class<? extends FPSet> clazz) {
-		return !OffHeapDiskFPSet.class.isAssignableFrom(clazz);
+		return !OffHeapDiskFPSet.class.isAssignableFrom(clazz)
+				&& !tlc2.tool.fp.fp128.OffHeapDiskFPSet.class
+						.isAssignableFrom(clazz);
 	}
 
 	static boolean allocatesOnHeap(final String clazz) {
