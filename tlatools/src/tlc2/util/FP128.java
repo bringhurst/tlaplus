@@ -13,7 +13,7 @@ import sun.misc.Unsafe;
  * 
  * Written by Allan Heydon and Marc Najork.
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction", "serial" })
 public class FP128 extends Fingerprint {
 
 	public static class Factory extends FPFactory {
@@ -296,14 +296,17 @@ public class FP128 extends Fingerprint {
 	public int compareTo(final Fingerprint other) {
 		if (other instanceof FP128) {
 			FP128 fp = (FP128) other;
-			int compareTo = /*Long.*/compare(IrredPolyHigher, fp.IrredPolyHigher);
+			// zero msb of higher part which is 1 or 0 depending on disk state
+			int compareTo = /* Long. */compare(
+					IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL,
+					fp.IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL);
 			if (compareTo != 0) {
 				return compareTo;
 			} else {
-				return /*Long.*/compare(IrredPolyLower, fp.IrredPolyLower);
+				return /* Long. */compare(IrredPolyLower, fp.IrredPolyLower);
 			}
-		} 
-		throw new IllegalArgumentException(); 
+		}
+		throw new IllegalArgumentException();
 	}
 	
 	/**
@@ -318,7 +321,7 @@ public class FP128 extends Fingerprint {
 	 */
 	@Override
 	public String toString() {
-		return "FP128 [IrredPolyLower=" + IrredPolyLower + " (" +Long.toBinaryString(IrredPolyLower) + "), IrredPolyHigher="
+		return "FP128 " + (isOnDisk() == true ? "(disk) " : "") + "[IrredPolyLower=" + IrredPolyLower + " (" +Long.toBinaryString(IrredPolyLower) + "), IrredPolyHigher="
 				+ IrredPolyHigher + " (" + Long.toBinaryString(IrredPolyHigher) + ")]";
 	}
 
@@ -332,7 +335,6 @@ public class FP128 extends Fingerprint {
 	private Fingerprint read(final java.io.RandomAccessFile raf) throws IOException {
 		IrredPolyLower = raf.readLong();
 		IrredPolyHigher = raf.readLong();
-		onDisk = true;
 		return this;
 	}
 
@@ -356,19 +358,17 @@ public class FP128 extends Fingerprint {
 		return IrredPolyLower ^ IrredPolyHigher;
 //		throw new UnsupportedOperationException("Not applicable for 128bit fingerprints");
 	}
-	
-	//TDOO implement once flushing to disk is supported
-	private boolean onDisk = false;
 
 	public boolean isOnDisk()  {
-		// onDisk state could be saved in OffHeapDiskFPSet. The upper n bits
-		// used for indexing into the hash table can easily be recovered from
-		// the index in which the fingerprint is found.
-		return onDisk;
+		if ((IrredPolyHigher & 0x8000000000000000L) < 0) {
+			return true;
+		}
+		return false;
 	}
 
 	public void setIsOnDisk() {
-		this.onDisk = true;
+		// set msb to 1 to indicate fp is on disk
+		this.IrredPolyHigher = IrredPolyHigher | 0x8000000000000000L;
 	}
 
 	public FP128 zeroMSB() {
@@ -381,22 +381,8 @@ public class FP128 extends Fingerprint {
 	}
 
 	public long getHigher() {
-		return IrredPolyHigher;
+		return IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL;
 	}
-//
-//	public static FP128 zeroMSB(Fingerprint fp) {
-//		final FP128 fp128 = (FP128) fp;
-//		fp128.IrredPolyHigher = fp128.IrredPolyHigher & 0x7FFFFFFFFFFFL;
-//		return fp128;
-//	}
-
-//	/**
-//	 * @param fp
-//	 * @return The index bits for the given fp
-//	 */
-//	public static long getIndex(FP128 fp) {
-//		return fp.IrredPolyHigher & 0x7FFFFFFFFFFFL;
-//	}
 
 	public static FP128 max(final FP128 a, final FP128 b) {
 		if (a.compareTo(b) < 0) {
