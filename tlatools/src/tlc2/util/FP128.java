@@ -262,61 +262,6 @@ public class FP128 extends Fingerprint {
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (IrredPolyHigher ^ (IrredPolyHigher >>> 32));
-		result = prime * result + (int) (IrredPolyLower ^ (IrredPolyLower >>> 32));
-		return result;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(final Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof FP128))
-			return false;
-		FP128 other = (FP128) obj;
-		if (IrredPolyHigher != other.IrredPolyHigher)
-			return false;
-		if (IrredPolyLower != other.IrredPolyLower)
-			return false;
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(final Fingerprint other) {
-		if (other instanceof FP128) {
-			FP128 fp = (FP128) other;
-			// zero msb of higher part which is 1 or 0 depending on disk state
-			int compareTo = /* Long. */compare(
-					IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL,
-					fp.IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL);
-			if (compareTo != 0) {
-				return compareTo;
-			} else {
-				return /* Long. */compare(IrredPolyLower, fp.IrredPolyLower);
-			}
-		}
-		throw new IllegalArgumentException();
-	}
-	
-	/**
-	 * @see Long#compare(long, long) in Java 1.7
-	 */
-	private int compare(long x, long y) {
-        return (x < y) ? -1 : ((x == y) ? 0 : 1);
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -383,7 +328,67 @@ public class FP128 extends Fingerprint {
 	public long getHigher() {
 		return IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (IrredPolyHigher ^ (IrredPolyHigher >>> 32));
+		result = prime * result + (int) (IrredPolyLower ^ (IrredPolyLower >>> 32));
+		return result;
+	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(final Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof FP128))
+			return false;
+		FP128 other = (FP128) obj;
+		if (IrredPolyHigher != other.IrredPolyHigher)
+			return false;
+		if (IrredPolyLower != other.IrredPolyLower)
+			return false;
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	public int compareTo(final Fingerprint other) {
+		if (other instanceof FP128) {
+			FP128 fp = (FP128) other;
+			// zero msb of higher part which is 1 or 0 depending on disk state
+			int compareTo = /* Long. */compare(
+					IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL,
+					fp.IrredPolyHigher & 0x7FFFFFFFFFFFFFFFL);
+			if (compareTo != 0) {
+				return compareTo;
+			} else {
+				return /* Long. */compare(IrredPolyLower, fp.IrredPolyLower);
+			}
+		}
+		throw new IllegalArgumentException();
+	}
+	
+	/**
+	 * @see Long#compare(long, long) in Java 1.7
+	 */
+	private int compare(long x, long y) {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+	}
+
+	/**
+	 * @param a
+	 * @param b
+	 * @return The maximum of both fingerprints.
+	 */
 	public static FP128 max(final FP128 a, final FP128 b) {
 		if (a.compareTo(b) < 0) {
 			return b;
