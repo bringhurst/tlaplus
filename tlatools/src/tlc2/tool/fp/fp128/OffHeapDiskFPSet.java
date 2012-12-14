@@ -312,7 +312,12 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		return (FP128) instance.newFingerprint(u, log2phy(position, index), log2phy(position, index+1));
 	}
 	
+	private FP128 largest = null;
+	
 	private void putFP128(long position, int index, FP128 fp) {
+		if (largest == null || largest.compareTo(fp) == -1) {
+			largest = fp;
+		}
 		fp.write(u, log2phy(position, index), log2phy(position, index+1));
 	}
 
@@ -515,6 +520,8 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		protected void flushTable() throws IOException {
 			super.flushTable();
 			
+			largest = null;
+			
 			// garbage old values in collision bucket
 			collisionBucket.clear();
 		}
@@ -529,6 +536,14 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 
 			// Precompute the maximum value of the new file
 			FP128 maxVal = itr.getLast();
+			
+			// Remove check and largest member all together once getLast() has shown to be stable.
+			// Wrap assert in if block to prevent toString from being invoked on FP128
+			if (maxVal.compareTo(largest) != 0) {
+				Assert.fail(EC.GENERAL,
+						new String[] { maxVal.toString(), largest.toString() });
+			}
+			
 			if (index != null) {
 				maxVal = FP128.max(maxVal, index[index.length - 1]);
 			}
@@ -767,14 +782,21 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 			logicalPosition = maxTblCnt - bucketCapacity;
 			sortNextBucket();
 
-			// Reverse the current bucket to obtain last element (More elegantly
-			// this could be achieved recursively, but this can cause a
-			// stack overflow).
-			// With 128bit fingerprints, we correctly index the last
-			// fingerprint slot, meaning we reduce the bucketCap by 2 (instead
-			// of 1 compared to 64bit fps).
+			/*
+			 * Reverse the current bucket from end to start to obtain last
+			 * element (More elegantly this could be achieved recursively, which
+			 * can cause a stack overflow though).
+			 * 
+			 * A bucket can be: a) empty b) full c) partially filled.
+			 * 
+			 * In case of a), the while loop skips to the next lower bucket. b)
+			 * means it will find the largest element in the last slot of the
+			 * bucket. The c) case mean it has to skip null slots until it
+			 * reaches the beginning of the bucket or an element (which is then
+			 * the largest one).
+			 */
 			FP128 l = null;
-			while ((l = getFP128(logicalPosition-- + bucketCapacity - 2, 0)) == null || l.isOnDisk()) {
+			while ((l = getFP128(logicalPosition-- + bucketCapacity)) == null) {
 				sortNextBucket();
 			}
 			
@@ -901,6 +923,13 @@ public class OffHeapDiskFPSet extends FP128DiskFPSet implements FPSetStatistic {
 		 */
 		public long size() {
 			return set.size();
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		public String toString() {
+			return set.toString();
 		}
 	}
 
