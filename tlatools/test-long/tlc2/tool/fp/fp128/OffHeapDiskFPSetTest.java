@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import tlc2.tool.fp.DummyFP128;
 import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.util.FP128;
+import tlc2.util.Fingerprint;
 
 public class OffHeapDiskFPSetTest extends TestCase {
 
@@ -23,6 +24,7 @@ public class OffHeapDiskFPSetTest extends TestCase {
 		// FPSet under test
 		FPSetConfiguration fpSetConfiguration = new FPSetConfiguration();
 		fpSetConfiguration.setFPImplementation(FP128.class);
+		Fingerprint.FPFactory.init(fpSetConfiguration);
 		final OffHeapDiskFPSet fpSet = new OffHeapDiskFPSet(fpSetConfiguration);
 		fpSet.init(1, System.getProperty("java.io.tmpdir"), System.currentTimeMillis() + "TestPutFP128.fp");
 		
