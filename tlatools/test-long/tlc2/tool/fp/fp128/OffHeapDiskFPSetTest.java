@@ -6,6 +6,7 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 import tlc2.tool.fp.DummyFP128;
+import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.util.FP128;
 
 public class OffHeapDiskFPSetTest extends TestCase {
@@ -20,7 +21,9 @@ public class OffHeapDiskFPSetTest extends TestCase {
 		final Random rnd = new Random(seed);
 	
 		// FPSet under test
-		final OffHeapDiskFPSet fpSet = new OffHeapDiskFPSet(new FP128SetConfiguration());
+		FPSetConfiguration fpSetConfiguration = new FPSetConfiguration();
+		fpSetConfiguration.setFPImplementation(FP128.class);
+		final OffHeapDiskFPSet fpSet = new OffHeapDiskFPSet(fpSetConfiguration);
 		fpSet.init(1, System.getProperty("java.io.tmpdir"), System.currentTimeMillis() + "TestPutFP128.fp");
 		
 		final long limit = Integer.MAX_VALUE;
@@ -41,5 +44,7 @@ public class OffHeapDiskFPSetTest extends TestCase {
 		for (long l = 0; l <limit; l++) {
 			assertTrue(fpSet.contains(new DummyFP128(rnd.nextLong(), rnd.nextLong())));
 		}
+		
+		assertTrue(fpSet.checkInvariant());
 	}
 }
