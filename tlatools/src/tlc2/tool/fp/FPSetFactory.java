@@ -9,6 +9,8 @@ import java.util.List;
 
 import tlc2.output.EC;
 import tlc2.output.MP;
+import tlc2.tool.fp.fp128.FP128MSBMultiFPSet;
+import tlc2.util.FP128;
 
 public abstract class FPSetFactory {
 
@@ -64,6 +66,9 @@ public abstract class FPSetFactory {
 				// Pass physical memory instead of logical FP count to adhere to
 				// the general FPSet ctor contract.
 				// @see http://bugzilla.tlaplus.net/show_bug.cgi?id=290
+				if (fpSetConfig.getFPImplementation().isAssignableFrom(FP128.class)) {
+					return new FP128MSBMultiFPSet(fpSetConfig);
+				}
 				return new MSBMultiFPSet(fpSetConfig);
 			} else {
 				// Pass physical memory instead of logical FP count to adhere to

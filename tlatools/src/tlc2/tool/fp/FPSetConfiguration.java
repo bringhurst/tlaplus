@@ -18,9 +18,9 @@ public class FPSetConfiguration implements Serializable {
 	protected long memoryInBytes = -1L;
 	protected double ratio;
 	protected String setImplementation;
-	private int fpSize = FPSet.LongSize;
-	private int fpIndex = 0;
-	private Class<? extends Fingerprint> fpImplementation = FP64.class;
+	protected int fpSize = FPSet.LongSize;
+	protected int fpIndex = 0;
+	protected Class<? extends Fingerprint> fpImplementation = FP64.class;
 
 	public FPSetConfiguration() {
 		// By default allocate 25% of memory for fingerprint storage

@@ -11,6 +11,10 @@ class MultiFPSetConfiguration extends FPSetConfiguration {
 		// Set wrapper to values of config to be wrapped
 		this.fpBits = fpSetConfig.getFpBits();
 		this.ratio = fpSetConfig.getRatio();
+		
+		this.fpImplementation = fpSetConfig.fpImplementation;
+		this.fpIndex = fpSetConfig.fpIndex;
+		this.setImplementation = fpSetConfig.setImplementation;
 	}
 
 	/* (non-Javadoc)

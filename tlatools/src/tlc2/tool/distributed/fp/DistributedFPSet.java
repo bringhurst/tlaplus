@@ -18,6 +18,7 @@ import tlc2.tool.fp.FPSet;
 import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.FPSetFactory;
 import tlc2.tool.fp.MultiFPSet;
+import tlc2.util.Fingerprint;
 import util.ToolIO;
 
 public class DistributedFPSet  {
@@ -51,8 +52,11 @@ public class DistributedFPSet  {
 			}
 			
 			// Initialize this FPSet with n-prefix bits and m mask bits
-			final FPSetConfiguration fpSetConfiguration = new FPSetConfiguration(1.0d);
+			final FPSetConfiguration fpSetConfiguration = tlcServer.getFPConfig();
 			fpSetConfiguration.setFpBits(1 + prefixBits);
+			
+			Fingerprint.FPFactory.init(fpSetConfiguration);
+			
 			final FPSet fpSet = FPSetFactory.getFPSet(fpSetConfiguration);
 			final String filename = "FPSet" + System.currentTimeMillis();
 			fpSet.init(1,metadir,filename);
