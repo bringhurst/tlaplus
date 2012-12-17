@@ -25,6 +25,7 @@ import tla2sany.semantic.ThmOrAssumpDefNode;
 import tlc2.TLCGlobals;
 import tlc2.output.EC;
 import tlc2.output.MP;
+import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.util.Context;
 import tlc2.util.Fingerprint;
 import tlc2.util.Vect;
@@ -87,11 +88,14 @@ public class Tool
    * @param specFile
    * @param configFile
    */
-  public Tool(String specDir, String specFile, String configFile, FilenameToStream resolver) 
+  public Tool(String specDir, String specFile, String configFile, FilenameToStream resolver, FPSetConfiguration fpConfig) 
   {
       super(specDir, specFile, configFile, resolver);
       this.actions = null;
       this.callStack = null;
+      
+      // Setup Fingerprint factory to hand out either 64 or 128 bit fingerprints
+      Fingerprint.FPFactory.init(fpConfig);
   }
 
   /**
@@ -100,7 +104,7 @@ public class Tool
    */
   public final void init(boolean preprocess, SpecObj spec) 
   {
-      
+
       // Parse and process this spec. 
       // It takes care of all overrides.
       // SZ Feb 20, 2009: added spec reference,

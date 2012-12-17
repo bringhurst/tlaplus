@@ -19,6 +19,7 @@ import tlc2.tool.fp.FPSetFactory;
 import tlc2.tool.liveness.LiveCheck;
 import tlc2.tool.queue.DiskStateQueue;
 import tlc2.tool.queue.IStateQueue;
+import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import tlc2.util.IdThread;
 import tlc2.util.LongVec;
@@ -55,17 +56,17 @@ public class ModelChecker extends AbstractChecker
      * @param specObj external SpecObj added to enable to work on existing specification 
      * Modified on 6 Apr 2010 by Yuan Yu to add fpMemSize parameter.
      */
-    public ModelChecker(String specFile, String configFile, String dumpFile, boolean deadlock, String fromChkpt,
-            FilenameToStream resolver, SpecObj specObj, final FPSetConfiguration fpSetConfig) throws EvalException, IOException
-    {
+	public ModelChecker(String specFile, String configFile, String dumpFile,
+			boolean deadlock, String fromChkpt, FilenameToStream resolver,
+			SpecObj specObj, final FPSetConfiguration fpSetConfig) throws EvalException,
+			IOException    {
         // call the abstract constructor
-        super(specFile, configFile, dumpFile, deadlock, fromChkpt, true, resolver, specObj);
+        super(specFile, configFile, dumpFile, deadlock, fromChkpt, true, resolver, specObj, fpSetConfig);
 
         // SZ Feb 20, 2009: this is a selected alternative
         this.theStateQueue = new DiskStateQueue(this.metadir);
         // this.theStateQueue = new MemStateQueue(this.metadir);
-
-        //TODO why used to div by 20?
+        
 		this.theFPSet = FPSetFactory.getFPSet(fpSetConfig);
 
         // initialize the set

@@ -36,7 +36,6 @@ import tlc2.tool.WorkerException;
 import tlc2.tool.distributed.fp.IFPSetManager;
 import tlc2.util.BitVector;
 import tlc2.util.Cache;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import tlc2.util.SimpleCache;
 import util.ToolIO;
@@ -319,9 +318,6 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 				}
 			}
 
-			int irredPolyIdx = server.getIrredPolyForFP();
-			FP128.Init(irredPolyIdx);
-
 			// this call has to be made before the first UniqueString gets
 			// created! Otherwise workers and server end up creating different
 			// unique strings for the same String value.
@@ -334,7 +330,7 @@ public class TLCWorker extends UnicastRemoteObject implements TLCWorkerRMI {
 			
 			DistApp work = new TLCApp(server.getSpecFileName(),
 					server.getConfigFileName(), server.getCheckDeadlock(),
-					server.getPreprocess(), fts);
+					server.getPreprocess(), fts, server.getFPConfig());
 
 			final IFPSetManager fpSetManager = server.getFPSetManager();
 			

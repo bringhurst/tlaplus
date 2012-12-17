@@ -495,6 +495,7 @@ public class TLC
                                     + " (inclusive).");
                             return false;
                         }
+                        fpSetConfiguration.setFPIndex(fpIndex);
                         index++;
                     } catch (Exception e)
                     {
@@ -506,6 +507,10 @@ public class TLC
                     printErrorMsg("Error: expect an integer for -workers option.");
                     return false;
                 }
+            } else if (args[index].equals("-fp128"))
+            {
+            	index++;
+            	this.fpSetConfiguration.setFPImplementation(FP128.class);
             } else if (args[index].equals("-fpmem"))
             {
                 index++;
@@ -657,7 +662,6 @@ public class TLC
                 // clean up the states directory only when not recovering
                 FileUtil.deleteDir(TLCGlobals.metaRoot, true);
             }
-            FP128.Init(fpIndex);
 
             // Start checking:
             if (isSimulate)
@@ -692,7 +696,7 @@ public class TLC
                     modelCheckerMXWrapper = new ModelCheckerMXWrapper((ModelChecker) mc);
                 } else
                 {
-                    mc = new DFIDModelChecker(mainFile, configFile, dumpFile, deadlock, fromChkpt, true, resolver, specObj);
+                    mc = new DFIDModelChecker(mainFile, configFile, dumpFile, deadlock, fromChkpt, true, resolver, specObj, fpSetConfiguration);
                 }
 // The following statement moved to Spec.processSpec by LL on 10 March 2011               
 //                MP.printMessage(EC.TLC_STARTING);

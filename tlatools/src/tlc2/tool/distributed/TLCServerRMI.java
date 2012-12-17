@@ -11,6 +11,7 @@ import java.rmi.RemoteException;
 
 import tlc2.tool.distributed.fp.FPSetRMI;
 import tlc2.tool.distributed.fp.IFPSetManager;
+import tlc2.tool.fp.FPSetConfiguration;
 
 /**
  * @version $Id$
@@ -27,7 +28,7 @@ public interface TLCServerRMI extends Remote {
 
 	public IFPSetManager getFPSetManager() throws RemoteException;
 
-	public int getIrredPolyForFP() throws RemoteException;
+	public FPSetConfiguration getFPConfig() throws RemoteException;
 	
 	/**
 	 * @return true iff server is done computing states

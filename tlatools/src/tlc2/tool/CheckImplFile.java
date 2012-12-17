@@ -305,7 +305,6 @@ public class CheckImplFile extends CheckImpl
         // We must recover the intern var table as early as possible
         UniqueString.internTbl.recover(fromChkpt);
       }
-      FP128.Init(0);
       
       // Start the checker:
       CheckImplFile checker = new CheckImplFile(mainFile, configFile, deadlock,

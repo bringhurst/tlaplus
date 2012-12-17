@@ -10,6 +10,7 @@ import tla2sany.semantic.ExprNode;
 import tlc2.TLCGlobals;
 import tlc2.output.EC;
 import tlc2.output.MP;
+import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.dfid.FPIntSet;
 import tlc2.tool.fp.dfid.MemFPIntSet;
 import tlc2.tool.liveness.LiveCheck;
@@ -43,10 +44,10 @@ public class DFIDModelChecker extends AbstractChecker
      * @param resolver 
      */
     public DFIDModelChecker(String specFile, String configFile, String dumpFile, boolean deadlock, String fromChkpt,
-            boolean preprocess, FilenameToStream resolver, SpecObj specObj) throws EvalException, IOException
+            boolean preprocess, FilenameToStream resolver, SpecObj specObj, FPSetConfiguration fpSetConfig) throws EvalException, IOException
     {
         // call the abstract constructor
-        super(specFile, configFile, dumpFile, deadlock, fromChkpt, preprocess, resolver, specObj);
+        super(specFile, configFile, dumpFile, deadlock, fromChkpt, preprocess, resolver, specObj, fpSetConfig);
 
         this.theInitStates = null;
         this.theInitFPs = null;

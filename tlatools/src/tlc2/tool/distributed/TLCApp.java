@@ -35,7 +35,7 @@ public class TLCApp extends DistApp {
 	/* Constructors */
 	public TLCApp(String specFile, String configFile, boolean deadlock,
 			String fromChkpt, FPSetConfiguration fpSetConfig) throws IOException {
-		this(specFile, configFile, deadlock, true, null);
+		this(specFile, configFile, deadlock, true, null, fpSetConfig);
 
 		this.fromChkpt = fromChkpt;
 		this.metadir = FileUtil.makeMetaDir(this.tool.specDir, fromChkpt);
@@ -44,7 +44,7 @@ public class TLCApp extends DistApp {
 
 	// TODO too many constructors redefinitions, replace with this(..) calls
 	public TLCApp(String specFile, String configFile,
-			Boolean deadlock, Boolean preprocess, FilenameToStream fts) throws IOException {
+			Boolean deadlock, Boolean preprocess, FilenameToStream fts, FPSetConfiguration fpConfig) throws IOException {
 
 		// get the spec dir from the spec file
 		int lastSep = specFile.lastIndexOf(File.separatorChar);
@@ -55,7 +55,7 @@ public class TLCApp extends DistApp {
 		this.config = configFile;
 		
 		// TODO NameResolver
-		this.tool = new Tool(specDir, specFile, configFile, fts);
+		this.tool = new Tool(specDir, specFile, configFile, fts, fpConfig);
 		// SZ Feb 24, 2009: setup the user directory
 		ToolIO.setUserDir(specDir);
 
@@ -390,6 +390,7 @@ public class TLCApp extends DistApp {
 									+ (FP128.numPolys - 1) + " (inclusive).");
 							return null;
 						}
+						fpSetConfig.setFPIndex(fpIndex);
 						index++;
 					} catch (Exception e) {
 						printErrorMsg("Error: A number for -fp is required. But encountered "
@@ -402,6 +403,10 @@ public class TLCApp extends DistApp {
 				}
 				
 				
+            } else if (args[index].equals("-fp128"))
+            {
+            	index++;
+            	fpSetConfig.setFPImplementation(FP128.class);
 			} else if (args[index].equals("-fpbits")) {
 				index++;
 				if (index < args.length) {
@@ -505,7 +510,6 @@ public class TLCApp extends DistApp {
 			// We must recover the intern table as early as possible
 			UniqueString.internTbl.recover(fromChkpt);
 		}
-		FP128.Init(fpIndex);
 
 		return new TLCApp(specFile, configFile, deadlock, fromChkpt, fpSetConfig);
 	}

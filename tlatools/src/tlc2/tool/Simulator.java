@@ -13,6 +13,7 @@ import tlc2.TLCGlobals;
 import tlc2.output.EC;
 import tlc2.output.MP;
 import tlc2.output.StatePrinter;
+import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.liveness.LiveCheck1;
 import tlc2.tool.liveness.LiveException;
 import tlc2.util.ObjLongTable;
@@ -47,7 +48,7 @@ public class Simulator implements Cancelable
     // SZ Mar 5, 2009: removed it again because of the bug in simulator
     // ToolIO.setUserDir(specDir);
     
-    this.tool = new Tool(specDir, specFile, configFile, resolver);
+    this.tool = new Tool(specDir, specFile, configFile, resolver, new FPSetConfiguration());
 
     this.tool.init(preprocess, specObj);   // parse and process the spec
 

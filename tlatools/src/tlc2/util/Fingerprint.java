@@ -3,8 +3,12 @@ package tlc2.util;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.logging.Logger;
+
+import tlc2.tool.fp.FPSetConfiguration;
 
 public abstract class Fingerprint implements Serializable, Comparable<Fingerprint> {
+	protected final static Logger LOGGER = Logger.getLogger(Fingerprint.class.getName());
 
 	/**
 	 * Extend the fingerprint <code>fp</code> by the characters of
@@ -58,8 +62,19 @@ public abstract class Fingerprint implements Serializable, Comparable<Fingerprin
 	public abstract long longValue();
 
 	public static abstract class FPFactory {
+
+		private static FPFactory factory;
+
 		public static FPFactory getInstance() {
-			return new FP128.Factory();
+			return factory;
+		}
+
+		public static void init(FPSetConfiguration fpConfig) {
+			if (fpConfig.getFPImplementation().isAssignableFrom(FP128.class)) {
+				factory = new FP128.Factory(fpConfig);
+			} else {
+				factory = new FP64.Factory(fpConfig);
+			}
 		}
 
 		public abstract Fingerprint newFingerprint();

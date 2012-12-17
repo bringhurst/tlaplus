@@ -8,6 +8,8 @@ import tla2sany.semantic.SemanticNode;
 import tlc2.TLCGlobals;
 import tlc2.output.EC;
 import tlc2.output.MP;
+import tlc2.tool.fp.FPSetConfiguration;
+import tlc2.util.Fingerprint;
 import tlc2.util.IdThread;
 import tlc2.util.ObjLongTable;
 import tlc2.util.StateWriter;
@@ -50,9 +52,10 @@ public abstract class AbstractChecker implements Cancelable
      * @param preprocess
      * @param resolver
      * @param spec - pre-built specification object (e.G. from calling SANY from the tool previously)
+     * @param fpImpl 
      */
     public AbstractChecker(String specFile, String configFile, String dumpFile, boolean deadlock, String fromChkpt,
-            boolean preprocess, FilenameToStream resolver, SpecObj spec) throws EvalException, IOException
+            boolean preprocess, FilenameToStream resolver, SpecObj spec, FPSetConfiguration fpConfig) throws EvalException, IOException
     {
         this.cancellationFlag = false;
 
@@ -62,7 +65,7 @@ public abstract class AbstractChecker implements Cancelable
         String specDir = (lastSep == -1) ? "" : specFile.substring(0, lastSep + 1);
         specFile = specFile.substring(lastSep + 1);
 
-        this.tool = new Tool(specDir, specFile, configFile, resolver);
+        this.tool = new Tool(specDir, specFile, configFile, resolver, fpConfig);
 
         this.tool.init(preprocess, spec);
         this.checkLiveness = !this.tool.livenessIsTrue();

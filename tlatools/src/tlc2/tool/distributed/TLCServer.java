@@ -42,11 +42,11 @@ import tlc2.tool.distributed.management.TLCServerMXWrapper;
 import tlc2.tool.distributed.selector.BlockSelectorFactory;
 import tlc2.tool.distributed.selector.IBlockSelector;
 import tlc2.tool.fp.FPSet;
+import tlc2.tool.fp.FPSetConfiguration;
 import tlc2.tool.fp.FPSetFactory;
 import tlc2.tool.management.TLCStandardMBean;
 import tlc2.tool.queue.DiskStateQueue;
 import tlc2.tool.queue.IStateQueue;
-import tlc2.util.FP128;
 import tlc2.util.Fingerprint;
 import util.Assert;
 import util.FileUtil;
@@ -114,7 +114,7 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	public final IStateQueue stateQueue;
 	public final TLCTrace trace;
 
-	private final DistApp work;
+	private final TLCApp work;
 	private final String metadir;
 	private final String filename;
 
@@ -212,10 +212,10 @@ public class TLCServer extends UnicastRemoteObject implements TLCServerRMI,
 	}
 
 	/* (non-Javadoc)
-	 * @see tlc2.tool.distributed.TLCServerRMI#getIrredPolyForFP()
+	 * @see tlc2.tool.distributed.TLCServerRMI#getFPConfig()
 	 */
-	public final int getIrredPolyForFP() {
-		return FP128.indexLower;
+	public FPSetConfiguration getFPConfig() throws RemoteException {
+		return work.getFPSetConfiguration();
 	}
 
 	/* (non-Javadoc)
