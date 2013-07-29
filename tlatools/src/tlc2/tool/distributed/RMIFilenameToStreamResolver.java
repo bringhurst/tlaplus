@@ -88,13 +88,8 @@ public class RMIFilenameToStreamResolver implements FilenameToStream {
 	 * Added by LL on 24 July 2013.
 	 */
 	public boolean isStandardModule(String moduleName) {
-		// The following error message code should be uncommented
-		// if the parser should not be called with an object of
-		// this class.
-//		 String[] foo = new String[] {
-//	       "Parsing called with unexpected FileNameToString implementation."} ;
-//		 MP.printTLCBug(42, foo) ;
-		 return false ;
+		throw new UnsupportedOperationException(
+				"This is a bug and should be reported to the TLC developers!");
 	}
 
 	private String getRandomStoragePrefix() {
