@@ -8,7 +8,6 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
-import tlc2.output.MP;
 import util.FilenameToStream;
 
 /**
@@ -88,8 +87,8 @@ public class RMIFilenameToStreamResolver implements FilenameToStream {
 	 * Added by LL on 24 July 2013.
 	 */
 	public boolean isStandardModule(String moduleName) {
-		throw new UnsupportedOperationException(
-				"This is a bug and should be reported to the TLC developers!");
+		// Humpty-Dumpty says false is fine here :-)
+		return false;
 	}
 
 	private String getRandomStoragePrefix() {
