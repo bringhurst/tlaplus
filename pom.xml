@@ -37,6 +37,7 @@
 		<module>org.lamport.tla.toolbox.tool.tla2tex</module>
 		<module>org.lamport.tla.toolbox.tool.tlc</module>
 		<module>org.lamport.tla.toolbox.tool.tlc.ui</module>
+		<module>org.lamport.tla.toolbox.tool.tlc.ui.trace</module>
 		<module>org.lamport.tla.toolbox.product.standalone</module>
 
 		<!-- Junit tests -->
